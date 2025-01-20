@@ -1,0 +1,28 @@
+<odoo>
+    <record id="view_purchase_order_form_inherit_dhl" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.dhl</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <!-- Botón para solicitar cotización -->
+                <button name="request_dhl_quote"
+                        string="Solicitar Cotización DHL"
+                        type="object"
+                        class="btn-primary"/>
+                <!-- Botón para generar la orden de DHL -->
+                <button name="generate_dhl_order"
+                        string="Generar Orden con DHL"
+                        type="object"
+                        class="btn-success"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="customer_id"/>
+                <field name="stored_selection_options"/>
+                <field name="shipping_method" 
+                    domain="[('x_purchase_order', '=', id)]"
+                />
+            </xpath>
+        </field>
+    </record>
+</odoo>
