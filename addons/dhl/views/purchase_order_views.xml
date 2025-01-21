@@ -18,10 +18,26 @@
             </xpath>
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="customer_id"/>
-                <field name="stored_selection_options"/>
+                <field name="shipping_date"/>
+                <field name="stored_selection_options" 
+                    invisible="1"
+                />
                 <field name="shipping_method" 
                     domain="[('x_purchase_order', '=', id)]"
                 />
+                <field name="pickup"/>
+                <field name="pickup_date" 
+                    invisible="pickup == False" 
+                />
+            </xpath>
+            <xpath expr="//field[@name='date_order']" position="before">
+                <field name="track_number" 
+                readonly="1"
+                invisible="track_number == False"/>
+                <field name="track_url"
+                readonly="1"
+                invisible="track_url == False"
+                widget="url"/>
             </xpath>
         </field>
     </record>

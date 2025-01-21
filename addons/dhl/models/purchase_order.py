@@ -8,6 +8,15 @@ class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
     
     dhl_quote = fields.Float(string='DHL Quote', readonly=True)
+
+    track_number = fields.Char(
+        string='Número de Seguimiento',
+    )
+    
+    track_url = fields.Char(
+        string='URL de seguimiento',
+    )
+    
     
     customer_id = fields.Many2one(
         'res.partner',
@@ -15,6 +24,23 @@ class PurchaseOrder(models.Model):
         domain=[],
         help='Selecciona el cliente asociado con esta orden de compra.'
     )
+
+    shipping_date = fields.Datetime(
+        string='Fecha estimada de envío',
+        default=fields.Datetime.now,
+    )
+
+    
+    pickup = fields.Boolean(
+        string='Servicio de Pickup',
+    )
+    
+
+    pickup_date = fields.Datetime(
+        string='Fecha estimada de Pickup',
+        default=fields.Datetime.now,
+    )
+    
 
     shipping_method = fields.Many2one(
         'x_shipping.method',
@@ -61,6 +87,8 @@ class PurchaseOrder(models.Model):
 
         url = "https://express.api.dhl.com/mydhlapi/test/rates"
 
+        _logger.info(f"fecha {self.shipping_date}")
+
         params = {
             "accountNumber" : "983441463",
             "originCountryCode": "MX",
@@ -71,7 +99,7 @@ class PurchaseOrder(models.Model):
             "length" : "5",
             "width" : "5",
             "height" : "5",
-            "plannedShippingDate" : "2025-01-22",
+            "plannedShippingDate" : self.shipping_date.strftime('%Y-%m-%d'),
             "isCustomsDeclarable" : False,
             "unitOfMeasurement" : "metric",
         }
@@ -104,7 +132,7 @@ class PurchaseOrder(models.Model):
 
                 for product in products:
                     precio = self.env['x_shipping.method'].create({
-                        'x_name': product['productName'],
+                        'x_name': product['productName'] + " - " + f"${product["totalPrice"][0]["price"]:,.2f}",
                         'x_dhl_code': product['productCode'],
                         'x_price': product["totalPrice"][0]["price"],
                         'x_purchase_order': self.id,
@@ -137,14 +165,24 @@ class PurchaseOrder(models.Model):
             raise models.UserError(_('No se pudo obtener la cotización de DHL: %s') % str(e))
 
     def generate_dhl_order(self):
+
+        # obtener tipo de envio:
+
+        metodo = self.shipping_method
+
         
+        import logging
+        _logger = logging.getLogger(__name__)        
+        
+        formatted_dt = self.shipping_date.strftime("%Y-%m-%dT%H:%M:%S GMT+00:00")
+        _logger.info(f"fecha foramto {formatted_dt}")
 
         payload = {
-            "plannedShippingDateAndTime": "2025-01-22T19:19:40 GMT+00:00",
+            "plannedShippingDateAndTime": formatted_dt,
             "pickup": {
-                "isRequested": False
+                "isRequested": self.pickup
             },
-            "productCode": "N",
+            "productCode": metodo.x_dhl_code,
             "getRateEstimates": False,
             "accounts": [
                 {
@@ -178,16 +216,16 @@ class PurchaseOrder(models.Model):
             "customerDetails": {
                 "shipperDetails": {
                     "postalAddress": {
-                        "postalCode": "57000",
-                        "cityName": "Nezahualcoyotl",
+                        "postalCode": self.partner_id.zip,
+                        "cityName": self.partner_id.city,
                         "countryCode": "MX",
-                        "addressLine1": "El Abandonado 363",
+                        "addressLine1": self.partner_id.street,
                     },
                     "contactInformation": {
-                        "email": "shipper_create_shipmentapi@dhltestmail.com",
-                        "phone": "5523088355",
-                        "companyName": "DPR Wholesalers",
-                        "fullName": "Johnny Steward"
+                        "email": self.partner_id.email or "shipper_create_shipmentapi@dhltestmail.com",
+                        "phone": self.partner_id.phone or "5523088355",
+                        "companyName": self.partner_id.company_id.name or "DPR Wholesalers",
+                        "fullName": self.partner_id.name
                     },
                     "registrationNumbers": [
                         {
@@ -200,16 +238,16 @@ class PurchaseOrder(models.Model):
                 },
                 "receiverDetails": {
                     "postalAddress": {
-                        "postalCode": "57000",
-                        "cityName": "Nezahualcoyotl",
+                        "postalCode": self.customer_id.zip,
+                        "cityName": self.customer_id.city,
                         "countryCode": "MX",
-                        "addressLine1": "Cascabel 201",    
+                        "addressLine1": self.customer_id.street,
                     },
                     "contactInformation": {
-                        "email": "recipient_create_shipmentapi@dhltestmail.com",
-                        "phone": "1123123",
-                        "companyName": "DoCo Event Airline Catering",
-                        "fullName": "Jorge Cruz"
+                        "email": self.customer_id.email or "recipient_create_shipmentapi@dhltestmail.com",
+                        "phone": self.customer_id.phone or "5523088355",
+                        "companyName": self.customer_id.company_id.name or "DPR Wholesalers",
+                        "fullName": self.customer_id.name
                     },
                     "registrationNumbers": [
                         {
@@ -257,6 +295,10 @@ class PurchaseOrder(models.Model):
                 # Procesar la respuesta y obtener el PDF de la etiqueta
                 data = response.json()
                 
+                _logger.info(f"Data received : {data}")
+                self.track_number = data['shipmentTrackingNumber']
+                self.track_url = data['trackingUrl']
+
                 pdf_content = data["documents"][0]["content"]
                 if not pdf_content:
                     raise UserError(_('No se pudo obtener la etiqueta de envío'))
@@ -264,7 +306,7 @@ class PurchaseOrder(models.Model):
                 # Decodificar el PDF (base64) y adjuntarlo al chatter
                 pdf_data = base64.b64decode(pdf_content)
                 attachment = self.env['ir.attachment'].create({
-                    'name': f'DHL_Shipment_Label_{self.name}.pdf',
+                    'name': f'DHL_etiqueta_{self.name}.pdf',
                     'type': 'binary',
                     'datas': base64.b64encode(pdf_data),
                     'res_model': 'purchase.order',
@@ -272,6 +314,30 @@ class PurchaseOrder(models.Model):
                     'mimetype': 'application/pdf',
                 })
                 # Agregar el adjunto al chatter
+
+                envio = self.env['product.product'].search([
+                    ('name', '=', 'Envío DHL')
+                ])
+
+                existe = self.order_line.filtered(lambda line: line.product_id == envio)
+
+                if existe: 
+                    existe.write({
+                        'price_unit': metodo.x_price,  # Actualizar el precio
+                        'name': envio.name + "\n" + metodo.x_name.split(" - $")[0],  # Nombre del producto
+                    })
+
+                else:
+                    self.order_line.create({
+                        'order_id': self.id,  # Asociar la línea a esta orden de compra
+                        'product_id': envio.id,  # Producto "Envío DHL"
+                        'name': envio.name + "\n" + metodo.x_name.split(" - $")[0],  # Nombre del producto
+                        'product_qty': 1.0,  # Cantidad
+                        'product_uom': envio.uom_id.id,  # Unidad de medida
+                        'price_unit': metodo.x_price,  # Precio del envío
+                    })
+
+
                 self.message_post(
                     body=_("Se ha generado la orden de envío con DHL y se ha adjuntado la etiqueta."),
                     attachment_ids=[attachment.id]
