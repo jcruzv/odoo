@@ -1,0 +1,15 @@
+<odoo>
+    <data>
+        <record id="action_filtered_purchase_orders" model="ir.actions.act_window">
+            <field name="name">Órdenes con Tracking</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_mode">list,form</field>
+            <field name="domain">[("track_number", "!=", False)]</field>
+        </record>
+
+        <menuitem id="menu_filtered_purchase_orders" 
+                  name="Órdenes con Tracking" 
+                  parent="purchase.menu_purchase_root" 
+                  action="action_filtered_purchase_orders"/>
+    </data>
+</odoo>

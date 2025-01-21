@@ -17,6 +17,10 @@ class PurchaseOrder(models.Model):
         string='URL de seguimiento',
     )
     
+    dhl_status = fields.Char(
+        string='Estado del Envío',
+    )
+    
     
     customer_id = fields.Many2one(
         'res.partner',

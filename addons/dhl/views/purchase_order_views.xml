@@ -31,6 +31,9 @@
                 />
             </xpath>
             <xpath expr="//field[@name='date_order']" position="before">
+                <field name="dhl_status" 
+                readonly="1"
+                invisible="track_number == False"/>
                 <field name="track_number" 
                 readonly="1"
                 invisible="track_number == False"/>
