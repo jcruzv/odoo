@@ -26,6 +26,21 @@
                     domain="[('x_purchase_order', '=', id)]"
                 />
                 <field name="pickup"/>
+                <field name="pickup_customer_id"
+                    invisible="pickup == False" 
+                />
+                <field name="weight" 
+                    required="shipping_method != False"
+                />
+                <field name="width" 
+                    required="shipping_method != False"
+                />
+                <field name="length" 
+                    required="shipping_method != False"
+                />
+                <field name="height" 
+                    required="shipping_method != False"
+                />
                 <field name="pickup_date" 
                     invisible="pickup == False" 
                 />

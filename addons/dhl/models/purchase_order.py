@@ -8,6 +8,30 @@ class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
     
     dhl_quote = fields.Float(string='DHL Quote', readonly=True)
+    
+    dhl_status = fields.Char(
+        string='dhl_status',
+    )
+
+    guia = fields.Char(
+        string='Guía DHL',
+    )
+
+    weight = fields.Float(
+        string='Peso',
+    )
+    
+    width = fields.Float(
+        string='Ancho',
+    )
+    
+    length = fields.Float(
+        string='Largo',
+    )
+    
+    height = fields.Float(
+        string='Alto',
+    ) 
 
     track_number = fields.Char(
         string='Número de Seguimiento',
@@ -20,7 +44,6 @@ class PurchaseOrder(models.Model):
     dhl_status = fields.Char(
         string='Estado del Envío',
     )
-    
     
     customer_id = fields.Many2one(
         'res.partner',
@@ -39,6 +62,13 @@ class PurchaseOrder(models.Model):
         string='Servicio de Pickup',
     )
     
+    
+    pickup_customer_id = fields.Many2one(
+        'res.partner',
+        string='Dirección de Pickup',
+        domain=[],
+        help='Selecciona el cliente en cuyo dirección se realizará el pickup.'
+    )
 
     pickup_date = fields.Datetime(
         string='Fecha estimada de Pickup',
@@ -58,6 +88,19 @@ class PurchaseOrder(models.Model):
         string='Stored Selection Options',
         help='Stores the options for the selection field as a JSON string.',
     )
+
+    def execute_request_dhl_quote(self, purchase_ids):
+        purchases = self.env['purchase.order'].browse(purchase_ids)
+        for purchase in purchases:
+            # Llama a la acción "request_dhl_quote" de cada registro
+            purchase.button_request_dhl_quote()
+        return True
+
+    def button_request_dhl_quote(self):
+        # Código relacionado con la acción "request_dhl_quote"
+        # Sobrescribe este método si necesitas lógica adicional
+        return super().button_request_dhl_quote()
+
 
     @api.onchange('stored_selection_options')
     def _onchange_field(self):
@@ -95,14 +138,14 @@ class PurchaseOrder(models.Model):
 
         params = {
             "accountNumber" : "983441463",
-            "originCountryCode": "MX",
+            "originCountryCode": self.partner_id.fiscal_country_codes or "MX",
             "originCityName": self.partner_id.city,
-            "destinationCountryCode": "MX",
+            "destinationCountryCode": self.customer_id.fiscal_country_codes or "MX",
             "destinationCityName" : self.customer_id.city,
-            "weight": "5",  # Peso en kg
-            "length" : "5",
-            "width" : "5",
-            "height" : "5",
+            "weight": self.weight,
+            "length" : self.length,
+            "width" : self.width,
+            "height" : self.height,
             "plannedShippingDate" : self.shipping_date.strftime('%Y-%m-%d'),
             "isCustomsDeclarable" : False,
             "unitOfMeasurement" : "metric",
@@ -144,7 +187,7 @@ class PurchaseOrder(models.Model):
                     _logger.info(f"precio: {precio}")
 
                 # Asignar el primer método de envío como predeterminado (puedes ajustar esto)
-                self.shipping_method = self.env['x_shipping.method'].search([], limit=1)
+                self.shipping_method = self.env['x_shipping.method'].search([('x_purchase_order', '=', self.id)], limit=1)
 
                 # Notificar al usuario
                 self.message_post(body=_('Cotización de DHL completada con los siguientes métodos: %s' % ', '.join([p['productName'] for p in products])))
@@ -183,9 +226,6 @@ class PurchaseOrder(models.Model):
 
         payload = {
             "plannedShippingDateAndTime": formatted_dt,
-            "pickup": {
-                "isRequested": self.pickup
-            },
             "productCode": metodo.x_dhl_code,
             "getRateEstimates": False,
             "accounts": [
@@ -194,6 +234,23 @@ class PurchaseOrder(models.Model):
                     "typeCode": "shipper"
                 }
             ],
+            "pickup": {
+                "isRequested" : self.pickup,
+                # "pickupDetails" : {
+                #     "postalAddress": {
+                #         "postalCode": self.pickup_customer_id.zip,
+                #         "cityName": self.pickup_customer_id.city,
+                #         "countryCode": self.pickup_customer_id.fiscal_country_codes or "MX",
+                #         "addressLine1": self.pickup_customer_id.street,
+                #     },
+                #     "contactInformation": {
+                #         "email": self.pickup_customer_id.email or "shipper_create_shipmentapi@dhltestmail.com",
+                #         "phone": self.pickup_customer_id.phone or "5523088355",
+                #         "companyName": self.pickup_customer_id.company_id.name or "DPR Wholesalers",
+                #         "fullName": self.pickup_customer_id.name
+                #     },
+                # }
+            },
             "outputImageProperties": {
                 "printerDPI": 300,
                 "encodingFormat": "pdf",
@@ -222,7 +279,7 @@ class PurchaseOrder(models.Model):
                     "postalAddress": {
                         "postalCode": self.partner_id.zip,
                         "cityName": self.partner_id.city,
-                        "countryCode": "MX",
+                        "countryCode": self.partner_id.fiscal_country_codes or "MX",
                         "addressLine1": self.partner_id.street,
                     },
                     "contactInformation": {
@@ -235,7 +292,7 @@ class PurchaseOrder(models.Model):
                         {
                         "typeCode": "VAT",
                         "number": "244444911",
-                        "issuerCountryCode": "MX"
+                        "issuerCountryCode": self.partner_id.fiscal_country_codes or "MX"
                         }
                     ],
                     "typeCode": "business"
@@ -244,7 +301,7 @@ class PurchaseOrder(models.Model):
                     "postalAddress": {
                         "postalCode": self.customer_id.zip,
                         "cityName": self.customer_id.city,
-                        "countryCode": "MX",
+                        "countryCode": self.customer_id.fiscal_country_codes or "MX",
                         "addressLine1": self.customer_id.street,
                     },
                     "contactInformation": {
@@ -257,7 +314,7 @@ class PurchaseOrder(models.Model):
                         {
                         "typeCode": "VAT",
                         "number": "12345678",
-                        "issuerCountryCode": "MX"
+                        "issuerCountryCode": self.customer_id.fiscal_country_codes or "MX"
                         }
                     ],
                     "typeCode": "business"
@@ -267,11 +324,11 @@ class PurchaseOrder(models.Model):
                 "packages": [
                 {
                     "typeCode": "2BP",
-                    "weight": 5,
+                    "weight": self.weight,
                     "dimensions": {
-                    "length": 1,
-                    "width": 1,
-                    "height": 1
+                        "length": self.length,
+                        "width": self.width,
+                        "height": self.height
                     }
                 }
                 ],
@@ -283,6 +340,7 @@ class PurchaseOrder(models.Model):
             "getTransliteratedResponse": False,
         }
 
+        _logger.info(payload)
         headers = {
             'Content-Type': 'application/json',
         }
@@ -298,7 +356,7 @@ class PurchaseOrder(models.Model):
             if response.status_code == 201:
                 # Procesar la respuesta y obtener el PDF de la etiqueta
                 data = response.json()
-                
+
                 _logger.info(f"Data received : {data}")
                 self.track_number = data['shipmentTrackingNumber']
                 self.track_url = data['trackingUrl']

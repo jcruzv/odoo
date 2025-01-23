@@ -25,6 +25,8 @@
     # always loaded
     'data': [
         'views/purchase_order_views.xml',
+        'views/filtered_purchase_order_menu.xml',
+        # 'data/actions.xml',
     ],
     'installable' : True,
     'application' : True,
