@@ -89,12 +89,15 @@ class PurchaseOrder(models.Model):
         help='Stores the options for the selection field as a JSON string.',
     )
 
-    def execute_request_dhl_quote(self, purchase_ids):
-        purchases = self.env['purchase.order'].browse(purchase_ids)
-        for purchase in purchases:
-            # Llama a la acción "request_dhl_quote" de cada registro
-            purchase.button_request_dhl_quote()
-        return True
+    def execute_request_dhl_quote(self):
+        
+        import logging
+        _logger = logging.getLogger(__name__)
+        
+        for id in self.env.context.get("active_ids"):
+            _logger.info(f"ya estoy funcionando {id}")
+        
+        pass
 
     def button_request_dhl_quote(self):
         # Código relacionado con la acción "request_dhl_quote"

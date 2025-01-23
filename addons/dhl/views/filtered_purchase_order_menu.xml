@@ -14,6 +14,25 @@
             <field name="domain">[("guia", "!=", False)]</field>
         </record>
 
+        
+        <record id="view_filtered_purchase_orders_dhl" model="ir.ui.view">
+            <field name="name">Ordenes esperando Guía</field>
+            <field name="model">purchase.order</field>
+            <field name="arch" type="xml">
+                <list>
+                    <header>
+                        <button string="Obtener Cotizaciones" name="execute_request_dhl_quote" type="object"/>
+                    </header>
+                    <field name="id"/>
+                    <field name="name"/>
+                    <field name="dhl_quote"/>
+                    <field name="guia"/>
+                </list>
+            </field>
+
+        </record>
+
+
         <menuitem id="menu_filtered_purchase_orders" 
                   name="Órdenes con Tracking" 
                   parent="purchase.menu_purchase_root" 
