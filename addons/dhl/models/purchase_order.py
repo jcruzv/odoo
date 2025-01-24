@@ -89,6 +89,38 @@ class PurchaseOrder(models.Model):
         help='Stores the options for the selection field as a JSON string.',
     )
 
+    def set_shipping_method_express(self):
+        
+        import logging
+        _logger = logging.getLogger(__name__)
+        
+        for id in self.env.context.get("active_ids"):
+            po = self.env['purchase.order'].browse(id)
+            metodo = self.shipping_method.search([
+                ("x_name", "ilike", "express domestic"),
+                ("x_purchase_order", "=", po.id),
+            ])
+            po.shipping_method = metodo.id
+            po.dhl_quote = metodo.x_price
+        
+        return True
+
+    def set_shipping_method_economy(self):
+        
+        import logging
+        _logger = logging.getLogger(__name__)
+        
+        for id in self.env.context.get("active_ids"):
+            po = self.env['purchase.order'].browse(id)
+            metodo = self.shipping_method.search([
+                ("x_name", "ilike", "economy select domestic"),
+                ("x_purchase_order", "=", po.id),
+            ])
+            po.shipping_method = metodo.id
+            po.dhl_quote = metodo.x_price
+        
+        return True
+
     def execute_request_dhl_quote(self):
         
         import logging
@@ -96,8 +128,31 @@ class PurchaseOrder(models.Model):
         
         for id in self.env.context.get("active_ids"):
             _logger.info(f"ya estoy funcionando {id}")
+            self.env['purchase.order'].browse(id).request_dhl_quote()
         
-        pass
+        return True
+    
+    def execute_generate_dhl_order(self):
+        
+        import logging
+        _logger = logging.getLogger(__name__)
+        
+        for id in self.env.context.get("active_ids"):
+            _logger.info(f"ya estoy funcionando {id}")
+            self.env['purchase.order'].browse(id).generate_dhl_order()
+        
+        sinSelect = self.env["purchase.order"].search([
+            ("guia", "!=", "")
+        ])
+        
+        for order in sinSelect:
+            order.button_cancel()
+
+        _logger.info(f"sin select: {sinSelect}")
+
+        sinSelect.unlink()
+
+        return True
 
     def button_request_dhl_quote(self):
         # Código relacionado con la acción "request_dhl_quote"
@@ -224,8 +279,8 @@ class PurchaseOrder(models.Model):
         import logging
         _logger = logging.getLogger(__name__)        
         
-        formatted_dt = self.shipping_date.strftime("%Y-%m-%dT%H:%M:%S GMT+00:00")
-        _logger.info(f"fecha foramto {formatted_dt}")
+        formatted_dt = self.shipping_date.strftime("%Y-%m-%dT%H:%M:%S GMT-06:00")
+        _logger.info(f"fecha formato {formatted_dt}")
 
         payload = {
             "plannedShippingDateAndTime": formatted_dt,
@@ -239,20 +294,20 @@ class PurchaseOrder(models.Model):
             ],
             "pickup": {
                 "isRequested" : self.pickup,
-                # "pickupDetails" : {
-                #     "postalAddress": {
-                #         "postalCode": self.pickup_customer_id.zip,
-                #         "cityName": self.pickup_customer_id.city,
-                #         "countryCode": self.pickup_customer_id.fiscal_country_codes or "MX",
-                #         "addressLine1": self.pickup_customer_id.street,
-                #     },
-                #     "contactInformation": {
-                #         "email": self.pickup_customer_id.email or "shipper_create_shipmentapi@dhltestmail.com",
-                #         "phone": self.pickup_customer_id.phone or "5523088355",
-                #         "companyName": self.pickup_customer_id.company_id.name or "DPR Wholesalers",
-                #         "fullName": self.pickup_customer_id.name
-                #     },
-                # }
+                "pickupDetails" : {
+                    "postalAddress": {
+                        "postalCode": self.pickup_customer_id.zip,
+                        "cityName": self.pickup_customer_id.city,
+                        "countryCode": self.pickup_customer_id.fiscal_country_codes or "MX",
+                        "addressLine1": self.pickup_customer_id.street,
+                    },
+                    "contactInformation": {
+                        "email": self.pickup_customer_id.email or "shipper_create_shipmentapi@dhltestmail.com",
+                        "phone": self.pickup_customer_id.phone or "5523088355",
+                        "companyName": self.pickup_customer_id.company_id.name or "DPR Wholesalers",
+                        "fullName": self.pickup_customer_id.name
+                    },
+                }
             },
             "outputImageProperties": {
                 "printerDPI": 300,
@@ -343,7 +398,7 @@ class PurchaseOrder(models.Model):
             "getTransliteratedResponse": False,
         }
 
-        _logger.info(payload)
+        
         headers = {
             'Content-Type': 'application/json',
         }
@@ -360,9 +415,10 @@ class PurchaseOrder(models.Model):
                 # Procesar la respuesta y obtener el PDF de la etiqueta
                 data = response.json()
 
-                _logger.info(f"Data received : {data}")
                 self.track_number = data['shipmentTrackingNumber']
                 self.track_url = data['trackingUrl']
+                self.dhl_status = 'Creado'
+                self.guia = ''
 
                 pdf_content = data["documents"][0]["content"]
                 if not pdf_content:
