@@ -3,14 +3,41 @@ from odoo.exceptions import UserError
 import requests
 import json
 import base64
+import math
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
+
+    customer_name = fields.Char(
+        related='customer_id.name', 
+        string="Cliente", 
+        store=True
+    )
+
+    customer_zip = fields.Char(
+        related='customer_id.zip', 
+        string="Código Postal", 
+        store=True
+    )
+    customer_state = fields.Char(
+        related='customer_id.state_id.name', 
+        string="Estado", 
+        store=True
+    )
+    customer_city = fields.Char(
+        related='customer_id.city', 
+        string="Localidad", 
+        store=True
+    )
     
     dhl_quote = fields.Float(string='DHL Quote', readonly=True)
     
     dhl_status = fields.Char(
         string='dhl_status',
+    )
+
+    campaign = fields.Char(
+        string='Campaña',
     )
 
     guia = fields.Char(
@@ -32,6 +59,43 @@ class PurchaseOrder(models.Model):
     height = fields.Float(
         string='Alto',
     ) 
+
+    pesoVolumetrico = fields.Float(
+        string='Peso Volumetrico',
+        compute='_compute_peso_vol'
+    )
+    
+    pesoMasa = fields.Float(
+        string='Peso Masa',
+        compute='_compute_peso_masa'
+    )
+    
+    pesoEnvio = fields.Float(
+        string='Peso a Cotizar',
+        compute='_compute_peso_cotizar'
+    )
+
+    @api.depends("weight")
+    def _compute_peso_masa(self):
+        self.pesoMasa = math.ceil(self.weight)
+
+    
+    @api.depends("width", "height", "length")
+    def _compute_peso_vol(self):
+        
+        import logging
+        _logger = logging.getLogger(__name__)
+        
+        _logger.info(self.width)
+        _logger.info(self.height)
+        _logger.info(self.length)
+        
+        self.pesoVolumetrico = math.ceil(self.width*self.height*self.length/5000)
+
+        
+    @api.depends("pesoVolumetrico", "pesoMasa")
+    def _compute_peso_cotizar(self):
+        self.pesoEnvio = math.ceil(self.pesoVolumetrico) if self.pesoVolumetrico > self.pesoMasa else math.ceil(self.pesoMasa)
 
     track_number = fields.Char(
         string='Número de Seguimiento',
@@ -145,12 +209,12 @@ class PurchaseOrder(models.Model):
             ("guia", "!=", "")
         ])
         
-        for order in sinSelect:
-            order.button_cancel()
+        # for order in sinSelect:
+        #     order.button_cancel()
 
-        _logger.info(f"sin select: {sinSelect}")
+        # _logger.info(f"sin select: {sinSelect}")
 
-        sinSelect.unlink()
+        # # sinSelect.unlink()
 
         return True
 
@@ -200,7 +264,7 @@ class PurchaseOrder(models.Model):
             "originCityName": self.partner_id.city,
             "destinationCountryCode": self.customer_id.fiscal_country_codes or "MX",
             "destinationCityName" : self.customer_id.city,
-            "weight": self.weight,
+            "weight": self.pesoEnvio,
             "length" : self.length,
             "width" : self.width,
             "height" : self.height,
@@ -274,7 +338,7 @@ class PurchaseOrder(models.Model):
         # obtener tipo de envio:
 
         metodo = self.shipping_method
-
+        self.dhl_quote = metodo.x_price
         
         import logging
         _logger = logging.getLogger(__name__)        
@@ -294,20 +358,20 @@ class PurchaseOrder(models.Model):
             ],
             "pickup": {
                 "isRequested" : self.pickup,
-                "pickupDetails" : {
-                    "postalAddress": {
-                        "postalCode": self.pickup_customer_id.zip,
-                        "cityName": self.pickup_customer_id.city,
-                        "countryCode": self.pickup_customer_id.fiscal_country_codes or "MX",
-                        "addressLine1": self.pickup_customer_id.street,
-                    },
-                    "contactInformation": {
-                        "email": self.pickup_customer_id.email or "shipper_create_shipmentapi@dhltestmail.com",
-                        "phone": self.pickup_customer_id.phone or "5523088355",
-                        "companyName": self.pickup_customer_id.company_id.name or "DPR Wholesalers",
-                        "fullName": self.pickup_customer_id.name
-                    },
-                }
+                # "pickupDetails" : {
+                #     "postalAddress": {
+                #         "postalCode": self.pickup_customer_id.zip,
+                #         "cityName": self.pickup_customer_id.city,
+                #         "countryCode": self.pickup_customer_id.fiscal_country_codes or "MX",
+                #         "addressLine1": self.pickup_customer_id.street,
+                #     },
+                #     "contactInformation": {
+                #         "email": self.pickup_customer_id.email or "shipper_create_shipmentapi@dhltestmail.com",
+                #         "phone": self.pickup_customer_id.phone or "5523088355",
+                #         "companyName": self.pickup_customer_id.company_id.name or "DPR Wholesalers",
+                #         "fullName": self.pickup_customer_id.name
+                #     },
+                # }
             },
             "outputImageProperties": {
                 "printerDPI": 300,
@@ -382,7 +446,7 @@ class PurchaseOrder(models.Model):
                 "packages": [
                 {
                     "typeCode": "2BP",
-                    "weight": self.weight,
+                    "weight": self.pesoEnvio,
                     "dimensions": {
                         "length": self.length,
                         "width": self.width,
@@ -417,7 +481,7 @@ class PurchaseOrder(models.Model):
 
                 self.track_number = data['shipmentTrackingNumber']
                 self.track_url = data['trackingUrl']
-                self.dhl_status = 'Creado'
+                self.dhl_status = 'Guía Creada'
                 self.guia = ''
 
                 pdf_content = data["documents"][0]["content"]

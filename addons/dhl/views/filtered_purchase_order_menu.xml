@@ -1,20 +1,30 @@
 <odoo>
     <data>
-        <record id="action_filtered_purchase_orders" model="ir.actions.act_window">
-            <field name="name">Órdenes con Tracking</field>
-            <field name="res_model">purchase.order</field>
-            <field name="view_mode">list,form</field>
-            <field name="domain">[("track_number", "!=", False)]</field>
-        </record>
 
-        <record id="action_filtered_purchase_orders_dhl" model="ir.actions.act_window">
-            <field name="name">Órdenes Esperando Guía</field>
-            <field name="res_model">purchase.order</field>
-            <field name="view_mode">list,form</field>
-            <field name="view_id" ref="dhl.view_filtered_purchase_orders_dhl"/>
-            <field name="domain">[("guia", "!=", False)]</field>
-        </record>
+        <record id="view_filtered_purchase_orders_dhl_track" model="ir.ui.view">
+            <field name="name">Ordenes esperando Guía</field>
+            <field name="model">purchase.order</field>
+            <field name="arch" type="xml">
+                <list>
+                    <header>
+                        <button string="Obtener Cotizaciones" name="execute_request_dhl_quote" type="object"/>
+                        <button string="Todo Express" name="set_shipping_method_express" type="object"/>
+                        <button string="Todo Economy" name="set_shipping_method_economy" type="object"/>
+                        <button string="Generar Guías" name="execute_generate_dhl_order" type="object"/>
+                    </header>
+                    <field name="id"/>
+                    <field name="name"/>
+                    <field name="customer_name"/>
+                    <field name="customer_zip"/>
+                    <field name="customer_city"/>
+                    <field name="customer_state"/>
+                    <field name="shipping_method"/>
+                    <field name="dhl_quote" sum="Cotización Total"/>
+                    <field name="dhl_status"/>
+                </list>
+            </field>
 
+        </record>
         
         <record id="view_filtered_purchase_orders_dhl" model="ir.ui.view">
             <field name="name">Ordenes esperando Guía</field>
@@ -35,6 +45,22 @@
                 </list>
             </field>
 
+        </record>
+
+        <record id="action_filtered_purchase_orders" model="ir.actions.act_window">
+            <field name="name">Órdenes con Tracking</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_id" ref="dhl.view_filtered_purchase_orders_dhl_track"/>
+            <field name="domain">[("track_number", "!=", False)]</field>
+        </record>
+
+        <record id="action_filtered_purchase_orders_dhl" model="ir.actions.act_window">
+            <field name="name">Órdenes Esperando Guía</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_mode">list,form</field>
+            <field name="view_id" ref="dhl.view_filtered_purchase_orders_dhl"/>
+            <field name="domain">[("guia", "!=", False)]</field>
         </record>
 
 
