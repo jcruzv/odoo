@@ -141,7 +141,7 @@ class PurchaseOrder(models.Model):
     
 
     shipping_method = fields.Many2one(
-        'x_shipping.method',
+        'dhl.shipping.methods',
         domain=[],
         string='Método de Envío',
         help='Selecciona un método de envío basado en las cotizaciones de DHL.'
@@ -161,11 +161,11 @@ class PurchaseOrder(models.Model):
         for id in self.env.context.get("active_ids"):
             po = self.env['purchase.order'].browse(id)
             metodo = self.shipping_method.search([
-                ("x_name", "ilike", "express domestic"),
-                ("x_purchase_order", "=", po.id),
+                ("name", "ilike", "express domestic"),
+                ("purchase_order", "=", po.id),
             ])
             po.shipping_method = metodo.id
-            po.dhl_quote = metodo.x_price
+            po.dhl_quote = metodo.price
         
         return True
 
@@ -177,11 +177,11 @@ class PurchaseOrder(models.Model):
         for id in self.env.context.get("active_ids"):
             po = self.env['purchase.order'].browse(id)
             metodo = self.shipping_method.search([
-                ("x_name", "ilike", "economy select domestic"),
-                ("x_purchase_order", "=", po.id),
+                ("name", "ilike", "economy select domestic"),
+                ("purchase_order", "=", po.id),
             ])
             po.shipping_method = metodo.id
-            po.dhl_quote = metodo.x_price
+            po.dhl_quote = metodo.price
         
         return True
 
@@ -294,22 +294,22 @@ class PurchaseOrder(models.Model):
                 if not products:
                     raise UserError(_('No se encontraron métodos de envío disponibles.'))
 
-                # Crear registros para los métodos de envío en el modelo 'shipping.method'
+                # Crear registros para los métodos de envío en el modelo 'dhl.shipping.methods'
                 _logger.info(f"id------ {self.id}")
                 
-                self.env['x_shipping.method'].search([('x_purchase_order', '=', self.id)]).unlink()
+                self.env['dhl.shipping.methods'].search([('purchase_order', '=', self.id)]).unlink()
 
                 for product in products:
-                    precio = self.env['x_shipping.method'].create({
-                        'x_name': product['productName'] + " - " + f"${product["totalPrice"][0]["price"]:,.2f}",
-                        'x_dhl_code': product['productCode'],
-                        'x_price': product["totalPrice"][0]["price"],
-                        'x_purchase_order': self.id,
+                    precio = self.env['dhl.shipping.methods'].create({
+                        'name': product['productName'] + " - " + f"${product["totalPrice"][0]["price"]:,.2f}",
+                        'dhl_code': product['productCode'],
+                        'price': product["totalPrice"][0]["price"],
+                        'purchase_order': self.id,
                     })
                     _logger.info(f"precio: {precio}")
 
                 # Asignar el primer método de envío como predeterminado (puedes ajustar esto)
-                self.shipping_method = self.env['x_shipping.method'].search([('x_purchase_order', '=', self.id)], limit=1)
+                self.shipping_method = self.env['dhl.shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
 
                 # Notificar al usuario
                 self.message_post(body=_('Cotización de DHL completada con los siguientes métodos: %s' % ', '.join([p['productName'] for p in products])))
@@ -338,7 +338,7 @@ class PurchaseOrder(models.Model):
         # obtener tipo de envio:
 
         metodo = self.shipping_method
-        self.dhl_quote = metodo.x_price
+        self.dhl_quote = metodo.price
         
         import logging
         _logger = logging.getLogger(__name__)        
@@ -348,7 +348,7 @@ class PurchaseOrder(models.Model):
 
         payload = {
             "plannedShippingDateAndTime": formatted_dt,
-            "productCode": metodo.x_dhl_code,
+            "productCode": metodo.dhl_code,
             "getRateEstimates": False,
             "accounts": [
                 {
@@ -508,18 +508,18 @@ class PurchaseOrder(models.Model):
 
                 if existe: 
                     existe.write({
-                        'price_unit': metodo.x_price,  # Actualizar el precio
-                        'name': envio.name + "\n" + metodo.x_name.split(" - $")[0],  # Nombre del producto
+                        'price_unit': metodo.price,  # Actualizar el precio
+                        'name': envio.name + "\n" + metodo.name.split(" - $")[0],  # Nombre del producto
                     })
 
                 else:
                     self.order_line.create({
                         'order_id': self.id,  # Asociar la línea a esta orden de compra
                         'product_id': envio.id,  # Producto "Envío DHL"
-                        'name': envio.name + "\n" + metodo.x_name.split(" - $")[0],  # Nombre del producto
+                        'name': envio.name + "\n" + metodo.name.split(" - $")[0],  # Nombre del producto
                         'product_qty': 1.0,  # Cantidad
                         'product_uom': envio.uom_id.id,  # Unidad de medida
-                        'price_unit': metodo.x_price,  # Precio del envío
+                        'price_unit': metodo.price,  # Precio del envío
                     })
 
 

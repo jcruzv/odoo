@@ -23,7 +23,7 @@
                     invisible="1"
                 />
                 <field name="shipping_method" 
-                    domain="[('x_purchase_order', '=', id)]"
+                    domain="[('purchase_order', '=', id)]"
                 />
                 <field name="pickup"/>
                 <field name="pickup_customer_id"
