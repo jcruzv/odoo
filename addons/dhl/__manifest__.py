@@ -28,6 +28,15 @@
         'views/filtered_purchase_order_menu.xml',
         # 'data/actions.xml',
     ],
+    'assets': {
+        'web.assets_frontend': [
+            '/dhl/static/src/css/custom_styles.css',
+        ],
+        'web.assets_backend': [
+            '/dhl/static/src/css/custom_styles.css',
+        ],
+    },
+
     'installable' : True,
     'application' : True,
 }
