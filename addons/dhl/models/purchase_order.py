@@ -115,6 +115,13 @@ class PurchaseOrder(models.Model):
         domain=[],
         help='Selecciona el cliente asociado con esta orden de compra.'
     )
+    
+    campaign = fields.Many2one(
+        'purchase.campaigns',
+        string='Campaña',
+        domain=[],
+        help='Selecciona la Campaña relacionada a esta orden.'
+    )
 
     shipping_date = fields.Datetime(
         string='Fecha estimada de envío',
