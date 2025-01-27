@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "DHL Express",
+    'name': "Campañas",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as
@@ -20,23 +20,16 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['purchase', 'dhl_methods', 'campaigns'],
+    'depends': ['base'],
 
     # always loaded
     'data': [
-        'views/purchase_order_views.xml',
-        'views/filtered_purchase_order_menu.xml',
-        # 'data/actions.xml',
+        # 'security/ir.model.access.csv',
+        'views/views.xml',
+        'views/templates.xml',
     ],
-    'assets': {
-        'web.assets_frontend': [
-            '/dhl/static/src/css/custom_styles.css',
-        ],
-        'web.assets_backend': [
-            '/dhl/static/src/css/custom_styles.css',
-        ],
-    },
-
-    'installable' : True,
-    'application' : True,
+    # only loaded in demonstration mode
+    'demo': [
+        'demo/demo.xml',
+    ],
 }

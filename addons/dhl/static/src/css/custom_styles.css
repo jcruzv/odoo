@@ -1,0 +1,29 @@
+.o_web_client{
+    background-color: rgb(35, 35, 35);
+}
+.o_main_navbar .o_menu_sections .o_nav_entry, .o_main_navbar .o_menu_sections .dropdown-toggle,
+.o_main_navbar,
+.o_navbar{
+    background-color: #006ef2!important;
+} 
+.o_main_navbar .o_menu_sections .o_nav_entry:hover, .o_main_navbar .o_menu_sections .dropdown-toggle:hover{
+        background-color: #0053b9!important;
+        
+} 
+
+.btn-primary {
+    --btn-color: #FFFFFF;
+    --btn-bg: #006ef2;
+    --btn-border-color: #006ef2;
+    --btn-hover-color: #FFFFFF;
+    --btn-hover-bg: #0053b9;
+    --btn-hover-border-color: #0053b9;
+    --btn-focus-shadow-rgb: 134, 122, 173;
+    --btn-active-color: #FFFFFF;
+    --btn-active-bg: #0053b9;
+    --btn-active-border-color: #0053b9;
+    --btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --btn-disabled-color: #FFFFFF;
+    --btn-disabled-bg: #006ef2;
+    --btn-disabled-border-color: #006ef2;
+}
