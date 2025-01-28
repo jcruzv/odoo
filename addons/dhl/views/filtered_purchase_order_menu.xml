@@ -7,13 +7,11 @@
             <field name="arch" type="xml">
                 <list>
                     <header>
-                        <button string="Obtener Cotizaciones" name="execute_request_dhl_quote" type="object"/>
-                        <button string="Todo Express" name="set_shipping_method_express" type="object"/>
-                        <button string="Todo Economy" name="set_shipping_method_economy" type="object"/>
-                        <button string="Generar Guías" name="execute_generate_dhl_order" type="object"/>
+                        <button string="Obtener Estado" name="execute_request_dhl_track" type="object"/>
                     </header>
                     <field name="id"/>
                     <field name="name"/>
+                    <field name="campaign"/>
                     <field name="customer_name"/>
                     <field name="customer_zip"/>
                     <field name="customer_city"/>
@@ -39,6 +37,7 @@
                     </header>
                     <field name="id"/>
                     <field name="name"/>
+                    <field name="campaign"/>
                     <field name="shipping_method"/>
                     <field name="dhl_quote" sum="Cotización Total"/>
                     <field name="guia"/>

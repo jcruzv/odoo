@@ -21,3 +21,26 @@ class shipping_methods(models.Model):
         ondelete='cascade',
     )
     
+    basePrice = fields.Float(
+        string='Precio Base',
+    )
+    
+    discount = fields.Float(
+        string='Descuento',
+    )
+
+    tax = fields.Float(
+        string='Impuesto',
+    )
+    
+    # envio = fields.Float(
+    #     string='Costo Envío',
+    # )
+    
+    # area = fields.Float(
+    #     string='Área Remota',
+    # )
+    
+    # gas = fields.Float(
+    #     string='Combustible',
+    # )

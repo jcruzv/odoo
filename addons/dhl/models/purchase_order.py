@@ -8,6 +8,14 @@ import math
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
 
+    def get_dhl_events_action(self):
+        """Retorna la acción para mostrar los eventos relacionados con la orden de compra."""
+        self.ensure_one()  # Asegúrate de que solo se está llamando en un registro
+        action = self.env.ref('dhl_events.action_dhl_events_view').read()[0]
+        action['domain'] = [('purchase_order', '=', self.id)]
+        return action
+
+
     customer_name = fields.Char(
         related='customer_id.name', 
         string="Cliente", 
@@ -162,9 +170,6 @@ class PurchaseOrder(models.Model):
 
     def set_shipping_method_express(self):
         
-        import logging
-        _logger = logging.getLogger(__name__)
-        
         for id in self.env.context.get("active_ids"):
             po = self.env['purchase.order'].browse(id)
             metodo = self.shipping_method.search([
@@ -178,9 +183,6 @@ class PurchaseOrder(models.Model):
 
     def set_shipping_method_economy(self):
         
-        import logging
-        _logger = logging.getLogger(__name__)
-        
         for id in self.env.context.get("active_ids"):
             po = self.env['purchase.order'].browse(id)
             metodo = self.shipping_method.search([
@@ -192,29 +194,29 @@ class PurchaseOrder(models.Model):
         
         return True
 
-    def execute_request_dhl_quote(self):
-        
-        import logging
-        _logger = logging.getLogger(__name__)
+
+    def execute_request_dhl_track(self):
         
         for id in self.env.context.get("active_ids"):
-            _logger.info(f"ya estoy funcionando {id}")
+            self.env['purchase.order'].browse(id).track()
+        
+        return True
+
+    def execute_request_dhl_quote(self):
+        
+        for id in self.env.context.get("active_ids"):
             self.env['purchase.order'].browse(id).request_dhl_quote()
         
         return True
     
     def execute_generate_dhl_order(self):
         
-        import logging
-        _logger = logging.getLogger(__name__)
-        
         for id in self.env.context.get("active_ids"):
-            _logger.info(f"ya estoy funcionando {id}")
             self.env['purchase.order'].browse(id).generate_dhl_order()
         
-        sinSelect = self.env["purchase.order"].search([
-            ("guia", "!=", "")
-        ])
+        # sinSelect = self.env["purchase.order"].search([
+        #     ("guia", "!=", "")
+        # ])
         
         # for order in sinSelect:
         #     order.button_cancel()
@@ -226,8 +228,6 @@ class PurchaseOrder(models.Model):
         return True
 
     def button_request_dhl_quote(self):
-        # Código relacionado con la acción "request_dhl_quote"
-        # Sobrescribe este método si necesitas lógica adicional
         return super().button_request_dhl_quote()
 
 
@@ -238,32 +238,44 @@ class PurchaseOrder(models.Model):
             try:
                 options = json.loads(self.stored_selection_options)
                 
-                import logging
-                _logger = logging.getLogger(__name__)
-                
-                _logger.info(f"options: {options}")
-                
                 return options
             except json.JSONDecodeError:
                 return []
         return []
-    
+
+    def Validar(self):
+        if not self.partner_id: 
+            raise UserError("No has asignado Proveedor")
+        if not self.customer_id: 
+            raise UserError("No has asignado Cliente")
+        if not self.partner_id.fiscal_country_codes: 
+            raise UserError("El Proveedor no tiene el campo 'País' asignado correctamente")
+        if not self.partner_id.city: 
+            raise UserError("El Proveedor no tiene el campo 'Ciudad' asignado correctamente")
+        if not self.customer_id.fiscal_country_codes: 
+            raise UserError("El Cliente no tiene el campo 'País' asignado correctamente")
+        if not self.customer_id.city: 
+            raise UserError("El Cliente no tiene el campo 'Ciudad' asignado correctamente")
+        if not self.weight or self.weight <= 0: 
+            raise UserError("El campo 'Peso' es incorrecto")
+        if not self.length or self.length <= 0: 
+            raise UserError("El campo 'Largo' es incorrecto")
+        if not self.width or self.width <= 0: 
+            raise UserError("El campo 'Ancho' es incorrecto")
+        if not self.height or self.height <= 0: 
+            raise UserError("El campo 'Alto' es incorrecto")
 
     def request_dhl_quote(self):
         # Ejemplo de datos a enviar a DHL
 
         import requests
         import logging
-        _logger = logging.getLogger(__name__)
-
-        _logger.info(f"self : {self}")        
-        _logger.info(f"city : {self.partner_id.city}")        
-        _logger.info(f"city dest : {self.customer_id.city}")        
+        _logger = logging.getLogger(__name__)  
         
 
         url = "https://express.api.dhl.com/mydhlapi/test/rates"
 
-        _logger.info(f"fecha {self.shipping_date}")
+        self.Validar()
 
         params = {
             "accountNumber" : "983441463",
@@ -271,7 +283,7 @@ class PurchaseOrder(models.Model):
             "originCityName": self.partner_id.city,
             "destinationCountryCode": self.customer_id.fiscal_country_codes or "MX",
             "destinationCityName" : self.customer_id.city,
-            "weight": self.pesoEnvio,
+            "weight": self.weight,
             "length" : self.length,
             "width" : self.width,
             "height" : self.height,
@@ -302,18 +314,22 @@ class PurchaseOrder(models.Model):
                     raise UserError(_('No se encontraron métodos de envío disponibles.'))
 
                 # Crear registros para los métodos de envío en el modelo 'dhl.shipping.methods'
-                _logger.info(f"id------ {self.id}")
+                _logger.info(f"productos------ {products}")
                 
                 self.env['dhl.shipping.methods'].search([('purchase_order', '=', self.id)]).unlink()
 
                 for product in products:
-                    precio = self.env['dhl.shipping.methods'].create({
-                        'name': product['productName'] + " - " + f"${product["totalPrice"][0]["price"]:,.2f}",
-                        'dhl_code': product['productCode'],
-                        'price': product["totalPrice"][0]["price"],
-                        'purchase_order': self.id,
-                    })
-                    _logger.info(f"precio: {precio}")
+                    if product['productName'] and product['productName'] in ['ECONOMY SELECT DOMESTIC', 'EXPRESS DOMESTIC', 'DOMESTICO ENVIO RETORNO']:
+                        precio = self.env['dhl.shipping.methods'].create({
+                            'name': product['productName'] + " - " + f"${product["totalPrice"][0]["price"]:,.2f}",
+                            'dhl_code': product['productCode'],
+                            'price': product["totalPrice"][0]["price"],
+                            'purchase_order': self.id,
+                            'basePrice': next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "SPRQT"),
+                            'discount': next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STDIS"),
+                            'tax': next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STTXA"),
+                        })
+                        _logger.info(f"precio: {precio}")
 
                 # Asignar el primer método de envío como predeterminado (puedes ajustar esto)
                 self.shipping_method = self.env['dhl.shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
@@ -538,3 +554,49 @@ class PurchaseOrder(models.Model):
                 raise UserError(_('Error al generar la orden con DHL: %s') % response.text)
         except Exception as e:
             raise UserError(_('No se pudo generar la orden con DHL: %s') % str(e))
+        
+
+
+    def track(self):
+        # Ejemplo de datos a enviar a DHL
+
+        import requests
+        import logging
+        _logger = logging.getLogger(__name__)  
+        
+
+        url = "https://express.api.dhl.com/mydhlapi/test/shipments/" + self.track_number + "/tracking"
+        
+        headers = {
+            'Content-Type': 'application/json',
+        }
+
+        try:
+            response = requests.get(
+                url,
+                auth=('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n'),
+                headers=headers
+            )
+            if response.status_code == 200:
+                data = response.json()
+
+                _logger.info(data)
+
+                self.dhl_status = data['shipments'][0]['status']
+                # self.dhl_status = data['shipments'][0]['estimatedDeliveryDate']
+                self.env['dhl.shipping.events'].search([('purchase_order', '=', self.id)]).unlink()
+                events = data.get('events', [])
+                for event in events:
+                    self.env['dhl.shipping.events'].create({
+                        'purchase_order': self.id,
+                        'track_number': self.track_number,
+                        'name': event['description'],
+                        'date': event['date'],
+                        'time': event['time'],
+                        'code': event['typeCode'],
+                    })
+
+            else:
+                raise Exception(_('Error en la solicitud de tracking de DHL: %s \n %s') % (response.text, response.status_code))
+        except Exception as e:
+            raise models.UserError(_('No se pudo obtener el estado de DHL: %s') % str(e))
