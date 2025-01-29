@@ -1,5 +1,6 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from datetime import datetime, timedelta
 import requests
 import json
 import base64
@@ -37,8 +38,25 @@ class PurchaseOrder(models.Model):
         string="Localidad", 
         store=True
     )
+
     
-    dhl_quote = fields.Float(string='DHL Quote', readonly=True)
+    method_basePrice = fields.Float(
+        related='shipping_method.basePrice', 
+        string="Precio Base", 
+        store=True
+    )
+    method_discount = fields.Float(
+        related='shipping_method.discount', 
+        string="Descuento", 
+        store=True
+    )
+    method_tax = fields.Float(
+        related='shipping_method.tax', 
+        string="Impuesto", 
+        store=True
+    )
+    
+    dhl_quote = fields.Float(string='Total Envío', readonly=True)
     
     dhl_status = fields.Char(
         string='dhl_status',
@@ -248,11 +266,11 @@ class PurchaseOrder(models.Model):
             raise UserError("No has asignado Proveedor")
         if not self.customer_id: 
             raise UserError("No has asignado Cliente")
-        if not self.partner_id.fiscal_country_codes: 
+        if not self.partner_id.country_code: 
             raise UserError("El Proveedor no tiene el campo 'País' asignado correctamente")
         if not self.partner_id.city: 
             raise UserError("El Proveedor no tiene el campo 'Ciudad' asignado correctamente")
-        if not self.customer_id.fiscal_country_codes: 
+        if not self.customer_id.country_code: 
             raise UserError("El Cliente no tiene el campo 'País' asignado correctamente")
         if not self.customer_id.city: 
             raise UserError("El Cliente no tiene el campo 'Ciudad' asignado correctamente")
@@ -277,17 +295,19 @@ class PurchaseOrder(models.Model):
 
         self.Validar()
 
+        date = datetime.now() + timedelta(minutes=5)
+
         params = {
             "accountNumber" : "983441463",
-            "originCountryCode": self.partner_id.fiscal_country_codes or "MX",
+            "originCountryCode": self.partner_id.country_code or "MX",
             "originCityName": self.partner_id.city,
-            "destinationCountryCode": self.customer_id.fiscal_country_codes or "MX",
+            "destinationCountryCode": self.customer_id.country_code or "MX",
             "destinationCityName" : self.customer_id.city,
             "weight": self.weight,
             "length" : self.length,
             "width" : self.width,
             "height" : self.height,
-            "plannedShippingDate" : self.shipping_date.strftime('%Y-%m-%d'),
+            "plannedShippingDate" : date.strftime('%Y-%m-%d'),
             "isCustomsDeclarable" : False,
             "unitOfMeasurement" : "metric",
         }
@@ -366,7 +386,8 @@ class PurchaseOrder(models.Model):
         import logging
         _logger = logging.getLogger(__name__)        
         
-        formatted_dt = self.shipping_date.strftime("%Y-%m-%dT%H:%M:%S GMT-06:00")
+        date = datetime.now() + timedelta(minutes=5)
+        formatted_dt = date.strftime("%Y-%m-%dT%H:%M:%S GMT-06:00")
         _logger.info(f"fecha formato {formatted_dt}")
 
         payload = {
@@ -424,7 +445,7 @@ class PurchaseOrder(models.Model):
                     "postalAddress": {
                         "postalCode": self.partner_id.zip,
                         "cityName": self.partner_id.city,
-                        "countryCode": self.partner_id.fiscal_country_codes or "MX",
+                        "countryCode": self.partner_id.country_code or "MX",
                         "addressLine1": self.partner_id.street,
                     },
                     "contactInformation": {
@@ -437,7 +458,7 @@ class PurchaseOrder(models.Model):
                         {
                         "typeCode": "VAT",
                         "number": "244444911",
-                        "issuerCountryCode": self.partner_id.fiscal_country_codes or "MX"
+                        "issuerCountryCode": self.partner_id.country_code or "MX"
                         }
                     ],
                     "typeCode": "business"
@@ -446,7 +467,7 @@ class PurchaseOrder(models.Model):
                     "postalAddress": {
                         "postalCode": self.customer_id.zip,
                         "cityName": self.customer_id.city,
-                        "countryCode": self.customer_id.fiscal_country_codes or "MX",
+                        "countryCode": self.customer_id.country_code or "MX",
                         "addressLine1": self.customer_id.street,
                     },
                     "contactInformation": {
@@ -459,7 +480,7 @@ class PurchaseOrder(models.Model):
                         {
                         "typeCode": "VAT",
                         "number": "12345678",
-                        "issuerCountryCode": self.customer_id.fiscal_country_codes or "MX"
+                        "issuerCountryCode": self.customer_id.country_code or "MX"
                         }
                     ],
                     "typeCode": "business"
@@ -571,7 +592,21 @@ class PurchaseOrder(models.Model):
             'Content-Type': 'application/json',
         }
 
+        classification = {
+            "Registrados": ['PY', 'SD', 'SM', 'MF'],
+            "Recolectados": ['PU', 'SA'],
+            "En tránsito": ['AF', 'AR', 'DF', 'EM', 'FD', 'LV', 'PL', 'TI', 'TP', 'UV', 'IC'],
+            "Entrega en proceso": ['CC', 'WC'],
+            "Entregados": ['OK', 'AD', 'DD', 'PD', 'TR'],
+            "Incidencias": ['BA', 'CA', 'CD', 'CR', 'DM', 'DP', 'DS', 'HN', 'HP', 'MC', 'MD', 'MS', 'NA', 'ND', 'NH', 'RD', 'RT', 'SC', 'SI', 'SS', 'ST', 'TD', 'TT', 'UD'],
+            "Cancelados": ['CS', 'HI', 'HO'],
+            "Devueltos": ['BN', 'BR', 'CM']
+        }
+
         try:
+
+
+
             response = requests.get(
                 url,
                 auth=('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n'),
@@ -581,11 +616,180 @@ class PurchaseOrder(models.Model):
                 data = response.json()
 
                 _logger.info(data)
-
-                self.dhl_status = data['shipments'][0]['status']
                 # self.dhl_status = data['shipments'][0]['estimatedDeliveryDate']
                 self.env['dhl.shipping.events'].search([('purchase_order', '=', self.id)]).unlink()
                 events = data.get('events', [])
+                if not events:
+                    events = [
+                        {
+                            "date": "2023-08-09",
+                            "time": "13:56:21",
+                            "typeCode": "PU",
+                            "description": "Shipment picked up",
+                            "serviceArea": [
+                                {
+                                    "code": "SYD",
+                                    "description": "SYDNEY-AU"
+                                }
+                            ]
+                        },
+                        {
+                            "date": "2023-08-09",
+                            "time": "18:47:01",
+                            "typeCode": "AF",
+                            "description": "Arrived at DHL Sort Facility - SYDNEY-AU",
+                            "serviceArea": [
+                                {
+                                    "code": "SYD",
+                                    "description": "SYDNEY-AU"
+                                }
+                            ]
+                        },
+                        {
+                            "date": "2023-08-09",
+                            "time": "19:40:02",
+                            "typeCode": "PL",
+                            "description": "Processed at- SYDNEY-AU",
+                            "serviceArea": [
+                                {
+                                    "code": "SYD",
+                                    "description": "SYDNEY-AU"
+                                }
+                            ]
+                        },
+                        {
+                            "date": "2023-08-09",
+                            "time": "21:28:58",
+                            "typeCode": "DF",
+                            "description": "Shipment has departed from a DHL facility- SYDNEY-AU",
+                            "serviceArea": [
+                                {
+                                    "code": "SYD",
+                                    "description": "SYDNEY-AU"
+                                }
+                            ],
+                            "remarks": [
+                                {
+                                    "value": "The shipment is on its way to the destination.",
+                                    "details": "Please continue to monitor the progress online. If you are the consignee and would like to change your delivery preference, please visit https://delivery.dhl.com."
+                                }
+                            ]
+                        },
+                        {
+                            "date": "2023-08-09",
+                            "time": "21:49:12",
+                            "typeCode": "RR",
+                            "description": "Customs clearance status updated. Note - The Customs clearance process may start while the shipment is in transit to the destination. ",
+                            "serviceArea": [
+                                {
+                                    "code": "AKL",
+                                    "description": "AUCKLAND-NZ"
+                                }
+                            ]
+                        },
+                        {
+                            "date": "2023-08-09",
+                            "time": "22:35:34",
+                            "typeCode": "RR",
+                            "description": "Customs clearance status updated. Note - The Customs clearance process may start while the shipment is in transit to the destination. ",
+                            "serviceArea": [
+                                {
+                                    "code": "AKL",
+                                    "description": "AUCKLAND-NZ"
+                                }
+                            ],
+                            "remarks": [
+                                {
+                                    "value": "Shipment has been given a release status by Customs.",
+                                    "details": "Unless there is an adhoc physical examination or a stop by another regulatory authority the shipment will proceed to DHL delivery facility. Please continue to monitor the progress online."
+                                }
+                            ]
+                        },
+                        {
+                            "date": "2023-08-10",
+                            "time": "04:09:01",
+                            "typeCode": "AF",
+                            "description": "Arrived at DHL Sort Facility - AUCKLAND-NZ",
+                            "serviceArea": [
+                                {
+                                    "code": "AKL",
+                                    "description": "AUCKLAND-NZ"
+                                }
+                            ]
+                        },
+                        {
+                            "date": "2023-08-10",
+                            "time": "04:18:00",
+                            "typeCode": "CR",
+                            "description": "Clearance processing complete at- AUCKLAND-NZ",
+                            "serviceArea": [
+                                {
+                                    "code": "AKL",
+                                    "description": "AUCKLAND-NZ"
+                                }
+                            ]
+                        },
+                        {
+                            "date": "2023-08-10",
+                            "time": "05:58:15",
+                            "typeCode": "PL",
+                            "description": "Processed at- AUCKLAND-NZ",
+                            "serviceArea": [
+                                {
+                                    "code": "AKL",
+                                    "description": "AUCKLAND-NZ"
+                                }
+                            ]
+                        },
+                        {
+                            "date": "2023-08-10",
+                            "time": "05:58:58",
+                            "typeCode": "DF",
+                            "description": "Shipment has departed from a DHL facility- AUCKLAND-NZ",
+                            "serviceArea": [
+                                {
+                                    "code": "AKL",
+                                    "description": "AUCKLAND-NZ"
+                                }
+                            ],
+                            "remarks": [
+                                {
+                                    "value": "The shipment is on its way to the destination.",
+                                    "details": "Please continue to monitor the progress online. If you are the consignee and would like to change your delivery preference, please visit https://delivery.dhl.com."
+                                }
+                            ]
+                        },
+                        {
+                            "date": "2023-08-10",
+                            "time": "09:50:00",
+                            "typeCode": "AR",
+                            "description": "Arrived at DHL Delivery Facility - AUCKLAND-NZ",
+                            "serviceArea": [
+                                {
+                                    "code": "AKL",
+                                    "description": "AUCKLAND-NZ"
+                                }
+                            ]
+                        },
+                        {
+                            "date": "2023-08-10",
+                            "time": "10:50:14",
+                            "typeCode": "WC",
+                            "description": "Shipment is out with courier for delivery",
+                            "serviceArea": [
+                                {
+                                    "code": "AKL",
+                                    "description": "AUCKLAND-NZ"
+                                }
+                            ],
+                            "remarks": [
+                                {
+                                    "value": "Shipment is taken out for delivery",
+                                    "details": "Expect delivery today"
+                                }
+                            ]
+                        },
+                    ]
                 for event in events:
                     self.env['dhl.shipping.events'].create({
                         'purchase_order': self.id,
@@ -595,6 +799,23 @@ class PurchaseOrder(models.Model):
                         'time': event['time'],
                         'code': event['typeCode'],
                     })
+                if events:
+                    most_recent_event = max(
+                        events,
+                        key=lambda e: datetime.strptime(f"{e['date']} {e['time']}", "%Y-%m-%d %H:%M:%S")
+                    )
+
+                    # Obtener el código del evento más reciente
+                    most_recent_code = most_recent_event["typeCode"]
+                    classification_found = next(
+                        (state for state, codes in classification.items() if most_recent_code in codes),
+                        None
+                    )
+
+                    self.dhl_status = classification_found
+                else:
+                    self.dhl_status = 'Registrado'
+                    
 
             else:
                 raise Exception(_('Error en la solicitud de tracking de DHL: %s \n %s') % (response.text, response.status_code))

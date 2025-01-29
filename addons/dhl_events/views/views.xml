@@ -29,6 +29,7 @@
             <list>
               <field name="date"/>
               <field name="time"/>
+              <field name="code"/>
               <field name="name"/>
             </list>
         </field>

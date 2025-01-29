@@ -24,7 +24,6 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="customer_id"/>
                 <field name="campaign"/>
-                <field name="shipping_date"/>
                 <field name="stored_selection_options" 
                     invisible="1"
                 />
