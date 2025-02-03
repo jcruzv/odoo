@@ -32,7 +32,15 @@ class shipping_methods(models.Model):
     tax = fields.Float(
         string='Impuesto',
     )
+
+    fuelSurcharge = fields.Float(
+        string='Recargo por Combustible',
+    )
     
+    remoteArea = fields.Float(
+        string='Área Remota',
+    )
+
     weight = fields.Float(
         string='Peso',
     )

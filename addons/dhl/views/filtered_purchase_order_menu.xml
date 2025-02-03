@@ -43,6 +43,8 @@
                     <field name="shipping_method"/>
                     <field name="method_basePrice" sum="Precio Base Total"/>
                     <field name="method_discount" sum="Descuento Total"/>
+                    <field name="method_fuelSurcharge" sum="Combustible Total"/>
+                    <field name="method_remoteArea" sum=">Zona extendida Total"/>
                     <field name="method_tax" sum="IVA Total"/>
                     <field name="dhl_quote" sum="Cotización Total"/>
                     <field name="guia"/>

@@ -55,6 +55,16 @@ class PurchaseOrder(models.Model):
         string="Impuesto", 
         store=True
     )
+    method_fuelSurcharge = fields.Float(
+        related='shipping_method.fuelSurcharge',
+        string="Recargo por Combustible",
+        store=True
+    )
+    method_remoteArea = fields.Float(
+        related='shipping_method.remoteArea',
+        string="Área Remota",
+        store=True
+    )
     
     dhl_quote = fields.Float(string='Total Envío', readonly=True)
     
@@ -146,7 +156,7 @@ class PurchaseOrder(models.Model):
     )
 
     campaign_product = fields.Many2one(
-        'product.product',
+        'product.template',
         string='Producto de Campaña',
         domain=[],
         help='Selecciona el producto de la Campaña relacionado a esta orden.'
@@ -417,6 +427,8 @@ class PurchaseOrder(models.Model):
                     'basePrice': metodo.basePrice,
                     'discount': metodo.discount,
                     'tax': metodo.tax,
+                    'fuelSurcharge': metodo.fuelSurcharge,
+                    'remoteArea': metodo.remoteArea,
                     'requestDate': datetime.now(),
                     'weight': metodo.weight,
                     'origin': metodo.origin,
@@ -452,7 +464,7 @@ class PurchaseOrder(models.Model):
                         # raise UserError(_('No se encontraron métodos de envío disponibles.'))
 
                     # Crear registros para los métodos de envío en el modelo 'dhl.shipping.methods'
-                    # _logger.info(f"productos------ {products}")
+                    _logger.info(f"productos------ {products}")
                     
                     self.env['dhl.shipping.methods'].search([('purchase_order', '=', self.id)]).unlink()
 
@@ -468,6 +480,15 @@ class PurchaseOrder(models.Model):
                                 'destination': self.customer_id.city,
                                 'requestDate': datetime.now(),
                             }
+                            if product["totalPrice"][0]["price"] != 0 and product["detailedPriceBreakdown"]:
+                                for breakdown in product["detailedPriceBreakdown"][0]["breakdown"]:
+                                    _logger.info(f"breakdown: {breakdown}")
+                                    if "serviceCode" in breakdown and "price" in breakdown:
+                                        if breakdown["serviceCode"] == "FF":
+                                            aux['fuelSurcharge'] = breakdown["price"]
+                                        elif breakdown["serviceCode"] == "OO":
+                                            aux['remoteArea'] = breakdown["price"]
+
                             if product["totalPrice"][0]["price"] != 0 and product["totalPriceBreakdown"]:
                                 aux['basePrice'] = next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "SPRQT")
                                 aux['discount'] = next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STDIS")
