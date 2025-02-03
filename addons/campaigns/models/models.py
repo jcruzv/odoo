@@ -21,4 +21,8 @@ class campaigns(models.Model):
         string='Activa',
         default=True,
     )
-    
+
+    product_ids = fields.Many2many(
+        comodel_name='product.product',
+        string='Productos',
+    )

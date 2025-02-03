@@ -60,11 +60,7 @@ class PurchaseOrder(models.Model):
     
     dhl_status = fields.Char(
         string='dhl_status',
-    )
-
-    campaign = fields.Char(
-        string='Campaña',
-    )
+    )        
 
     guia = fields.Char(
         string='Guía DHL',
@@ -149,6 +145,13 @@ class PurchaseOrder(models.Model):
         help='Selecciona la Campaña relacionada a esta orden.'
     )
 
+    campaign_product = fields.Many2one(
+        'product.product',
+        string='Producto de Campaña',
+        domain=[],
+        help='Selecciona el producto de la Campaña relacionado a esta orden.'
+    )
+
     shipping_date = fields.Datetime(
         string='Fecha estimada de envío',
         default=fields.Datetime.now,
@@ -186,6 +189,34 @@ class PurchaseOrder(models.Model):
         help='Stores the options for the selection field as a JSON string.',
     )
 
+    def set_shipping_method_best(self):
+        # Elegir el mejor precio entre "express domestic" y "economy select domestic"
+        for id in self.env.context.get("active_ids"):
+            po = self.env['purchase.order'].browse(id)
+            express_method = self.shipping_method.search([
+            ("name", "ilike", "express domestic"),
+            ("purchase_order", "=", po.id),
+            ], limit=1)
+            economy_method = self.shipping_method.search([
+            ("name", "ilike", "economy select domestic"),
+            ("purchase_order", "=", po.id),
+            ], limit=1)
+            
+            if express_method and economy_method:
+                best_method = express_method if express_method.price < economy_method.price else economy_method
+            elif express_method:
+                best_method = express_method
+            elif economy_method:
+                best_method = economy_method
+            else:
+                best_method = None
+            
+            if best_method:
+                po.shipping_method = best_method.id
+                po.dhl_quote = best_method.price
+        
+        return True
+
     def set_shipping_method_express(self):
         
         for id in self.env.context.get("active_ids"):
@@ -221,12 +252,10 @@ class PurchaseOrder(models.Model):
         return True
 
     def execute_request_dhl_quote(self):
-        
         for id in self.env.context.get("active_ids"):
             self.env['purchase.order'].browse(id).request_dhl_quote()
-        
         return True
-    
+
     def execute_generate_dhl_order(self):
         
         for id in self.env.context.get("active_ids"):
@@ -262,26 +291,68 @@ class PurchaseOrder(models.Model):
         return []
 
     def Validar(self):
+        import logging
+        _logger = logging.getLogger(__name__)
         if not self.partner_id: 
-            raise UserError("No has asignado Proveedor")
+            # raise UserError("No has asignado Proveedor")
+            _logger.warning("No has asignado Proveedor")
+            self.message_post(
+                body=_("No has asignado Proveedor")
+            )
         if not self.customer_id: 
-            raise UserError("No has asignado Cliente")
+            # raise UserError("No has asignado Cliente")
+            _logger.warning("No has asignado Cliente")
+            self.message_post(
+                body=_("No has asignado Cliente")
+            )
         if not self.partner_id.country_code: 
-            raise UserError("El Proveedor no tiene el campo 'País' asignado correctamente")
+            # raise UserError("El Proveedor no tiene el campo 'País' asignado correctamente")
+            _logger.warning("El Proveedor no tiene el campo 'País' asignado correctamente")
+            self.message_post(
+                body=_("El Proveedor no tiene el campo 'País' asignado correctamente")
+            )
         if not self.partner_id.city: 
-            raise UserError("El Proveedor no tiene el campo 'Ciudad' asignado correctamente")
+            # raise UserError("El Proveedor no tiene el campo 'Ciudad' asignado correctamente")
+            _logger.warning("El Proveedor no tiene el campo 'Ciudad' asignado correctamente")
+            self.message_post(
+                body=_("El Proveedor no tiene el campo 'Ciudad' asignado correctamente")
+            )
         if not self.customer_id.country_code: 
-            raise UserError("El Cliente no tiene el campo 'País' asignado correctamente")
+            # raise UserError("El Cliente no tiene el campo 'País' asignado correctamente")
+            _logger.warning("El Cliente no tiene el campo 'País' asignado correctamente")
+            self.message_post(
+                body=_("El Cliente no tiene el campo 'País' asignado correctamente")
+            )
         if not self.customer_id.city: 
-            raise UserError("El Cliente no tiene el campo 'Ciudad' asignado correctamente")
+            # raise UserError("El Cliente no tiene el campo 'Ciudad' asignado correctamente")
+            _logger.warning("El Cliente no tiene el campo 'Ciudad' asignado correctamente")
+            self.message_post(
+                body=_("El Cliente no tiene el campo 'Ciudad' asignado correctamente")
+            )
         if not self.weight or self.weight <= 0: 
-            raise UserError("El campo 'Peso' es incorrecto")
+            # raise UserError("El campo 'Peso' es incorrecto")
+            _logger.warning("El campo 'Peso' es incorrecto")
+            self.message_post(
+                body=_("El campo 'Peso' es incorrecto")
+            )
         if not self.length or self.length <= 0: 
-            raise UserError("El campo 'Largo' es incorrecto")
+            # raise UserError("El campo 'Largo' es incorrecto")
+            _logger.warning("El campo 'Largo' es incorrecto")
+            self.message_post(
+                body=_("El campo 'Largo' es incorrecto")
+            )
         if not self.width or self.width <= 0: 
-            raise UserError("El campo 'Ancho' es incorrecto")
+            # raise UserError("El campo 'Ancho' es incorrecto")
+            _logger.warning("El campo 'Ancho' es incorrecto")
+            self.message_post(
+                body=_("El campo 'Ancho' es incorrecto")
+            )
         if not self.height or self.height <= 0: 
-            raise UserError("El campo 'Alto' es incorrecto")
+            # raise UserError("El campo 'Alto' es incorrecto")
+            _logger.warning("El campo 'Alto' es incorrecto")
+            self.message_post(
+                body=_("El campo 'Alto' es incorrecto")
+            )
 
     def request_dhl_quote(self):
         # Ejemplo de datos a enviar a DHL
@@ -295,7 +366,10 @@ class PurchaseOrder(models.Model):
 
         self.Validar()
 
-        date = datetime.now() + timedelta(minutes=5)
+        # date = datetime.now() + timedelta(minutes=5)
+        date = self.shipping_date
+
+        _logger.info(f"fecha formato {date.strftime('%Y-%m-%d')}")
 
         params = {
             "accountNumber" : "983441463",
@@ -315,66 +389,128 @@ class PurchaseOrder(models.Model):
         headers = {
             'Content-Type': 'application/json',
         }
+        # Buscar en shipping_methods si ya existe una cotización para este origen y destino no mayor a 8 horas
+        self.env['dhl.shipping.methods'].search([('purchase_order', '=', self.id)]).unlink()
+        existe = self.env['dhl.shipping.methods'].search([
+            ('origin', '=', self.partner_id.city),
+            ('destination', '=', self.customer_id.city),
+            ('weight', '=', self.pesoEnvio),
+            ('requestDate', '>=', datetime.now() - timedelta(hours=8)),
+        ], order='purchase_order.id asc')
 
-        try:
-            response = requests.get(
-                url,
-                auth=('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n'),
-                params=params,
-                headers=headers
+        # si existe, clonar los campos y cambiar la orden de compra a esta
+        if existe:
+            _logger.info(f"existe: {existe}, en la ciudad {self.partner_id.city} a la ciudad {self.customer_id.city}")
+            primera = 0
+            for metodo in existe:
+                _logger.info(f"metodo orden: {metodo.purchase_order}")
+                if primera == 0:
+                    primera = metodo.purchase_order.id
+                elif primera != metodo.purchase_order.id:
+                    break
+                # clonar cada metodo cambiando la orden de compra
+                self.env['dhl.shipping.methods'].create({
+                    'name': metodo.name,
+                    'dhl_code': metodo.dhl_code,
+                    'price': metodo.price,
+                    'purchase_order': self.id,
+                    'basePrice': metodo.basePrice,
+                    'discount': metodo.discount,
+                    'tax': metodo.tax,
+                    'requestDate': datetime.now(),
+                    'weight': metodo.weight,
+                    'origin': metodo.origin,
+                    'destination': metodo.destination,
+                })
+            self.shipping_method = self.env['dhl.shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
+
+            # Notificar al usuario
+            self.message_post(body=_('Cotización de DHL completada con los siguientes métodos: %s' % ', '.join([p['name'] for p in existe])))
+
+            self.dhl_quote = self.shipping_method.price
+            self.message_post(
+            body=_(f"Se ha obtenido la cotización del envio en DHL: {self.dhl_quote}"),
             )
-            if response.status_code == 200:
-                quote_data = response.json()
-                quote = quote_data["products"][0]["totalPrice"][0]["price"] 
-                # _logger.info(f"respuesta: {response.json()}")
-
-                # selection=[('valor1', 'valor1'), ('valor2', 'valor2')]
-                products = quote_data.get('products', [])
-                if not products:
-                    raise UserError(_('No se encontraron métodos de envío disponibles.'))
-
-                # Crear registros para los métodos de envío en el modelo 'dhl.shipping.methods'
-                _logger.info(f"productos------ {products}")
-                
-                self.env['dhl.shipping.methods'].search([('purchase_order', '=', self.id)]).unlink()
-
-                for product in products:
-                    if product['productName'] and product['productName'] in ['ECONOMY SELECT DOMESTIC', 'EXPRESS DOMESTIC', 'DOMESTICO ENVIO RETORNO']:
-                        precio = self.env['dhl.shipping.methods'].create({
-                            'name': product['productName'] + " - " + f"${product["totalPrice"][0]["price"]:,.2f}",
-                            'dhl_code': product['productCode'],
-                            'price': product["totalPrice"][0]["price"],
-                            'purchase_order': self.id,
-                            'basePrice': next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "SPRQT"),
-                            'discount': next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STDIS"),
-                            'tax': next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STTXA"),
-                        })
-                        _logger.info(f"precio: {precio}")
-
-                # Asignar el primer método de envío como predeterminado (puedes ajustar esto)
-                self.shipping_method = self.env['dhl.shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
-
-                # Notificar al usuario
-                self.message_post(body=_('Cotización de DHL completada con los siguientes métodos: %s' % ', '.join([p['productName'] for p in products])))
-
-                metodos = [
-                    (product['productCode'], f"{product['productName']} - {product["totalPrice"][0]["price"]}")
-                    for product in products
-                ]
-
-
-                _logger.info(f"metodos: {metodos}")
-                
-                self.stored_selection_options = json.dumps(metodos)
-                
-                self.dhl_quote = quote
-                self.message_post(
-                    body=_(f"Se ha obtenido la cotización del envio en DHL: {quote}"),
+        # si no existe, hacer la solicitud a DHL y guardar los datos en shipping_methods
+        else:
+            # _logger.info(f"no existe, llamar api")
+            try:
+                response = requests.get(
+                    url,
+                    auth=('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n'),
+                    params=params,
+                    headers=headers
                 )
-            else:
-                raise Exception(_('Error en la solicitud de cotización de DHL: %s \n %s') % (response.text, response.status_code))
-        except Exception as e:
-            raise models.UserError(_('No se pudo obtener la cotización de DHL: %s') % str(e))
+                if response.status_code == 200:
+                    quote_data = response.json()
+                    # _logger.info(f"respuesta: {response.json()}")
+
+                    # selection=[('valor1', 'valor1'), ('valor2', 'valor2')]
+                    products = quote_data.get('products', [])
+                    if not products:
+                        _logger.warning('No se encontraron métodos de envío disponibles.')
+                        # raise UserError(_('No se encontraron métodos de envío disponibles.'))
+
+                    # Crear registros para los métodos de envío en el modelo 'dhl.shipping.methods'
+                    # _logger.info(f"productos------ {products}")
+                    
+                    self.env['dhl.shipping.methods'].search([('purchase_order', '=', self.id)]).unlink()
+
+                    for product in products:
+                        if product['productName'] and product["totalPrice"][0]["price"] != 0 and product['productName'] in ['ECONOMY SELECT DOMESTIC', 'EXPRESS DOMESTIC', 'DOMESTICO ENVIO RETORNO']:
+                            aux = {
+                                'name': product['productName'] + " - " + f"${product["totalPrice"][0]["price"]:,.2f}",
+                                'dhl_code': product['productCode'],
+                                'price': product["totalPrice"][0]["price"],
+                                'purchase_order': self.id,
+                                'weight': self.pesoEnvio,
+                                'origin': self.partner_id.city,
+                                'destination': self.customer_id.city,
+                                'requestDate': datetime.now(),
+                            }
+                            if product["totalPrice"][0]["price"] != 0 and product["totalPriceBreakdown"]:
+                                aux['basePrice'] = next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "SPRQT")
+                                aux['discount'] = next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STDIS")
+                                aux['tax'] = next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STTXA")
+                            else:
+                                aux['basePrice'] = 0
+                                aux['discount'] = 0
+                                aux['tax'] = 0
+                            precio = self.env['dhl.shipping.methods'].create(aux)
+                            self.env.cr.commit()
+
+                    # Asignar el primer método de envío como predeterminado (puedes ajustar esto)
+                    self.shipping_method = self.env['dhl.shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
+
+                    # Notificar al usuario
+                    self.message_post(body=_('Cotización de DHL completada con los siguientes métodos: %s' % ', '.join([p['productName'] for p in products])))
+
+                    metodos = [
+                        (product['productCode'], f"{product['productName']} - {product["totalPrice"][0]["price"]}")
+                        for product in products
+                    ]
+
+
+                    # _logger.info(f"metodos: {metodos}")
+                    
+                    self.stored_selection_options = json.dumps(metodos)
+                    
+                    self.dhl_quote = self.shipping_method.price
+                    self.message_post(
+                        body=_(f"Se ha obtenido la cotización del envio en DHL: {self.dhl_quote}"),
+                    )
+                else:
+                    _logger.warning(f"Error en la solicitud de cotización de DHL:{response.text}, {response.status_code}")
+                    self.message_post(
+                        body=_(f"Error en la solicitud de cotización de DHL:{response.text}, {response.status_code}"),
+                    )
+                    # raise Exception(_('Error en la solicitud de cotización de DHL: %s \n %s') % (response.text, response.status_code))
+            except Exception as e:
+                _logger.warning(f"No se pudo obtener la cotización de DHL: {e}")
+                self.message_post(
+                    body=_(f"No se pudo obtener la cotización de DHL: {e}"),
+                )
+                # raise models.UserError(_('No se pudo obtener la cotización de DHL: %s') % str(e))
 
     def generate_dhl_order(self):
 

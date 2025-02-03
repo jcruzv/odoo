@@ -20,7 +20,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['purchase', 'dhl_methods', 'dhl_events', 'campaigns'],
+    'depends': ['purchase', 'dhl_methods', 'dhl_events', 'campaigns', 'product'],
 
     # always loaded
     'data': [

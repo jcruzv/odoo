@@ -33,6 +33,24 @@ class shipping_methods(models.Model):
         string='Impuesto',
     )
     
+    weight = fields.Float(
+        string='Peso',
+    )
+
+    requestDate = fields.Datetime(
+        string="Hora y Fecha de Solicitud",
+    )
+
+    origin = fields.Char(
+        string='Origen',
+        description='Origen del envío (ciudad)',
+    )
+
+    destination = fields.Char(
+        string='Destino',
+        description='Origen del envío (ciudad)',
+    )
+
     # envio = fields.Float(
     #     string='Costo Envío',
     # )
