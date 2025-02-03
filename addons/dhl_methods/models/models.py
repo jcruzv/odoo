@@ -34,7 +34,7 @@ class shipping_methods(models.Model):
     )
 
     fuelSurcharge = fields.Float(
-        string='Recargo por Combustible',
+        string='Combustible',
     )
     
     remoteArea = fields.Float(

@@ -464,7 +464,7 @@ class PurchaseOrder(models.Model):
                         # raise UserError(_('No se encontraron métodos de envío disponibles.'))
 
                     # Crear registros para los métodos de envío en el modelo 'dhl.shipping.methods'
-                    _logger.info(f"productos------ {products}")
+                    # _logger.info(f"productos------ {products}")
                     
                     self.env['dhl.shipping.methods'].search([('purchase_order', '=', self.id)]).unlink()
 
@@ -480,21 +480,25 @@ class PurchaseOrder(models.Model):
                                 'destination': self.customer_id.city,
                                 'requestDate': datetime.now(),
                             }
+                            descuentoAdicional = 0
+                            if "detailedPriceBreakdown" in product:
+                                # _logger.info(f"product_detail: {product["detailedPriceBreakdown"]}")
+                                if product["detailedPriceBreakdown"][0]["breakdown"][0]["price"] != 0:
+                                    aux['basePrice'] = product["detailedPriceBreakdown"][0]["breakdown"][0]["priceBreakdown"][1]["basePrice"]
+
                             if product["totalPrice"][0]["price"] != 0 and product["detailedPriceBreakdown"]:
                                 for breakdown in product["detailedPriceBreakdown"][0]["breakdown"]:
-                                    _logger.info(f"breakdown: {breakdown}")
                                     if "serviceCode" in breakdown and "price" in breakdown:
                                         if breakdown["serviceCode"] == "FF":
-                                            aux['fuelSurcharge'] = breakdown["price"]
+                                            aux['fuelSurcharge'] = breakdown["price"]/1.16
+                                            descuentoAdicional += breakdown["priceBreakdown"][1]["price"]
                                         elif breakdown["serviceCode"] == "OO":
-                                            aux['remoteArea'] = breakdown["price"]
+                                            aux['remoteArea'] = breakdown["price"]/1.16
 
                             if product["totalPrice"][0]["price"] != 0 and product["totalPriceBreakdown"]:
-                                aux['basePrice'] = next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "SPRQT")
-                                aux['discount'] = next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STDIS")
+                                aux['discount'] = -abs(next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STDIS") + descuentoAdicional)
                                 aux['tax'] = next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STTXA")
                             else:
-                                aux['basePrice'] = 0
                                 aux['discount'] = 0
                                 aux['tax'] = 0
                             precio = self.env['dhl.shipping.methods'].create(aux)
