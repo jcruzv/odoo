@@ -73,7 +73,13 @@ class PurchaseOrder(models.Model):
     )        
 
     guia = fields.Char(
-        string='Guía DHL',
+        string='Generar Guía DHL',
+        help='Marcar si esta orden de compra será procesada por DHL',
+    )
+
+    requestShipping = fields.Boolean(
+        string='Solicitar Guía DHL',
+        help='Marcar si esta orden de compra será procesada por DHL',
     )
 
     weight = fields.Float(
@@ -94,40 +100,36 @@ class PurchaseOrder(models.Model):
 
     pesoVolumetrico = fields.Float(
         string='Peso Volumetrico',
-        compute='_compute_peso_vol'
+        compute='_compute_peso_vol',
+        store=True,
     )
     
     pesoMasa = fields.Float(
         string='Peso Masa',
-        compute='_compute_peso_masa'
+        compute='_compute_peso_masa',
+        store=True,
     )
     
     pesoEnvio = fields.Float(
         string='Peso a Cotizar',
-        compute='_compute_peso_cotizar'
+        compute='_compute_peso_cotizar',
+        store=True,
     )
 
     @api.depends("weight")
     def _compute_peso_masa(self):
-        self.pesoMasa = math.ceil(self.weight)
+        for order in self:
+            order.pesoMasa = math.ceil(order.weight)
 
-    
     @api.depends("width", "height", "length")
     def _compute_peso_vol(self):
-        
-        import logging
-        _logger = logging.getLogger(__name__)
-        
-        _logger.info(self.width)
-        _logger.info(self.height)
-        _logger.info(self.length)
-        
-        self.pesoVolumetrico = math.ceil(self.width*self.height*self.length/5000)
+        for order in self:
+            order.pesoVolumetrico = math.ceil(order.width * order.height * order.length / 5000)
 
-        
     @api.depends("pesoVolumetrico", "pesoMasa")
     def _compute_peso_cotizar(self):
-        self.pesoEnvio = math.ceil(self.pesoVolumetrico) if self.pesoVolumetrico > self.pesoMasa else math.ceil(self.pesoMasa)
+        for order in self:
+            order.pesoEnvio = math.ceil(order.pesoVolumetrico) if order.pesoVolumetrico > order.pesoMasa else math.ceil(order.pesoMasa)
 
     track_number = fields.Char(
         string='Número de Seguimiento',
@@ -496,7 +498,7 @@ class PurchaseOrder(models.Model):
                                             aux['remoteArea'] = breakdown["price"]/1.16
 
                             if product["totalPrice"][0]["price"] != 0 and product["totalPriceBreakdown"]:
-                                aux['discount'] = -abs(next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STDIS") + descuentoAdicional)
+                                aux['discount'] = -abs(next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STDIS")-descuentoAdicional)
                                 aux['tax'] = next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STTXA")
                             else:
                                 aux['discount'] = 0
@@ -568,7 +570,8 @@ class PurchaseOrder(models.Model):
                 #         "postalCode": self.pickup_customer_id.zip,
                 #         "cityName": self.pickup_customer_id.city,
                 #         "countryCode": self.pickup_customer_id.fiscal_country_codes or "MX",
-                #         "addressLine1": self.pickup_customer_id.street,
+                #         "addressLine1": self.pickup_customer_id.street_name,
+                #         "addressLine1": self.pickup_customer_id.street_number + " " + self.pickup_customer_id.street_number2,
                 #     },
                 #     "contactInformation": {
                 #         "email": self.pickup_customer_id.email or "shipper_create_shipmentapi@dhltestmail.com",
@@ -607,7 +610,8 @@ class PurchaseOrder(models.Model):
                         "postalCode": self.partner_id.zip,
                         "cityName": self.partner_id.city,
                         "countryCode": self.partner_id.country_code or "MX",
-                        "addressLine1": self.partner_id.street,
+                        "addressLine1": self.partner_id.street_name,
+                        "addressLine2": self.partner_id.street_number + " " + self.partner_id.street_number2,
                     },
                     "contactInformation": {
                         "email": self.partner_id.email or "shipper_create_shipmentapi@dhltestmail.com",
@@ -629,7 +633,8 @@ class PurchaseOrder(models.Model):
                         "postalCode": self.customer_id.zip,
                         "cityName": self.customer_id.city,
                         "countryCode": self.customer_id.country_code or "MX",
-                        "addressLine1": self.customer_id.street,
+                        "addressLine1": self.customer_id.street_name,
+                        "addressLine2": self.customer_id.street_number + " " + self.partner_id.street_number2,
                     },
                     "contactInformation": {
                         "email": self.customer_id.email or "recipient_create_shipmentapi@dhltestmail.com",

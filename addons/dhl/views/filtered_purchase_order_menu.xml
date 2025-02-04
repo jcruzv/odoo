@@ -66,7 +66,7 @@
             <field name="res_model">purchase.order</field>
             <field name="view_mode">list,form,pivot</field>
             <field name="view_id" ref="dhl.view_filtered_purchase_orders_dhl"/>
-            <field name="domain">[("guia", "!=", False)]</field>
+            <field name="domain">[("dhl_status", "=", False), ('requestShipping', '=', True)]</field>
         </record>
 
 
