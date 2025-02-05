@@ -1,0 +1,83 @@
+<odoo>
+    <data>
+
+        <record id="view_filtered_purchase_orders_shipping_track" model="ir.ui.view">
+            <field name="name">Ordenes esperando Guía</field>
+            <field name="model">purchase.order</field>
+            <field name="arch" type="xml">
+                <list>
+                    <header>
+                        <button string="Obtener Estado" name="execute_request_shipping_track" type="object"/>
+                    </header>
+                    <field name="id"/>
+                    <field name="name"/>
+                    <field name="campaign"/>
+                    <field name="customer_name"/>
+                    <field name="customer_zip"/>
+                    <field name="customer_city"/>
+                    <field name="customer_state"/>
+                    <field name="shipping_method"/>
+                    <field name="shipping_quote" sum="Cotización Total"/>
+                    <field name="shipping_status"/>
+                </list>
+            </field>
+
+        </record>
+        
+        <record id="view_filtered_purchase_orders_shipping" model="ir.ui.view">
+            <field name="name">Ordenes esperando Guía</field>
+            <field name="model">purchase.order</field>
+            <field name="arch" type="xml">
+                <list>
+                    <header>
+                        <button string="Obtener Cotizaciones" name="execute_request_shipping_quote" type="object"/>
+                        <button string="Express" name="set_shipping_method_express" type="object"/>
+                        <button string="Economy" name="set_shipping_method_economy" type="object"/>
+                        <button string="Mejor Precio" name="set_shipping_method_best" type="object"/>
+                        <button string="Generar Guías" name="execute_generate_shipping_order" type="object"/>
+                    </header>
+                    <field name="id"/>
+                    <field name="name"/>
+                    <field name="campaign"/>
+                    <field name="campaign_product"/>
+                    <field name="shipping_method"/>
+                    <!-- <field name="method_basePrice" sum="Precio Base Total"/>
+                    <field name="method_discount" sum="Descuento Total"/>
+                    <field name="method_fuelSurcharge" sum="Combustible Total"/>
+                    <field name="method_remoteArea" sum=">Zona extendida Total"/>
+                    <field name="method_tax" sum="IVA Total"/> -->
+                    <field name="shipping_quote" sum="Cotización Total"/>
+                    <field name="requestShipping"/>
+                </list>
+            </field>
+
+        </record>
+
+        <record id="action_filtered_purchase_orders" model="ir.actions.act_window">
+            <field name="name">Órdenes con Tracking</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_mode">list,form,pivot</field>
+            <field name="view_id" ref="shipping.view_filtered_purchase_orders_shipping_track"/>
+            <field name="domain">[("track_number", "!=", False)]</field>
+        </record>
+
+        <record id="action_filtered_purchase_orders_shipping" model="ir.actions.act_window">
+            <field name="name">Órdenes Esperando Guía</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_mode">list,form,pivot</field>
+            <field name="view_id" ref="shipping.view_filtered_purchase_orders_shipping"/>
+            <field name="domain">[("shipping_status", "=", False), ('requestShipping', '=', True)]</field>
+        </record>
+
+
+        <menuitem id="menu_filtered_purchase_orders" 
+                  name="Órdenes con Tracking" 
+                  parent="purchase.menu_purchase_root" 
+                  action="action_filtered_purchase_orders"/>
+                  
+        <menuitem id="menu_filtered_purchase_orders_shipping" 
+                  name="Órdenes Esperando Guía" 
+                  parent="purchase.menu_purchase_root" 
+                  action="action_filtered_purchase_orders_shipping"/>
+    </data>
+</odoo>
