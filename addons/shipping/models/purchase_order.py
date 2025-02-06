@@ -233,14 +233,9 @@ class PurchaseOrder(models.Model):
         return True
 
     def execute_request_shipping_quote(self):
-        import logging
-        _logger = logging.getLogger(__name__)
-
-        time = datetime.now()
         orders = self.env['purchase.order'].browse(self.env.context.get("active_ids"))
         for order in orders:
             order.request_shipping_quote()
-        _logger.info(f"tiempo total: {datetime.now()-time}")
         return True
 
     def execute_generate_shipping_order(self):
@@ -471,42 +466,80 @@ class PurchaseOrder(models.Model):
                 async def fetch(session, url, params, headers, handler):
                     if handler == 'Envia':
                         async with session.post(url, data=params, headers=headers) as response:
-                            return await response.json(), response.status
+                            respuesta = await response.json()
+
+                            if 'error' in respuesta or ('code' in respuesta and respuesta["code"] == 500) or isinstance(respuesta["data"], str):
+                                # _logger.warning(f"Error en la respuesta: {respuesta}")
+                                return
+                            products = respuesta['data']
+                            
+                            if not products:
+                                _logger.warning('No se encontraron métodos de envío disponibles.')
+
+                            for product in products:
+                                tax = 0
+                                aux = {
+                                    'name': product['serviceDescription'] + " - " + f"${product['totalPrice']:,.2f}",
+                                    'shipping_code': product['service'],
+                                    'price': product['totalPrice'],
+                                    'purchase_order': self.id,
+                                    'courier': product['carrierDescription'],
+                                    'weight': self.pesoEnvio,
+                                    'origin': self.partner_id.city,
+                                    'destination': self.customer_id.city,
+                                    'requestDate': datetime.now(),
+                                    'other': 0,
+                                }
+                                descuentoAdicional = 0
+                                if "costSummary" in product:
+                                    costSummary = product["costSummary"][0]
+                                    aux["basePrice"] = costSummary["basePrice"] / 1.16
+                                    tax = costSummary["basePrice"] - aux["basePrice"]
+                                    
+                                    for additional in costSummary["costAdditionalCharges"]:
+                                        if additional["additionalService"] == "fuel":
+                                            aux["fuelSurcharge"] = additional["commission"]
+                                            tax += additional["taxes"]
+                                        elif additional["additionalService"] == "peak_season":
+                                            aux["peakSeason"] = additional["commission"]
+                                            tax += additional["taxes"]
+                                        else:
+                                            aux["other"] += additional["commission"]
+                                            tax += additional["taxes"]
+                                aux["tax"] = tax
+                                self.env['shipping.methods'].create(aux)
+                                self.env.cr.commit()
+
+                            self.shipping_method = self.env['shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
+                            self.shipping_quote = self.shipping_method.price
+
                     else:
                         async with session.get(url, params=params, headers=headers, auth=aiohttp.BasicAuth('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n')) as response:
                             return await response.json(), response.status
 
                 async def fetch_all():
-                    _logger.info(f"fetching_all")
                     async with aiohttp.ClientSession() as session:
-                        _logger.info(f"session")
-                        _logger.info(f"couriers: {couriers}")
-                        respuestas = []
-                        # dhl_response, dhl_status = await fetch(session, urlDHL, paramsDHL, headers, "dhl")
-                        # envia_response["handler"] = "DHL"
-                        # respuestas.append(dhl_response)
                         headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
+                        tasks = []
                         for courier in couriers:
                             paramsEnvia['shipment'] = {
                                 "carrier": courier,
                                 "type": 0
                             }
-                            # _logger.info(f"paramsEnvia: {paramsEnvia}")
-                            _logger.info(f"Paquetaría: {courier}")
-                            envia_response, _ = await fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia")
-                            envia_response["handler"] = "Envia"
-                            respuestas.append(envia_response)
-                        return respuestas
+                            _logger.info(f"Paquetería: {courier}")
+                            tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia"))
+                        await asyncio.gather(*tasks)
+
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                respuestas = loop.run_until_complete(fetch_all())
+                loop.run_until_complete(fetch_all())
             except Exception as e:
                 _logger.error(f"Error fetching shipping quotes: {e}")
                 self.message_post(
                     body=_(f"Error fetching shipping quotes: {e}"),
                 )
                 return
-            
+            """
             _logger.info(f"tiempo total: {datetime.now()-tiempo}")
 
             self.env['shipping.methods'].search([('purchase_order', '=', self.id)]).unlink()
@@ -619,6 +652,7 @@ class PurchaseOrder(models.Model):
                         self.shipping_method = self.env['shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
                         
                         self.shipping_quote = self.shipping_method.price
+            """
 
     def generate_shipping_order(self):
 
