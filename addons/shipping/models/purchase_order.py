@@ -595,14 +595,14 @@ class PurchaseOrder(models.Model):
                         # DHL
                         tasks.append(fetch(session, urlDHL, paramsDHL, headersDHL, "DHL"))
                         
-                        # headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
-                        # for courier in couriers:
-                        #     paramsEnvia['shipment'] = {
-                        #         "carrier": courier,
-                        #         "type": 0
-                        #     }
-                        #     _logger.info(f"Paquetería: {courier}")
-                        #     tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia"))
+                        headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
+                        for courier in couriers:
+                            paramsEnvia['shipment'] = {
+                                "carrier": courier,
+                                "type": 0
+                            }
+                            _logger.info(f"Paquetería: {courier}")
+                            tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia"))
                         await asyncio.gather(*tasks)
 
                 loop = asyncio.new_event_loop()
