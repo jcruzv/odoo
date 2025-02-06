@@ -1,13 +1,13 @@
 <odoo>
   <data>
-    <record model="ir.ui.view" id="dhl_methods.list">
-      <field name="name">Metodos de envío de DHL</field>
-      <field name="model">dhl.shipping.methods</field>
+    <record model="ir.ui.view" id="shipping_methods.list">
+      <field name="name">Metodos de envío</field>
+      <field name="model">shipping.methods</field>
       <field name="arch" type="xml">
-        <list string="Metodos de envío de DHL">
+        <list string="Metodos de envío">
           <field name="purchase_order"/>
           <field name="name"/>
-          <field name="dhl_code"/>
+          <field name="shipping_code"/>
           <field name="price"/>
           <field name="weight"/>
           <field name="origin"/>

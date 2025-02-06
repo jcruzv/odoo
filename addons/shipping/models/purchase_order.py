@@ -429,10 +429,12 @@ class PurchaseOrder(models.Model):
             ('weight', '=', self.pesoEnvio),
             ('requestDate', '>=', datetime.now() - timedelta(hours=8)),
         ], order='purchase_order.id asc')
+        
+        _logger.info(f"existe: {existe}")
 
         # si existe, clonar los campos y cambiar la orden de compra a esta
         # if existe:
-        if False:
+        if existe:
             _logger.info(f"existe: {existe}, en la ciudad {self.partner_id.city} a la ciudad {self.customer_id.city}")
             primera = 0
             for metodo in existe:
@@ -455,7 +457,10 @@ class PurchaseOrder(models.Model):
                     'requestDate': datetime.now(),
                     'weight': metodo.weight,
                     'origin': metodo.origin,
+                    'courier': metodo.courier,
                     'destination': metodo.destination,
+                    'processedBy': metodo.processedBy,
+                    'peakSeason': metodo.peakSeason,
                 })
             self.shipping_method = self.env['shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
 
@@ -522,13 +527,9 @@ class PurchaseOrder(models.Model):
                             self.shipping_quote = self.shipping_method.price
 
                     else:
-                        _logger.info(f"url: {url}")
-                        _logger.info(f"params: {params}")
-                        _logger.info(f"handler: {handler}")
                         async with session.get(url, params=params, headers=headers, auth=aiohttp.BasicAuth('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n')) as response:
-                            _logger.info(f"response: {response}")
                             quote_data = await response.json()
-                            _logger.info(f"quote_data: {quote_data}")
+                            
                             products = quote_data.get('products', [])
                         
                         if not products:
