@@ -354,7 +354,7 @@ class PurchaseOrder(models.Model):
             "width" : self.width,
             "height" : self.height,
             "plannedShippingDate" : date.strftime('%Y-%m-%d'),
-            "isCustomsDeclarable" : False,
+            "isCustomsDeclarable" : "False",
             "unitOfMeasurement" : "metric",
         }
 
@@ -413,9 +413,14 @@ class PurchaseOrder(models.Model):
 
         # _logger.info(f"paramsEnvia: {paramsEnvia}")
         
+        headersDHL = {
+            'Content-Type': 'application/json',
+        }
+        
         headers = {
             'Content-Type': 'application/json',
         }
+
         # Buscar en shipping_methods si ya existe una cotización para este origen y destino no mayor a 8 horas
         self.env['shipping.methods'].search([('purchase_order', '=', self.id)]).unlink()
         existe = self.env['shipping.methods'].search([
@@ -464,6 +469,8 @@ class PurchaseOrder(models.Model):
             tiempo = datetime.now()
             try:
                 async def fetch(session, url, params, headers, handler):
+                    _logger.info(f"handler: {handler}")
+                    _logger.info(f"headers: {headers}")
                     if handler == 'Envia':
                         async with session.post(url, data=params, headers=headers) as response:
                             respuesta = await response.json()
@@ -489,6 +496,7 @@ class PurchaseOrder(models.Model):
                                     'destination': self.customer_id.city,
                                     'requestDate': datetime.now(),
                                     'other': 0,
+                                    'processedBy': handler
                                 }
                                 descuentoAdicional = 0
                                 if "costSummary" in product:
@@ -514,42 +522,14 @@ class PurchaseOrder(models.Model):
                             self.shipping_quote = self.shipping_method.price
 
                     else:
+                        _logger.info(f"url: {url}")
+                        _logger.info(f"params: {params}")
+                        _logger.info(f"handler: {handler}")
                         async with session.get(url, params=params, headers=headers, auth=aiohttp.BasicAuth('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n')) as response:
-                            return await response.json(), response.status
-
-                async def fetch_all():
-                    async with aiohttp.ClientSession() as session:
-                        headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
-                        tasks = []
-                        for courier in couriers:
-                            paramsEnvia['shipment'] = {
-                                "carrier": courier,
-                                "type": 0
-                            }
-                            _logger.info(f"Paquetería: {courier}")
-                            tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia"))
-                        await asyncio.gather(*tasks)
-
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                loop.run_until_complete(fetch_all())
-            except Exception as e:
-                _logger.error(f"Error fetching shipping quotes: {e}")
-                self.message_post(
-                    body=_(f"Error fetching shipping quotes: {e}"),
-                )
-                return
-            """
-            _logger.info(f"tiempo total: {datetime.now()-tiempo}")
-
-            self.env['shipping.methods'].search([('purchase_order', '=', self.id)]).unlink()
-            for respuesta in respuestas:
-                if 'error' in respuesta or ('code' in respuesta and respuesta["code"] == 500) or isinstance(respuesta["data"], str):
-                    # _logger.warning(f"Error en la respuesta: {respuesta}")
-                    continue
-                else:
-                    if respuesta["handler"] == "DHL":
-                        products = quote_data.get('products', [])
+                            _logger.info(f"response: {response}")
+                            quote_data = await response.json()
+                            _logger.info(f"quote_data: {quote_data}")
+                            products = quote_data.get('products', [])
                         
                         if not products:
                             _logger.warning('No se encontraron métodos de envío disponibles.')
@@ -561,6 +541,8 @@ class PurchaseOrder(models.Model):
                                     'name': product['productName'] + " - " + f"${product["totalPrice"][0]["price"]:,.2f}",
                                     'shipping_code': product['productCode'],
                                     'price': product["totalPrice"][0]["price"],
+                                    'courier': handler,
+                                    'processedBy': handler,
                                     'purchase_order': self.id,
                                     'weight': self.pesoEnvio,
                                     'origin': self.partner_id.city,
@@ -605,55 +587,34 @@ class PurchaseOrder(models.Model):
                         self.stored_selection_options = json.dumps(metodos)
                         
                         self.shipping_quote = self.shipping_method.price
-                    else:
-                        # _logger.info(f"respuesta: {respuesta}")
-                        products = respuesta['data']
+
+                async def fetch_all():
+                    async with aiohttp.ClientSession() as session:
+                        tasks = []
+
+                        # DHL
+                        tasks.append(fetch(session, urlDHL, paramsDHL, headersDHL, "DHL"))
                         
-                        if not products:
-                            _logger.warning('No se encontraron métodos de envío disponibles.')
-                            # raise UserError(_('No se encontraron métodos de envío disponibles.'))
+                        # headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
+                        # for courier in couriers:
+                        #     paramsEnvia['shipment'] = {
+                        #         "carrier": courier,
+                        #         "type": 0
+                        #     }
+                        #     _logger.info(f"Paquetería: {courier}")
+                        #     tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia"))
+                        await asyncio.gather(*tasks)
 
-                        for product in products:
-                            # _logger.info(f"product: {product}")
-                            tax = 0
-                            aux = {
-                                'name': product['serviceDescription'] + " - " + f"${product["totalPrice"]:,.2f}",
-                                'shipping_code': product['service'],
-                                'price': product["totalPrice"],
-                                'purchase_order': self.id,
-                                'courier' : product['carrierDescription'],
-                                'weight': self.pesoEnvio,
-                                'origin': self.partner_id.city,
-                                'destination': self.customer_id.city,
-                                'requestDate': datetime.now(),
-                                'other' : 0,
-                            }
-                            descuentoAdicional = 0
-                            if "costSummary" in product:
-                                costSummary = product["costSummary"][0]
-                                aux["basePrice"] = costSummary["basePrice"]/1.16
-                                tax = costSummary["basePrice"] - aux["basePrice"]
-                                
-                                for additional in costSummary["costAdditionalCharges"]:
-                                    if additional["additionalService"] == "fuel":
-                                        aux["fuelSurcharge"] = additional["commission"]
-                                        tax += additional["taxes"]
-                                    elif additional["additionalService"] == "peak_season":
-                                        aux["peakSeason"] = additional["commission"]
-                                        tax += additional["taxes"]
-                                    else:
-                                        aux["other"] += additional["commission"]
-                                        tax += additional["taxes"]
-                            aux["tax"] = tax
-                            precio = self.env['shipping.methods'].create(aux)
-                            self.env.cr.commit()
-
-                        # Asignar el primer método de envío como predeterminado (puedes ajustar esto)
-                        self.shipping_method = self.env['shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
-                        
-                        self.shipping_quote = self.shipping_method.price
-            """
-
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                loop.run_until_complete(fetch_all())
+            except Exception as e:
+                _logger.error(f"Error fetching shipping quotes: {e}")
+                self.message_post(
+                    body=_(f"Error fetching shipping quotes: {e}"),
+                )
+                return
+            
     def generate_shipping_order(self):
 
         # obtener tipo de envio:
@@ -779,12 +740,12 @@ class PurchaseOrder(models.Model):
                     }
                 }
                 ],
-                "isCustomsDeclarable": False,
+                "isCustomsDeclarable": "False",
                 "description": "Shipment Description",
                 "incoterm": "DAP",
                 "unitOfMeasurement": "metric"
             },
-            "getTransliteratedResponse": False,
+            "getTransliteratedResponse": "False",
         }
 
         
