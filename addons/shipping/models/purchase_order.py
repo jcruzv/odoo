@@ -5,6 +5,8 @@ import requests
 import json
 import base64
 import math
+import asyncio
+import aiohttp
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
@@ -45,7 +47,6 @@ class PurchaseOrder(models.Model):
         string="Localidad", 
         store=True
     )
-
     
     shipping_quote = fields.Float(string='Total Envío', readonly=True)
     
@@ -226,33 +227,27 @@ class PurchaseOrder(models.Model):
 
 
     def execute_request_shipping_track(self):
-        
-        for id in self.env.context.get("active_ids"):
-            self.env['purchase.order'].browse(id).track()
-        
+        orders = self.env['purchase.order'].browse(self.env.context.get("active_ids"))
+        for order in orders:
+            order.track()
         return True
 
     def execute_request_shipping_quote(self):
-        for id in self.env.context.get("active_ids"):
-            self.env['purchase.order'].browse(id).request_shipping_quote()
+        import logging
+        _logger = logging.getLogger(__name__)
+
+        time = datetime.now()
+        orders = self.env['purchase.order'].browse(self.env.context.get("active_ids"))
+        for order in orders:
+            order.request_shipping_quote()
+        _logger.info(f"tiempo total: {datetime.now()-time}")
         return True
 
     def execute_generate_shipping_order(self):
         
-        for id in self.env.context.get("active_ids"):
-            self.env['purchase.order'].browse(id).generate_shipping_order()
-        
-        # sinSelect = self.env["purchase.order"].search([
-        #     ("guia", "!=", "")
-        # ])
-        
-        # for order in sinSelect:
-        #     order.button_cancel()
-
-        # _logger.info(f"sin select: {sinSelect}")
-
-        # # sinSelect.unlink()
-
+        orders = self.env['purchase.order'].browse(self.env.context.get("active_ids"))
+        for order in orders:
+            order.generate_shipping_order()
         return True
 
     def button_request_shipping_quote(self):
@@ -336,13 +331,15 @@ class PurchaseOrder(models.Model):
             )
 
     def request_shipping_quote(self):
-
+        
+        from .address_info import state_code_2_digits, couriers
         import requests
         import logging
         _logger = logging.getLogger(__name__)  
         
 
-        url = "https://express.api.dhl.com/mydhlapi/test/rates"
+        urlDHL = "https://express.api.dhl.com/mydhlapi/test/rates"
+        urlEnvia = "https://api-test.envia.com/ship/rate/"
 
         self.Validar()
 
@@ -351,7 +348,7 @@ class PurchaseOrder(models.Model):
 
         _logger.info(f"fecha formato {date.strftime('%Y-%m-%d')}")
 
-        params = {
+        paramsDHL = {
             "accountNumber" : "983441463",
             "originCountryCode": self.partner_id.country_code or "MX",
             "originCityName": self.partner_id.city,
@@ -365,6 +362,61 @@ class PurchaseOrder(models.Model):
             "isCustomsDeclarable" : False,
             "unitOfMeasurement" : "metric",
         }
+
+        paramsEnvia = {
+            "origin": {
+                "name": self.partner_id.name or '',
+                "company": self.partner_id.company_id.name or '',
+                "email": self.partner_id.email or '',
+                "phone": self.partner_id.phone or '',
+                "street": self.partner_id.street or '',
+                "number": self.partner_id.street2 or '',
+                "district": self.partner_id.city or '',
+                "city": self.partner_id.city or '',
+                "state": state_code_2_digits(self.partner_id.state_id.name) or '',
+                "country": self.partner_id.country_code or '',
+                "postalCode": self.partner_id.zip or '',
+                "reference": "",
+            },
+            "destination": {
+                "name": self.customer_id.name or '',
+                "company": self.customer_id.company_id.name or '',
+                "email": self.customer_id.email or '',
+                "phone": self.customer_id.phone or '',
+                "street": self.customer_id.street or '',
+                "number": self.customer_id.street2 or '',
+                "district": self.customer_id.city or '',
+                "city": self.customer_id.city or '',
+                "state": state_code_2_digits(self.customer_id.state_id.name) or '',
+                "country": self.customer_id.country_code or '',
+                "postalCode": self.customer_id.zip or '',
+                "reference": "",
+            },
+            "packages": [{
+                "content": self.campaign_product.name or '',
+                "amount": 1,
+                "type": "box",
+                "weight": self.weight or 0,
+                "insurance": 0,
+                "declaredValue": 0,
+                "weightUnit": "KG",
+                "lengthUnit": "CM",
+                "dimensions": {
+                    "length": self.length or 0,
+                    "width": self.width or 0,
+                    "height": self.height or 0
+                }
+            }],
+            "settings": {
+            "printFormat": "PDF",
+            "printSize": "STOCK_4X6",
+            "currency": "MXN",
+            "cashOnDelivery": "0.00",
+            "comments": ""
+            }
+        }
+
+        # _logger.info(f"paramsEnvia: {paramsEnvia}")
         
         headers = {
             'Content-Type': 'application/json',
@@ -379,7 +431,8 @@ class PurchaseOrder(models.Model):
         ], order='purchase_order.id asc')
 
         # si existe, clonar los campos y cambiar la orden de compra a esta
-        if existe:
+        # if existe:
+        if False:
             _logger.info(f"existe: {existe}, en la ciudad {self.partner_id.city} a la ciudad {self.customer_id.city}")
             primera = 0
             for metodo in existe:
@@ -406,9 +459,6 @@ class PurchaseOrder(models.Model):
                 })
             self.shipping_method = self.env['shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
 
-            # Notificar al usuario
-            self.message_post(body=_('Cotización completada con los siguientes métodos: %s' % ', '.join([p['name'] for p in existe])))
-
             self.shipping_quote = self.shipping_method.price
             self.message_post(
             body=_(f"Se ha obtenido la cotización del envio: {self.shipping_quote}"),
@@ -416,96 +466,159 @@ class PurchaseOrder(models.Model):
         # si no existe, hacer la solicitud a DHL y guardar los datos en shipping_methods
         else:
             # _logger.info(f"no existe, llamar api")
+            tiempo = datetime.now()
             try:
-                response = requests.get(
-                    url,
-                    auth=('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n'),
-                    params=params,
-                    headers=headers
+                async def fetch(session, url, params, headers, handler):
+                    if handler == 'Envia':
+                        async with session.post(url, data=params, headers=headers) as response:
+                            return await response.json(), response.status
+                    else:
+                        async with session.get(url, params=params, headers=headers, auth=aiohttp.BasicAuth('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n')) as response:
+                            return await response.json(), response.status
+
+                async def fetch_all():
+                    _logger.info(f"fetching_all")
+                    async with aiohttp.ClientSession() as session:
+                        _logger.info(f"session")
+                        _logger.info(f"couriers: {couriers}")
+                        respuestas = []
+                        # dhl_response, dhl_status = await fetch(session, urlDHL, paramsDHL, headers, "dhl")
+                        # envia_response["handler"] = "DHL"
+                        # respuestas.append(dhl_response)
+                        headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
+                        for courier in couriers:
+                            paramsEnvia['shipment'] = {
+                                "carrier": courier,
+                                "type": 0
+                            }
+                            # _logger.info(f"paramsEnvia: {paramsEnvia}")
+                            _logger.info(f"Paquetaría: {courier}")
+                            envia_response, _ = await fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia")
+                            envia_response["handler"] = "Envia"
+                            respuestas.append(envia_response)
+                        return respuestas
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                respuestas = loop.run_until_complete(fetch_all())
+            except Exception as e:
+                _logger.error(f"Error fetching shipping quotes: {e}")
+                self.message_post(
+                    body=_(f"Error fetching shipping quotes: {e}"),
                 )
-                if response.status_code == 200:
-                    quote_data = response.json()
-                    # _logger.info(f"respuesta: {response.json()}")
+                return
+            
+            _logger.info(f"tiempo total: {datetime.now()-tiempo}")
 
-                    # selection=[('valor1', 'valor1'), ('valor2', 'valor2')]
-                    products = quote_data.get('products', [])
-                    if not products:
-                        _logger.warning('No se encontraron métodos de envío disponibles.')
-                        # raise UserError(_('No se encontraron métodos de envío disponibles.'))
+            self.env['shipping.methods'].search([('purchase_order', '=', self.id)]).unlink()
+            for respuesta in respuestas:
+                if 'error' in respuesta or ('code' in respuesta and respuesta["code"] == 500) or isinstance(respuesta["data"], str):
+                    # _logger.warning(f"Error en la respuesta: {respuesta}")
+                    continue
+                else:
+                    if respuesta["handler"] == "DHL":
+                        products = quote_data.get('products', [])
+                        
+                        if not products:
+                            _logger.warning('No se encontraron métodos de envío disponibles.')
+                            # raise UserError(_('No se encontraron métodos de envío disponibles.'))
 
-                    # Crear registros para los métodos de envío en el modelo 'shipping.methods'
-                    # _logger.info(f"productos------ {products}")
-                    
-                    self.env['shipping.methods'].search([('purchase_order', '=', self.id)]).unlink()
+                        for product in products:
+                            if product['productName'] and product["totalPrice"][0]["price"] != 0 and product['productName'] in ['ECONOMY SELECT DOMESTIC', 'EXPRESS DOMESTIC', 'DOMESTICO ENVIO RETORNO']:
+                                aux = {
+                                    'name': product['productName'] + " - " + f"${product["totalPrice"][0]["price"]:,.2f}",
+                                    'shipping_code': product['productCode'],
+                                    'price': product["totalPrice"][0]["price"],
+                                    'purchase_order': self.id,
+                                    'weight': self.pesoEnvio,
+                                    'origin': self.partner_id.city,
+                                    'destination': self.customer_id.city,
+                                    'requestDate': datetime.now(),
+                                }
+                                descuentoAdicional = 0
+                                if "detailedPriceBreakdown" in product:
+                                    # _logger.info(f"product_detail: {product["detailedPriceBreakdown"]}")
+                                    if product["detailedPriceBreakdown"][0]["breakdown"][0]["price"] != 0:
+                                        aux['basePrice'] = product["detailedPriceBreakdown"][0]["breakdown"][0]["priceBreakdown"][1]["basePrice"]
 
-                    for product in products:
-                        if product['productName'] and product["totalPrice"][0]["price"] != 0 and product['productName'] in ['ECONOMY SELECT DOMESTIC', 'EXPRESS DOMESTIC', 'DOMESTICO ENVIO RETORNO']:
+                                if product["totalPrice"][0]["price"] != 0 and product["detailedPriceBreakdown"]:
+                                    for breakdown in product["detailedPriceBreakdown"][0]["breakdown"]:
+                                        if "serviceCode" in breakdown and "price" in breakdown:
+                                            if breakdown["serviceCode"] == "FF":
+                                                aux['fuelSurcharge'] = breakdown["price"]/1.16
+                                                descuentoAdicional += breakdown["priceBreakdown"][1]["price"]
+                                            elif breakdown["serviceCode"] == "OO":
+                                                aux['remoteArea'] = breakdown["price"]/1.16
+
+                                if product["totalPrice"][0]["price"] != 0 and product["totalPriceBreakdown"]:
+                                    aux['discount'] = -abs(next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STDIS")-descuentoAdicional)
+                                    aux['tax'] = next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STTXA")
+                                else:
+                                    aux['discount'] = 0
+                                    aux['tax'] = 0
+                                precio = self.env['shipping.methods'].create(aux)
+                                self.env.cr.commit()
+
+                        # Asignar el primer método de envío como predeterminado (puedes ajustar esto)
+                        self.shipping_method = self.env['shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
+
+                        metodos = [
+                            (product['productCode'], f"{product['productName']} - {product["totalPrice"][0]["price"]}")
+                            for product in products
+                        ]
+
+
+                        # _logger.info(f"metodos: {metodos}")
+                        
+                        self.stored_selection_options = json.dumps(metodos)
+                        
+                        self.shipping_quote = self.shipping_method.price
+                    else:
+                        # _logger.info(f"respuesta: {respuesta}")
+                        products = respuesta['data']
+                        
+                        if not products:
+                            _logger.warning('No se encontraron métodos de envío disponibles.')
+                            # raise UserError(_('No se encontraron métodos de envío disponibles.'))
+
+                        for product in products:
+                            # _logger.info(f"product: {product}")
+                            tax = 0
                             aux = {
-                                'name': product['productName'] + " - " + f"${product["totalPrice"][0]["price"]:,.2f}",
-                                'shipping_code': product['productCode'],
-                                'price': product["totalPrice"][0]["price"],
+                                'name': product['serviceDescription'] + " - " + f"${product["totalPrice"]:,.2f}",
+                                'shipping_code': product['service'],
+                                'price': product["totalPrice"],
                                 'purchase_order': self.id,
+                                'courier' : product['carrierDescription'],
                                 'weight': self.pesoEnvio,
                                 'origin': self.partner_id.city,
                                 'destination': self.customer_id.city,
                                 'requestDate': datetime.now(),
+                                'other' : 0,
                             }
                             descuentoAdicional = 0
-                            if "detailedPriceBreakdown" in product:
-                                # _logger.info(f"product_detail: {product["detailedPriceBreakdown"]}")
-                                if product["detailedPriceBreakdown"][0]["breakdown"][0]["price"] != 0:
-                                    aux['basePrice'] = product["detailedPriceBreakdown"][0]["breakdown"][0]["priceBreakdown"][1]["basePrice"]
-
-                            if product["totalPrice"][0]["price"] != 0 and product["detailedPriceBreakdown"]:
-                                for breakdown in product["detailedPriceBreakdown"][0]["breakdown"]:
-                                    if "serviceCode" in breakdown and "price" in breakdown:
-                                        if breakdown["serviceCode"] == "FF":
-                                            aux['fuelSurcharge'] = breakdown["price"]/1.16
-                                            descuentoAdicional += breakdown["priceBreakdown"][1]["price"]
-                                        elif breakdown["serviceCode"] == "OO":
-                                            aux['remoteArea'] = breakdown["price"]/1.16
-
-                            if product["totalPrice"][0]["price"] != 0 and product["totalPriceBreakdown"]:
-                                aux['discount'] = -abs(next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STDIS")-descuentoAdicional)
-                                aux['tax'] = next(item["price"] for item in product["totalPriceBreakdown"][0]["priceBreakdown"] if item["typeCode"] == "STTXA")
-                            else:
-                                aux['discount'] = 0
-                                aux['tax'] = 0
+                            if "costSummary" in product:
+                                costSummary = product["costSummary"][0]
+                                aux["basePrice"] = costSummary["basePrice"]/1.16
+                                tax = costSummary["basePrice"] - aux["basePrice"]
+                                
+                                for additional in costSummary["costAdditionalCharges"]:
+                                    if additional["additionalService"] == "fuel":
+                                        aux["fuelSurcharge"] = additional["commission"]
+                                        tax += additional["taxes"]
+                                    elif additional["additionalService"] == "peak_season":
+                                        aux["peakSeason"] = additional["commission"]
+                                        tax += additional["taxes"]
+                                    else:
+                                        aux["other"] += additional["commission"]
+                                        tax += additional["taxes"]
+                            aux["tax"] = tax
                             precio = self.env['shipping.methods'].create(aux)
                             self.env.cr.commit()
 
-                    # Asignar el primer método de envío como predeterminado (puedes ajustar esto)
-                    self.shipping_method = self.env['shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
-
-                    # Notificar al usuario
-                    self.message_post(body=_('Cotización completada con los siguientes métodos: %s' % ', '.join([p['productName'] for p in products])))
-
-                    metodos = [
-                        (product['productCode'], f"{product['productName']} - {product["totalPrice"][0]["price"]}")
-                        for product in products
-                    ]
-
-
-                    # _logger.info(f"metodos: {metodos}")
-                    
-                    self.stored_selection_options = json.dumps(metodos)
-                    
-                    self.shipping_quote = self.shipping_method.price
-                    self.message_post(
-                        body=_(f"Se ha obtenido la cotización del envio: {self.shipping_quote}"),
-                    )
-                else:
-                    _logger.warning(f"Error en la solicitud de cotización:{response.text}, {response.status_code}")
-                    self.message_post(
-                        body=_(f"Error en la solicitud de cotización:{response.text}, {response.status_code}"),
-                    )
-                    # raise Exception(_('Error en la solicitud de cotización: %s \n %s') % (response.text, response.status_code))
-            except Exception as e:
-                _logger.warning(f"No se pudo obtener la cotización: {e}")
-                self.message_post(
-                    body=_(f"No se pudo obtener la cotización: {e}"),
-                )
-                # raise models.UserError(_('No se pudo obtener la cotización: %s') % str(e))
+                        # Asignar el primer método de envío como predeterminado (puedes ajustar esto)
+                        self.shipping_method = self.env['shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
+                        
+                        self.shipping_quote = self.shipping_method.price
 
     def generate_shipping_order(self):
 
@@ -710,8 +823,6 @@ class PurchaseOrder(models.Model):
         except Exception as e:
             raise UserError(_('No se pudo generar la orden: %s') % str(e))
         
-
-
     def track(self):
 
         import requests
@@ -719,7 +830,7 @@ class PurchaseOrder(models.Model):
         _logger = logging.getLogger(__name__)  
         
 
-        url = "https://express.api.dhl.com/mydhlapi/test/shipments/" + self.track_number + "/tracking"
+        urlDHL = "https://express.api.dhl.com/mydhlapi/test/shipments/" + self.track_number + "/tracking"
         
         headers = {
             'Content-Type': 'application/json',
@@ -741,7 +852,7 @@ class PurchaseOrder(models.Model):
 
 
             response = requests.get(
-                url,
+                urlDHL,
                 auth=('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n'),
                 headers=headers
             )

@@ -29,9 +29,9 @@
                 <field name="stored_selection_options" 
                     invisible="1"
                 />
-                <!-- <field name="shipping_method" 
+                <field name="shipping_method" 
                     domain="[('purchase_order', '=', id)]"
-                /> -->
+                />
                 <field name="pickup"/>
                 <field name="pickup_customer_id"
                     invisible="pickup == False" 

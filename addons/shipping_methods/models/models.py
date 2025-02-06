@@ -6,6 +6,14 @@ class shipping_methods(models.Model):
     name = fields.Char(
         string='Nombre',
     )
+
+    courier = fields.Char(
+        string='Paquetería',
+    )
+
+    processedBy = fields.Char(
+        string='Procesado por',
+    )
     
     shipping_code = fields.Char(
         string='Código del producto de envío',
@@ -39,6 +47,14 @@ class shipping_methods(models.Model):
     
     remoteArea = fields.Float(
         string='Área Remota',
+    )
+
+    peakSeason = fields.Float(
+        string='Temporada Alta',
+    )
+
+    other = fields.Float(
+        string='Otros',
     )
 
     weight = fields.Float(
