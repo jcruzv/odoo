@@ -175,28 +175,14 @@ class PurchaseOrder(models.Model):
         # Elegir el mejor precio entre "express domestic" y "economy select domestic"
         for id in self.env.context.get("active_ids"):
             po = self.env['purchase.order'].browse(id)
-            express_method = self.shipping_method.search([
-            ("name", "ilike", "express domestic"),
+            methods = self.shipping_method.search([
             ("purchase_order", "=", po.id),
-            ], limit=1)
-            economy_method = self.shipping_method.search([
-            ("name", "ilike", "economy select domestic"),
-            ("purchase_order", "=", po.id),
-            ], limit=1)
+            ])
             
-            if express_method and economy_method:
-                best_method = express_method if express_method.price < economy_method.price else economy_method
-            elif express_method:
-                best_method = express_method
-            elif economy_method:
-                best_method = economy_method
-            else:
-                best_method = None
-            
-            if best_method:
+            if methods:
+                best_method = min(methods, key=lambda m: m.price)
                 po.shipping_method = best_method.id
                 po.shipping_quote = best_method.price
-        
         return True
 
     def set_shipping_method_express(self):
@@ -473,14 +459,14 @@ class PurchaseOrder(models.Model):
             # _logger.info(f"no existe, llamar api")
             tiempo = datetime.now()
             try:
-                async def fetch(session, url, params, headers, handler):
+                async def fetch(session, url, params, headers, handler, courier):
                     _logger.info(f"handler: {handler}")
                     _logger.info(f"headers: {headers}")
                     if handler == 'Envia':
                         async with session.post(url, data=params, headers=headers) as response:
                             respuesta = await response.json()
-
-                            if 'error' in respuesta or ('code' in respuesta and respuesta["code"] == 500) or isinstance(respuesta["data"], str):
+                            _logger.info(f"courier: {courier}, respuesta: {respuesta}")
+                            if 'error' in respuesta or ('code' in respuesta and (respuesta["code"] == 500 or respuesta["code"] == 400)) or ("data" in respuesta and isinstance(respuesta["data"], str)):
                                 # _logger.warning(f"Error en la respuesta: {respuesta}")
                                 return
                             products = respuesta['data']
@@ -594,7 +580,7 @@ class PurchaseOrder(models.Model):
                         tasks = []
 
                         # DHL
-                        tasks.append(fetch(session, urlDHL, paramsDHL, headersDHL, "DHL"))
+                        tasks.append(fetch(session, urlDHL, paramsDHL, headersDHL, "DHL", "DHL"))
                         
                         headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
                         for courier in couriers:
@@ -603,7 +589,7 @@ class PurchaseOrder(models.Model):
                                 "type": 0
                             }
                             _logger.info(f"Paquetería: {courier}")
-                            tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia"))
+                            tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia", courier))
                         await asyncio.gather(*tasks)
 
                 loop = asyncio.new_event_loop()
@@ -621,6 +607,166 @@ class PurchaseOrder(models.Model):
         # obtener tipo de envio:
 
         metodo = self.shipping_method
+    
+        if metodo.processedBy == 'Envia':
+            self.get_guide_Envia(metodo)
+        else:
+            self.get_guide_DHL(metodo)
+
+            
+    def get_guide_Envia(self, metodo):
+        import logging
+        from .address_info import state_code_2_digits
+        _logger = logging.getLogger(__name__)  
+
+        self.shipping_quote = metodo.price
+        
+        
+        date = datetime.now() + timedelta(minutes=5)
+        formatted_dt = date.strftime("%Y-%m-%dT%H:%M:%S GMT-06:00")
+        _logger.info(f"fecha formato {formatted_dt}")
+
+        paramsEnvia = json.dumps({
+            "origin": {
+                "name": self.partner_id.name or '',
+                "company": self.partner_id.company_id.name or '',
+                "email": self.partner_id.email or '',
+                "phone": self.partner_id.phone or '',
+                "street": self.partner_id.street or '',
+                "number": self.partner_id.street2 or '',
+                "district": self.partner_id.city or '',
+                "city": self.partner_id.city or '',
+                "state": state_code_2_digits(self.partner_id.state_id.name) or '',
+                "country": self.partner_id.country_code or '',
+                "postalCode": self.partner_id.zip or '',
+                "reference": "",
+            },
+            "destination": {
+                "name": self.customer_id.name or '',
+                "company": self.customer_id.company_id.name or '',
+                "email": self.customer_id.email or '',
+                "phone": self.customer_id.phone or '',
+                "street": self.customer_id.street or '',
+                "number": self.customer_id.street2 or '',
+                "district": self.customer_id.city or '',
+                "city": self.customer_id.city or '',
+                "state": state_code_2_digits(self.customer_id.state_id.name) or '',
+                "country": self.customer_id.country_code or '',
+                "postalCode": self.customer_id.zip or '',
+                "reference": "",
+            },
+            "packages": [{
+                "content": self.campaign_product.name or '',
+                "amount": 1,
+                "type": "box",
+                "weight": self.weight or 0,
+                "insurance": 0,
+                "declaredValue": 0,
+                "weightUnit": "KG",
+                "lengthUnit": "CM",
+                "dimensions": {
+                    "length": self.length or 0,
+                    "width": self.width or 0,
+                    "height": self.height or 0
+                }
+            }],
+            "shipment": {
+                "carrier": metodo.courier,
+                "service": metodo.shipping_code,
+                "type": 0
+            },
+            "settings": {
+                "printFormat": "PDF",
+                "printSize": "STOCK_4X6",
+                "currency": "MXN",
+                "cashOnDelivery": "0.00",
+                "comments": ""
+            }
+        })
+
+        paramsEnvia = paramsEnvia.replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u').replace('Á', 'A').replace('É', 'E').replace('Í', 'I').replace('Ó', 'O').replace('Ú', 'U')
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'authorization': "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
+        }
+
+        _logger.info(f"paramsEnvia: {paramsEnvia}")
+
+        try:
+            response = requests.post(
+                'https://api-test.envia.com/ship/generate/',
+                headers=headers,
+                data=paramsEnvia
+            )
+            if response.status_code == 200:
+                _logger.info(f"response: {response}")
+                resp = response.json()
+                if 'error' in resp:
+                    raise UserError(_('No se pudo generar la orden 1: %s') % resp['error'])
+                else:
+                    _logger.info(f"resp: {resp}")
+                    data = resp['data'][0]
+                    _logger.info(f"data: {data}")
+
+                    self.track_number = data['trackingNumber']
+                    self.track_url = data['trackUrl']
+                    self.shipping_status = 'Guía Creada'
+                    
+                    # obtener el PDF desde aws con el campo "label" y crear un archivo
+                    _logger.info(f"urlLabel: {data['label']}")
+                    urlLabel = data['label']
+                    response = requests.get(urlLabel)
+                    pdf_content = response.content
+                    if not pdf_content:
+                        raise UserError(_('No se pudo obtener la etiqueta de envío'))
+
+                    # Adjuntar el PDF directamente al chatter
+                    attachment = self.env['ir.attachment'].create({
+                        'name': f'shipping_etiqueta_{self.name}.pdf',
+                        'type': 'binary',
+                        'datas': base64.b64encode(pdf_content),
+                        'res_model': 'purchase.order',
+                        'res_id': self.id,
+                        'mimetype': 'application/pdf',
+                    })
+                    # Agregar el adjunto al chatter
+
+                    envio = self.env['product.product'].search([
+                        ('name', '=', 'Envío')
+                    ])
+
+                    existe = self.order_line.filtered(lambda line: line.product_id == envio)
+
+                    if existe: 
+                        existe.write({
+                            'price_unit': metodo.price,  # Actualizar el precio
+                            'name': envio.name + "\n" + metodo.name.split(" - $")[0],  # Nombre del producto
+                        })
+
+                    else:
+                        self.order_line.create({
+                            'order_id': self.id,  # Asociar la línea a esta orden de compra
+                            'product_id': envio.id,  # Producto "Envío"
+                            'name': envio.name + "\n" + metodo.name.split(" - $")[0],  # Nombre del producto
+                            'product_qty': 1.0,  # Cantidad
+                            'product_uom': envio.uom_id.id,  # Unidad de medida
+                            'price_unit': metodo.price,  # Precio del envío
+                        })
+
+
+                    self.message_post(
+                        body=_("Se ha generado la orden de envío y se ha adjuntado la etiqueta."),
+                        attachment_ids=[attachment.id]
+                    )
+            else:
+                _logger.warning(f"No se pudo generar la orden: {response.text()}")
+                # raise UserError(_('No se pudo generar la orden: %s') % response
+        except Exception as e:
+            raise UserError(_('No se pudo generar la orden: %s') % str(e))
+        
+
+    def get_guide_DHL(self, metodo):
         self.shipping_quote = metodo.price
         
         import logging
@@ -769,8 +915,7 @@ class PurchaseOrder(models.Model):
                 self.track_number = data['shipmentTrackingNumber']
                 self.track_url = data['trackingUrl']
                 self.shipping_status = 'Guía Creada'
-                self.guia = ''
-
+                
                 pdf_content = data["documents"][0]["content"]
                 if not pdf_content:
                     raise UserError(_('No se pudo obtener la etiqueta de envío'))
