@@ -335,11 +335,12 @@ jsonCourier = {
       "description": "tresGuerras",
       "country_code": "MX"
     },
-    {
-      "name": "bigLogistics",
-      "description": "BigLogistics",
-      "country_code": "MX"
-    },
+    # al parecer solo es para estados unidos
+    # {
+    #   "name": "bigLogistics",
+    #   "description": "BigLogistics",
+    #   "country_code": "MX"
+    # },
     {
       "name": "dhl2",
       "description": "DHL(S&G)",
@@ -405,4 +406,4 @@ jsonCourier = {
   ]
 }
 
-couriers = {courier["name"]: courier["description"] for courier in jsonCourier["data"]}
+couriers = {courier["name"]: courier["name"] for courier in jsonCourier["data"]}

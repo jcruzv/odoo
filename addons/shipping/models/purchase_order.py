@@ -415,8 +415,6 @@ class PurchaseOrder(models.Model):
             ('weight', '=', self.pesoEnvio),
             ('requestDate', '>=', datetime.now() - timedelta(hours=8)),
         ], order='purchase_order.id asc')
-        
-        _logger.info(f"existe: {existe}")
 
         # si existe, clonar los campos y cambiar la orden de compra a esta
         # if existe:
@@ -424,7 +422,6 @@ class PurchaseOrder(models.Model):
             _logger.info(f"existe: {existe}, en la ciudad {self.partner_id.city} a la ciudad {self.customer_id.city}")
             primera = 0
             for metodo in existe:
-                _logger.info(f"metodo orden: {metodo.purchase_order}")
                 if primera == 0:
                     primera = metodo.purchase_order.id
                 elif primera != metodo.purchase_order.id:
@@ -460,12 +457,10 @@ class PurchaseOrder(models.Model):
             tiempo = datetime.now()
             try:
                 async def fetch(session, url, params, headers, handler, courier):
-                    _logger.info(f"handler: {handler}")
-                    _logger.info(f"headers: {headers}")
                     if handler == 'Envia':
                         async with session.post(url, data=params, headers=headers) as response:
                             respuesta = await response.json()
-                            _logger.info(f"courier: {courier}, respuesta: {respuesta}")
+                            
                             if 'error' in respuesta or ('code' in respuesta and (respuesta["code"] == 500 or respuesta["code"] == 400)) or ("data" in respuesta and isinstance(respuesta["data"], str)):
                                 # _logger.warning(f"Error en la respuesta: {respuesta}")
                                 return
@@ -481,7 +476,7 @@ class PurchaseOrder(models.Model):
                                     'shipping_code': product['service'],
                                     'price': product['totalPrice'],
                                     'purchase_order': self.id,
-                                    'courier': product['carrierDescription'],
+                                    'courier': courier,
                                     'weight': self.pesoEnvio,
                                     'origin': self.partner_id.city,
                                     'destination': self.customer_id.city,
@@ -589,6 +584,7 @@ class PurchaseOrder(models.Model):
                                 "type": 0
                             }
                             _logger.info(f"Paquetería: {courier}")
+                            _logger.info(f"Parametros: {paramsEnvia}")
                             tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia", courier))
                         await asyncio.gather(*tasks)
 
@@ -626,7 +622,7 @@ class PurchaseOrder(models.Model):
         formatted_dt = date.strftime("%Y-%m-%dT%H:%M:%S GMT-06:00")
         _logger.info(f"fecha formato {formatted_dt}")
 
-        paramsEnvia = json.dumps({
+        paramsEnvia = {
             "origin": {
                 "name": self.partner_id.name or '',
                 "company": self.partner_id.company_id.name or '',
@@ -682,39 +678,36 @@ class PurchaseOrder(models.Model):
                 "cashOnDelivery": "0.00",
                 "comments": ""
             }
-        })
+        }
 
-        paramsEnvia = paramsEnvia.replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u').replace('Á', 'A').replace('É', 'E').replace('Í', 'I').replace('Ó', 'O').replace('Ú', 'U')
+        # paramsEnvia = paramsEnvia.replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u').replace('Á', 'A').replace('É', 'E').replace('Í', 'I').replace('Ó', 'O').replace('Ú', 'U')
         
         headers = {
             'Content-Type': 'application/json',
             'authorization': "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
         }
 
-        _logger.info(f"paramsEnvia: {paramsEnvia}")
-
         try:
+            _logger.info(f"paramsEnvia: {paramsEnvia}")
             response = requests.post(
                 'https://api-test.envia.com/ship/generate/',
                 headers=headers,
-                data=paramsEnvia
+                json=paramsEnvia
             )
+            _logger.info(f"response: {response}")
             if response.status_code == 200:
-                _logger.info(f"response: {response}")
+                
                 resp = response.json()
                 if 'error' in resp:
                     raise UserError(_('No se pudo generar la orden 1: %s') % resp['error'])
                 else:
-                    _logger.info(f"resp: {resp}")
                     data = resp['data'][0]
-                    _logger.info(f"data: {data}")
 
                     self.track_number = data['trackingNumber']
                     self.track_url = data['trackUrl']
                     self.shipping_status = 'Guía Creada'
                     
                     # obtener el PDF desde aws con el campo "label" y crear un archivo
-                    _logger.info(f"urlLabel: {data['label']}")
                     urlLabel = data['label']
                     response = requests.get(urlLabel)
                     pdf_content = response.content
@@ -833,8 +826,8 @@ class PurchaseOrder(models.Model):
                         "postalCode": self.partner_id.zip,
                         "cityName": self.partner_id.city,
                         "countryCode": self.partner_id.country_code or "MX",
-                        "addressLine1": self.partner_id.street_name,
-                        "addressLine2": self.partner_id.street_number + " " + self.partner_id.street_number2,
+                        "addressLine1": self.partner_id.street,
+                        "addressLine2": self.partner_id.street2,
                     },
                     "contactInformation": {
                         "email": self.partner_id.email or "shipper_create_shipmentapi@dhltestmail.com",
@@ -856,8 +849,8 @@ class PurchaseOrder(models.Model):
                         "postalCode": self.customer_id.zip,
                         "cityName": self.customer_id.city,
                         "countryCode": self.customer_id.country_code or "MX",
-                        "addressLine1": self.customer_id.street_name,
-                        "addressLine2": self.customer_id.street_number + " " + self.partner_id.street_number2,
+                        "addressLine1": self.customer_id.street,
+                        "addressLine2": self.customer_id.street2,
                     },
                     "contactInformation": {
                         "email": self.customer_id.email or "recipient_create_shipmentapi@dhltestmail.com",
