@@ -1,18 +1,18 @@
 <odoo>
-    <record id="view_purchase_order_form_inherit_dhl" model="ir.ui.view">
-        <field name="name">purchase.order.form.inherit.dhl</field>
+    <record id="view_purchase_order_form_inherit_shipping" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.shipping</field>
         <field name="model">purchase.order</field>
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
                 <!-- Botón para solicitar cotización -->
                 <button name="request_shipping_quote"
-                        string="Solicitar Cotización DHL"
+                        string="Solicitar Cotización"
                         type="object"
                         class="btn-primary"/>
-                <!-- Botón para generar la orden de DHL -->
+                <!-- Botón para generar la orden de shipping -->
                 <button name="generate_shipping_order"
-                        string="Generar Orden con DHL"
+                        string="Generar Orden de Envío"
                         type="object"
                         class="btn-success"/>
                         
