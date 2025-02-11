@@ -13,6 +13,7 @@
           <field name="origin"/>
           <field name="destination"/>
           <field name="requestDate"/>
+          <!-- <field name="rate_id"/> -->
         </list>
       </field>
     </record>

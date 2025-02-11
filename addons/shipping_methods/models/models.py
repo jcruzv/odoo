@@ -19,6 +19,11 @@ class shipping_methods(models.Model):
         string='Código del producto de envío',
     )
 
+    rate_id = fields.Char(
+        string="ID de Cotización",
+        help="Exclusivo para Skydropx"
+    )
+
     price = fields.Float(
         string='Precio',
     )

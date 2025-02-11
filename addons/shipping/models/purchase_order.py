@@ -320,6 +320,7 @@ class PurchaseOrder(models.Model):
         
 
         urlDHL = "https://express.api.dhl.com/mydhlapi/test/rates"
+        urlSkydropx = "https://sb-pro.skydropx.com/"
         urlEnvia = "https://api-test.envia.com/ship/rate/"
 
         self.Validar()
@@ -342,6 +343,49 @@ class PurchaseOrder(models.Model):
             "plannedShippingDate" : date.strftime('%Y-%m-%d'),
             "isCustomsDeclarable" : "False",
             "unitOfMeasurement" : "metric",
+        }
+
+        paramsSkydropx = {
+            "quotation": {
+                "order_id": str(self.id),
+                "address_from": {
+                    "country_code": self.partner_id.country_code.lower(),
+                    "postal_code": self.partner_id.zip,
+                    "area_level1": self.partner_id.state_id.name,
+                    "area_level2": self.partner_id.city,
+                    "area_level3": self.partner_id.street2 or "",
+                    "street1": self.partner_id.street,
+                    "apartment_number": "",
+                    "reference": "Nave 7",
+                    "name": self.partner_id.name,
+                    "company": self.partner_id.company_id.name or "",
+                    "phone": self.partner_id.phone or "",
+                    "email": self.partner_id.email or ""
+                },
+                "address_to": {
+                    "country_code": self.customer_id.country_code.lower(),
+                    "postal_code": self.customer_id.zip,
+                    "area_level1": self.customer_id.state_id.name,
+                    "area_level2": self.customer_id.city,
+                    "area_level3": self.customer_id.street2 or "",
+                    "street1": self.customer_id.street,
+                    "apartment_number": "",
+                    "reference": "Zaguan blanco",
+                    "name": self.customer_id.name,
+                    "company": self.customer_id.company_id.name or "",
+                    "phone": self.customer_id.phone or "",
+                    "email": self.customer_id.email or ""
+                },
+                "parcel": {
+                    "length": self.length,
+                    "width": self.width,
+                    "height": self.height,
+                    "weight": self.weight
+                },
+                "requested_carriers": [
+                    "all"
+                ]
+            }
         }
 
         paramsEnvia = {
@@ -457,7 +501,77 @@ class PurchaseOrder(models.Model):
             tiempo = datetime.now()
             try:
                 async def fetch(session, url, params, headers, handler, courier):
-                    if handler == 'Envia':
+                    if handler == 'Skydropx':
+                        async with session.post(url, json=params, headers=headers) as response:
+                            _logger.info(f"response: {response}")
+                            respuesta = await response.json()
+                            _logger.info(f"respuesta: {respuesta}")
+
+                            if 'error' in respuesta or ('code' in respuesta and (respuesta["code"] == 500 or respuesta["code"] == 400)) or ("data" in respuesta and isinstance(respuesta["data"], str)):
+                                return
+
+                            quote_id = respuesta.get('id')
+                            if not quote_id:
+                                _logger.warning('No se pudo obtener el ID de la cotización.')
+                                return
+
+                            while True:
+                                async with session.get(f"{url}/{quote_id}", headers=headers) as check_response:
+                                    check_respuesta = await check_response.json()
+                                    _logger.info(f"check_respuesta: {check_respuesta}")
+
+                                    if check_respuesta.get('is_completed'):
+                                        products = check_respuesta['rates']
+                                        if not products:
+                                            _logger.warning('No se encontraron métodos de envío disponibles.')
+                                            return
+
+                                        for product in products:
+                                            if product["success"]:
+                                                tax = 0
+                                                aux = {
+                                                    'name': product['provider_name'] + " " + product["provider_service_name"] + " - " + f"${float(product['total']):,.2f}",
+                                                    'rate_id': product['id'],
+                                                    'shipping_code': product['provider_service_code'],
+                                                    'price': product['total'],
+                                                    'purchase_order': self.id,
+                                                    'courier': product['provider_name'],
+                                                    'weight': self.pesoEnvio,
+                                                    'origin': self.partner_id.city,
+                                                    'destination': self.customer_id.city,
+                                                    'requestDate': datetime.now(),
+                                                    'other': 0,
+                                                    'processedBy': handler
+                                                }
+                                                descuentoAdicional = 0
+
+                                                aux["basePrice"] = float(product["amount"]) / 1.16
+                                                tax = aux["basePrice"]*.16
+
+                                                for additional in product["extra_fees"]:
+                                                    if additional["code"] == "FUEL_SURCHARGE_FEE":
+                                                        aux["fuelSurcharge"] = additional["value"]/1.16
+                                                        tax += aux["fuelSurcharge"]*.16
+                                                    elif additional["additionalService"] == "PEAK_SEASON_FEE":
+                                                        aux["peakSeason"] = additional["value"]/1.16
+                                                        tax += aux["peakSeason"]*.16
+                                                    elif additional["additionalService"] == "REMOTE_AREA_FEE":
+                                                        aux["remoteArea"] = additional["value"]/1.16
+                                                        tax += aux["remoteArea"]*.16
+                                                    else:
+                                                        aux["other"] += additional["value"]/1.16
+                                                        tax += aux["other"]*.16
+                                                aux["tax"] = tax
+                                                self.env['shipping.methods'].create(aux)
+                                                self.env.cr.commit()
+
+                                        self.shipping_method = self.env['shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
+                                        self.shipping_quote = self.shipping_method.price
+                                        break
+                                    else:
+                                        await asyncio.sleep(4)
+
+                    elif handler == 'Envia':
                         async with session.post(url, data=params, headers=headers) as response:
                             respuesta = await response.json()
                             
@@ -507,7 +621,7 @@ class PurchaseOrder(models.Model):
                             self.shipping_method = self.env['shipping.methods'].search([('purchase_order', '=', self.id)], limit=1)
                             self.shipping_quote = self.shipping_method.price
 
-                    else:
+                    elif handler == 'DHL':
                         async with session.get(url, params=params, headers=headers, auth=aiohttp.BasicAuth('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n')) as response:
                             quote_data = await response.json()
                             
@@ -575,17 +689,50 @@ class PurchaseOrder(models.Model):
                         tasks = []
 
                         # DHL
-                        tasks.append(fetch(session, urlDHL, paramsDHL, headersDHL, "DHL", "DHL"))
+                        # tasks.append(fetch(session, urlDHL, paramsDHL, headersDHL, "DHL", "DHL"))
+
+                        # obtener el token guardado localmente
+                        # si no existe el token solicitad uno a skydropx
+                        # si existe el token, solicitar cotización a skydropx
+                        # Skydropx
+
+                        # Obtener el token guardado localmente
+                        token = self.env['ir.config_parameter'].sudo().get_param('skydropx_token')
+
+                        if token:
+                            token_data = json.loads(token)
+                            if 'expires_in' in token_data and token_data['expires_in'] < datetime.now().timestamp():
+                                token = None
+                        if not token:
+                            # Solicitar un nuevo token a Skydropx
+                            auth_response = await session.post(
+                                urlSkydropx + 'api/v1/oauth/token',
+                                json={
+                                    "grant_type": "client_credentials",
+                                    "client_id" : "KRJ2ZCd6dxBNPCBKeIxmYfJ25_VU-Z8ULVudhct3MKI",
+                                    "client_secret" : "xYP0CsERedn2I_MWXnY3pOaPbjP4ty2o38WHkSEUYq4"
+                                },
+                                headers=headers
+                            )
+                            
+                            token = await auth_response.json()
+                            if token:
+                                self.env['ir.config_parameter'].sudo().set_param('skydropx_token', json.dumps(token))
+                            else:
+                                _logger.warning('No se pudo obtener el token de Skydropx')
+                        _logger.info(f"token: {token}")
+                        headers['Authorization'] = f'Bearer {token["access_token"]}'
+
+                        tasks.append(fetch(session, urlSkydropx+"api/v1/quotations", paramsSkydropx, headers, "Skydropx", "Skydropx"))
                         
-                        headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
-                        for courier in couriers:
-                            paramsEnvia['shipment'] = {
-                                "carrier": courier,
-                                "type": 0
-                            }
-                            _logger.info(f"Paquetería: {courier}")
-                            _logger.info(f"Parametros: {paramsEnvia}")
-                            tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia", courier))
+                        # headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
+                        # for courier in couriers:
+                        #     paramsEnvia['shipment'] = {
+                        #         "carrier": courier,
+                        #         "type": 0
+                        #     }
+                        #     _logger.info(f"Paquetería: {courier}")
+                        #     tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia", courier))
                         await asyncio.gather(*tasks)
 
                 loop = asyncio.new_event_loop()
@@ -606,6 +753,8 @@ class PurchaseOrder(models.Model):
     
         if metodo.processedBy == 'Envia':
             self.get_guide_Envia(metodo)
+        elif metodo.processedBy == 'Skydropx':
+            self.get_guide_Skydropx(metodo)
         else:
             self.get_guide_DHL(metodo)
 
@@ -755,6 +904,180 @@ class PurchaseOrder(models.Model):
             else:
                 _logger.warning(f"No se pudo generar la orden: {response.text()}")
                 # raise UserError(_('No se pudo generar la orden: %s') % response
+        except Exception as e:
+            raise UserError(_('No se pudo generar la orden: %s') % str(e))
+        
+        
+    def get_guide_Skydropx(self, metodo):
+        import logging
+        from .address_info import state_code_2_digits
+        _logger = logging.getLogger(__name__)  
+
+        self.shipping_quote = metodo.price
+        
+        
+        urlSkydropx = "https://sb-pro.skydropx.com/"
+        date = datetime.now() + timedelta(minutes=5)
+        formatted_dt = date.strftime("%Y-%m-%dT%H:%M:%S GMT-06:00")
+        _logger.info(f"fecha formato {formatted_dt}")
+
+        paramsSkydropx = {
+            "shipment": {
+                "rate_id": metodo.rate_id,
+                "protected": True,
+                "declared_value": 1400,
+                "printing_format": "thermal",
+                "address_from": {
+                    "country_code": self.partner_id.country_code.lower(),
+                    "postal_code": self.partner_id.zip,
+                    "area_level1": self.partner_id.state_id.name,
+                    "area_level2": self.partner_id.city,
+                    "area_level3": self.partner_id.street2 or "",
+                    "street1": self.partner_id.street,
+                    "name": self.partner_id.name,
+                    "company": self.partner_id.company_id.name or "",
+                    "phone": self.partner_id.phone or "",
+                    "email": self.partner_id.email or "",
+                    "reference": self.partner_id.street2 or ""
+                },
+                "address_to": {
+                    "country_code": self.customer_id.country_code.lower(),
+                    "postal_code": self.customer_id.zip,
+                    "area_level1": self.customer_id.state_id.name,
+                    "area_level2": self.customer_id.city,
+                    "area_level3": self.customer_id.street2 or "",
+                    "street1": self.customer_id.street,
+                    "name": self.customer_id.name,
+                    "company": self.customer_id.company_id.name or "",
+                    "phone": self.customer_id.phone or "",
+                    "email": self.customer_id.email or "",
+                    "reference": self.customer_id.street2 or ""
+                },
+                "consignment_note": '53102400',
+                "package_type": "4G",
+                "products": []
+            }
+        }
+
+        # paramsEnvia = paramsEnvia.replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u').replace('Á', 'A').replace('É', 'E').replace('Í', 'I').replace('Ó', 'O').replace('Ú', 'U')
+        
+        headers = {
+            'Content-Type': 'application/json',
+        }
+
+        try:
+            async def fetch(session, url, params, headers, handler, courier):
+                if handler == 'Skydropx':
+                    async with session.post(url, json=params, headers=headers) as response:
+                        resp = await response.json()
+                        _logger.info(f"resp: {resp}")
+
+                        if 'error' in resp:
+                            raise UserError(_('No se pudo generar la orden 1: %s') % resp['error'])
+                        else:
+                            id = resp['data']["id"]
+                            while True:
+                                async with aiohttp.ClientSession() as session:
+                                    async with session.get(urlSkydropx + 'api/v1/shipments/' + str(id), headers=headers) as response:
+                                        resp = await response.json()
+                                        # _logger.info(f"Checking shipment status: {resp}")
+
+                                        if resp["data"]["attributes"]["workflow_status"] == "success":
+                                            data = resp
+                                            self.track_number = data['included'][0]["attributes"]["tracking_number"]
+                                            self.track_url = data['included'][0]["attributes"]["tracking_url_provider"]
+                                            self.shipping_status = 'Guía Creada'
+                                            
+                                            # obtener el PDF desde aws con el campo "label" y crear un archivo
+                                            urlLabel = urlSkydropx.rstrip('/') + data['included'][0]["attributes"]["label_url"]
+
+                                            _logger.info(f"url del pdf {urlLabel}")
+
+                                            response = requests.get(urlLabel, headers=headers)
+                                            _logger.info(f"response: {response}")
+                                            pdf_content = response.content
+                                            if not pdf_content:
+                                                raise UserError(_('No se pudo obtener la etiqueta de envío'))
+                                            _logger.info(f"contenido del pdf:{pdf_content}")
+                                            # Adjuntar el PDF directamente al chatter
+                                            attachment = self.env['ir.attachment'].create({
+                                                'name': f'shipping_etiqueta_{self.name}.pdf',
+                                                'type': 'binary',
+                                                'datas': base64.b64encode(pdf_content),
+                                                'res_model': 'purchase.order',
+                                                'res_id': self.id,
+                                                'mimetype': 'application/pdf',
+                                            })
+                                            # Agregar el adjunto al chatter
+
+                                            envio = self.env['product.product'].search([
+                                                ('name', '=', 'Envío')
+                                            ])
+
+                                            existe = self.order_line.filtered(lambda line: line.product_id == envio)
+
+                                            if existe: 
+                                                existe.write({
+                                                    'price_unit': metodo.price,  # Actualizar el precio
+                                                    'name': envio.name + "\n" + metodo.name.split(" - $")[0],  # Nombre del producto
+                                                })
+
+                                            else:
+                                                self.order_line.create({
+                                                    'order_id': self.id,  # Asociar la línea a esta orden de compra
+                                                    'product_id': envio.id,  # Producto "Envío"
+                                                    'name': envio.name + "\n" + metodo.name.split(" - $")[0],  # Nombre del producto
+                                                    'product_qty': 1.0,  # Cantidad
+                                                    'product_uom': envio.uom_id.id,  # Unidad de medida
+                                                    'price_unit': metodo.price,  # Precio del envío
+                                                })
+
+
+                                            self.message_post(
+                                                body=_("Se ha generado la orden de envío y se ha adjuntado la etiqueta."),
+                                                attachment_ids=[attachment.id]
+                                            )
+                                            break
+
+                                        await asyncio.sleep(5)
+                    
+
+            async def fetch_all():
+                async with aiohttp.ClientSession() as session:
+                    tasks = []
+
+                    token = self.env['ir.config_parameter'].sudo().get_param('skydropx_token')
+
+                    if token:
+                        token_data = json.loads(token)
+                        if 'expires_in' in token_data and token_data['expires_in'] < datetime.now().timestamp():
+                            token = None
+                    if not token:
+                        # Solicitar un nuevo token a Skydropx
+                        auth_response = await session.post(
+                            urlSkydropx + 'api/v1/oauth/token',
+                            json={
+                                "grant_type": "client_credentials",
+                                "client_id" : "KRJ2ZCd6dxBNPCBKeIxmYfJ25_VU-Z8ULVudhct3MKI",
+                                "client_secret" : "xYP0CsERedn2I_MWXnY3pOaPbjP4ty2o38WHkSEUYq4"
+                            },
+                            headers=headers
+                        )
+                        
+                        token = await auth_response.json()
+                        if token:
+                            self.env['ir.config_parameter'].sudo().set_param('skydropx_token', json.dumps(token))
+                        else:
+                            _logger.warning('No se pudo obtener el token de Skydropx')
+                    _logger.info(f"token: {token}")
+                    headers['Authorization'] = f'Bearer {token["access_token"]}'
+
+                    tasks.append(fetch(session, urlSkydropx+"api/v1/shipments", paramsSkydropx, headers, "Skydropx", "Skydropx"))
+                    await asyncio.gather(*tasks)
+
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(fetch_all())
         except Exception as e:
             raise UserError(_('No se pudo generar la orden: %s') % str(e))
         
