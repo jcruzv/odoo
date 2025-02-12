@@ -8,6 +8,7 @@
                 <list>
                     <header>
                         <button string="Obtener Estado" name="execute_request_shipping_track" type="object"/>
+                        <button string="Descargar Guías" name="action_download_zip" type="object"/>
                     </header>
                     <field name="id"/>
                     <field name="name"/>

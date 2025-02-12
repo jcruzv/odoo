@@ -1,8 +1,10 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from datetime import datetime, timedelta
+import io
+import zipfile
 import requests
-import json
+import json 
 import base64
 import math
 import asyncio
@@ -170,6 +172,51 @@ class PurchaseOrder(models.Model):
         string='Stored Selection Options',
         help='Stores the options for the selection field as a JSON string.',
     )
+
+    def action_download_zip(self):
+        
+        import logging
+        _logger = logging.getLogger(__name__)
+
+        zip_buffer = io.BytesIO()
+        attachments = []
+        for id in self.env.context.get("active_ids"):
+            po = self.env['purchase.order'].browse(id)
+            _logger.info(f"orden de compra: {po}")
+            auxAttachments = self.env['ir.attachment'].search([
+                ('res_model', '=', 'purchase.order'),
+                ('res_id', '=', po.id),
+                ('name', 'ilike', 'shipping_etiqueta')
+            ])
+            _logger.info(f"orden de compra: {auxAttachments}")
+
+            if not auxAttachments:
+                continue
+            for att in auxAttachments:
+                attachments.append(att)
+
+        _logger.info(f"atts: {attachments}")
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for attachment in attachments:
+                zip_file.writestr(attachment.name, base64.b64decode(attachment.datas))
+
+        zip_buffer.seek(0)
+        zip_data = base64.b64encode(zip_buffer.read())
+
+        attachment = self.env['ir.attachment'].create({
+            'name': 'archivos_pdf.zip',
+            'datas': zip_data,
+            'mimetype': 'application/zip',
+            'res_model': 'download.zip.wizard',
+            'res_id': "121",
+        })
+
+        return {
+            'type': 'ir.actions.act_url',
+            'url': f'/web/content/{attachment.id}?download=true',
+            'target': 'self',
+        }
+
 
     def set_shipping_method_best(self):
         # Elegir el mejor precio entre "express domestic" y "economy select domestic"
@@ -992,12 +1039,46 @@ class PurchaseOrder(models.Model):
                                             urlLabel = urlSkydropx.rstrip('/') + data['included'][0]["attributes"]["label_url"]
 
                                             _logger.info(f"url del pdf {urlLabel}")
+                                            """
+                                            login_url = "https://sb-pro.skydropx.com/es-MX/users/sign_in"
+                                            credentials = {
+                                                "user": {
+                                                    "email": "champy.cruz@gmail.com",
+                                                    "password": "Siddhartha21."
+                                                }
+                                            }
 
-                                            response = requests.get(urlLabel, headers=headers)
-                                            _logger.info(f"response: {response}")
-                                            pdf_content = response.content
+                                            # Iniciar sesión y guardar cookies
+                                            session = requests.Session()
+                                            login_response = session.post(login_url, json=credentials)
+
+                                            if login_response.status_code == 200:
+                                                _logger.info("Inicio de sesión exitoso")
+
+                                            cookies = session.cookies.get_dict()
+                                            _logger.info(f"Cookies después del login: {cookies}")
+                                            """
+                                            # Enviar la solicitud con las cookies manualmente
+                                            """
+                                                _vid_t=qhWGY+HBm5l+5q5M4qU7BuvQ6gUo2Gvfr4uWwmSlHh/enwkh42v9Bv0rjU+dMfqCuoIOn8jM1tXMDrqvgGx2x4uLZiXb1rjAcmC2psM=; _ll_hub_session_staging=94298f9d1ae0c70a190ee517942bae6c; locale=es-MX; cf_clearance=tJG4j0KBgC8FNuO1yDRg.UTgwP80wLKnX3SsLlmksHo-1739300523-1.2.1.1-LsSiyY.4qHfj3ihmg.ctY9Xe1tbdsSAUXRTaxsPyEVpbRu1Cog9h7X_YSAPMCeeyKs6PsWhjy2PukYDBY9MyrXad4WxeTqxITJImF3ysPEKM3wQUoolR4GbyLrKPCgzvlU2kiK5i9w5fQ47z0vs2P8kqbd5UwK1FDexqCEpVkIBwKdnDKhKMyBSsIXi4IIdqE9Fx64UxN.9chvjRpVkoHDvNDxNezlIjzBV0Wk48J5C_rNkyXPvAslP6xO62P179kJ0_E76P5CQbWE2TTlTwe9OXIG4fLdbRkhGg5CR1qT0
+                                            """
+                                            headers = {
+                                                "Cookie": f"_vid_t=qhWGY+HBm5l+5q5M4qU7BuvQ6gUo2Gvfr4uWwmSlHh/enwkh42v9Bv0rjU+dMfqCuoIOn8jM1tXMDrqvgGx2x4uLZiXb1rjAcmC2psM=; _ll_hub_session_staging=94298f9d1ae0c70a190ee517942bae6c; locale=es-MX; cf_clearance=tJG4j0KBgC8FNuO1yDRg.UTgwP80wLKnX3SsLlmksHo-1739300523-1.2.1.1-LsSiyY.4qHfj3ihmg.ctY9Xe1tbdsSAUXRTaxsPyEVpbRu1Cog9h7X_YSAPMCeeyKs6PsWhjy2PukYDBY9MyrXad4WxeTqxITJImF3ysPEKM3wQUoolR4GbyLrKPCgzvlU2kiK5i9w5fQ47z0vs2P8kqbd5UwK1FDexqCEpVkIBwKdnDKhKMyBSsIXi4IIdqE9Fx64UxN.9chvjRpVkoHDvNDxNezlIjzBV0Wk48J5C_rNkyXPvAslP6xO62P179kJ0_E76P5CQbWE2TTlTwe9OXIG4fLdbRkhGg5CR1qT0",
+                                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+                                            }
+
+                                            _logger.info(f"encabezado: {headers}")
+
+                                            response = session.get(urlLabel, headers=headers)
+
+                                            if response.status_code == 200:
+                                                pdf_content = response.content
+                                                _logger.info("Etiqueta descargada correctamente")
+                                            else:
+                                                _logger.info(f"Error en la descarga: {response.status_code} - {response.text}")
+
                                             if not pdf_content:
-                                                raise UserError(_('No se pudo obtener la etiqueta de envío'))
+                                                _logger.warning('No se pudo obtener la etiqueta de envío')
                                             _logger.info(f"contenido del pdf:{pdf_content}")
                                             # Adjuntar el PDF directamente al chatter
                                             attachment = self.env['ir.attachment'].create({
