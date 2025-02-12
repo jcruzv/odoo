@@ -6,6 +6,7 @@
       <field name="arch" type="xml">
         <list string="Metodos de envío">
           <field name="purchase_order"/>
+          <field name="processedBy"/>
           <field name="name"/>
           <field name="shipping_code"/>
           <field name="price"/>

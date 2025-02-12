@@ -24,7 +24,6 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="customer_id"/>
                 <field name="campaign"/>
-                <field name="campaign_product"/>
                 <field name="shipping_date"/>
                 <field name="stored_selection_options" 
                     invisible="1"
@@ -69,6 +68,10 @@
                 readonly="1"
                 invisible="track_url == False"
                 widget="url"/>
+            </xpath>
+            <xpath expr="//form[1]/sheet[1]/group[1]" position="after">
+                <h4>Productos de la campaña</h4>
+                <field name="campaign_product"/>
             </xpath>
         </field>
     </record>

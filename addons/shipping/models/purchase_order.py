@@ -136,11 +136,11 @@ class PurchaseOrder(models.Model):
         help='Selecciona la Campaña relacionada a esta orden.'
     )
 
-    campaign_product = fields.Many2one(
+    campaign_product = fields.Many2many(
         'product.template',
-        string='Producto de Campaña',
+        string='Productos de Campaña',
         domain=[],
-        help='Selecciona el producto de la Campaña relacionado a esta orden.'
+        help='Selecciona los productos de la Campaña relacionado a esta orden.'
     )
 
     shipping_date = fields.Datetime(
@@ -388,96 +388,96 @@ class PurchaseOrder(models.Model):
             "width" : self.width,
             "height" : self.height,
             "plannedShippingDate" : date.strftime('%Y-%m-%d'),
-            "isCustomsDeclarable" : "False",
+            "isCustomsDeclarable" : False,
             "unitOfMeasurement" : "metric",
         }
 
         paramsSkydropx = {
             "quotation": {
-                "order_id": str(self.id),
-                "address_from": {
-                    "country_code": self.partner_id.country_code.lower(),
-                    "postal_code": self.partner_id.zip,
-                    "area_level1": self.partner_id.state_id.name,
-                    "area_level2": self.partner_id.city,
-                    "area_level3": self.partner_id.street2 or "",
-                    "street1": self.partner_id.street,
-                    "apartment_number": "",
-                    "reference": "Nave 7",
-                    "name": self.partner_id.name,
-                    "company": self.partner_id.company_id.name or "",
-                    "phone": self.partner_id.phone or "",
-                    "email": self.partner_id.email or ""
-                },
-                "address_to": {
-                    "country_code": self.customer_id.country_code.lower(),
-                    "postal_code": self.customer_id.zip,
-                    "area_level1": self.customer_id.state_id.name,
-                    "area_level2": self.customer_id.city,
-                    "area_level3": self.customer_id.street2 or "",
-                    "street1": self.customer_id.street,
-                    "apartment_number": "",
-                    "reference": "Zaguan blanco",
-                    "name": self.customer_id.name,
-                    "company": self.customer_id.company_id.name or "",
-                    "phone": self.customer_id.phone or "",
-                    "email": self.customer_id.email or ""
-                },
-                "parcel": {
-                    "length": self.length,
-                    "width": self.width,
-                    "height": self.height,
-                    "weight": self.weight
-                },
-                "requested_carriers": [
-                    "all"
-                ]
+            "order_id": str(self.id),
+            "address_from": {
+                "country_code": self.partner_id.country_code.lower(),
+                "postal_code": self.partner_id.zip,
+                "area_level1": self.partner_id.state_id.name,
+                "area_level2": self.partner_id.city,
+                "area_level3": self.partner_id.street2 or "",
+                "street1": self.partner_id.street,
+                "apartment_number": "",
+                "reference": "Nave 7",
+                "name": ''.join(filter(str.isalpha, self.partner_id.name)),
+                "company": self.partner_id.company_id.name or "",
+                "phone": self.partner_id.phone or "",
+                "email": self.partner_id.email or ""
+            },
+            "address_to": {
+                "country_code": self.customer_id.country_code.lower(),
+                "postal_code": self.customer_id.zip,
+                "area_level1": self.customer_id.state_id.name,
+                "area_level2": self.customer_id.city,
+                "area_level3": self.customer_id.street2 or "",
+                "street1": self.customer_id.street,
+                "apartment_number": "",
+                "reference": "Zaguan blanco",
+                "name": ''.join(filter(str.isalpha, self.customer_id.name)),
+                "company": self.customer_id.company_id.name or "",
+                "phone": self.customer_id.phone or "",
+                "email": self.customer_id.email or ""
+            },
+            "parcel": {
+                "length": self.length,
+                "width": self.width,
+                "height": self.height,
+                "weight": self.weight
+            },
+            "requested_carriers": [
+                "all"
+            ]
             }
         }
 
         paramsEnvia = {
             "origin": {
-                "name": self.partner_id.name or '',
-                "company": self.partner_id.company_id.name or '',
-                "email": self.partner_id.email or '',
-                "phone": self.partner_id.phone or '',
-                "street": self.partner_id.street or '',
-                "number": self.partner_id.street2 or '',
-                "district": self.partner_id.city or '',
-                "city": self.partner_id.city or '',
-                "state": state_code_2_digits(self.partner_id.state_id.name) or '',
-                "country": self.partner_id.country_code or '',
-                "postalCode": self.partner_id.zip or '',
-                "reference": "",
+            "name": self.partner_id.name or '',
+            "company": self.partner_id.company_id.name or '',
+            "email": self.partner_id.email or '',
+            "phone": self.partner_id.phone or '',
+            "street": self.partner_id.street or '',
+            "number": self.partner_id.street2 or '',
+            "district": self.partner_id.city or '',
+            "city": self.partner_id.city or '',
+            "state": state_code_2_digits(self.partner_id.state_id.name) or '',
+            "country": self.partner_id.country_code or '',
+            "postalCode": self.partner_id.zip or '',
+            "reference": "",
             },
             "destination": {
-                "name": self.customer_id.name or '',
-                "company": self.customer_id.company_id.name or '',
-                "email": self.customer_id.email or '',
-                "phone": self.customer_id.phone or '',
-                "street": self.customer_id.street or '',
-                "number": self.customer_id.street2 or '',
-                "district": self.customer_id.city or '',
-                "city": self.customer_id.city or '',
-                "state": state_code_2_digits(self.customer_id.state_id.name) or '',
-                "country": self.customer_id.country_code or '',
-                "postalCode": self.customer_id.zip or '',
-                "reference": "",
+            "name": self.customer_id.name or '',
+            "company": self.customer_id.company_id.name or '',
+            "email": self.customer_id.email or '',
+            "phone": self.customer_id.phone or '',
+            "street": self.customer_id.street or '',
+            "number": self.customer_id.street2 or '',
+            "district": self.customer_id.city or '',
+            "city": self.customer_id.city or '',
+            "state": state_code_2_digits(self.customer_id.state_id.name) or '',
+            "country": self.customer_id.country_code or '',
+            "postalCode": self.customer_id.zip or '',
+            "reference": "",
             },
             "packages": [{
-                "content": self.campaign_product.name or '',
-                "amount": 1,
-                "type": "box",
-                "weight": self.weight or 0,
-                "insurance": 0,
-                "declaredValue": 0,
-                "weightUnit": "KG",
-                "lengthUnit": "CM",
-                "dimensions": {
-                    "length": self.length or 0,
-                    "width": self.width or 0,
-                    "height": self.height or 0
-                }
+            "content": ', '.join(self.campaign_product.mapped('name')) or '',
+            "amount": 1,
+            "type": "box",
+            "weight": self.weight or 0,
+            "insurance": 0,
+            "declaredValue": 0,
+            "weightUnit": "KG",
+            "lengthUnit": "CM",
+            "dimensions": {
+                "length": self.length or 0,
+                "width": self.width or 0,
+                "height": self.height or 0
+            }
             }],
             "settings": {
             "printFormat": "PDF",
@@ -549,6 +549,31 @@ class PurchaseOrder(models.Model):
             try:
                 async def fetch(session, url, params, headers, handler, courier):
                     if handler == 'Skydropx':
+                        token = self.env['ir.config_parameter'].sudo().get_param('skydropx_token')
+
+                        if token:
+                            token_data = json.loads(token)
+                            if 'expires_in' in token_data and token_data['expires_in'] < datetime.now().timestamp():
+                                token = None
+                        if not token:
+                            # Solicitar un nuevo token a Skydropx
+                            auth_response = await session.post(
+                                urlSkydropx + 'api/v1/oauth/token',
+                                json={
+                                    "grant_type": "client_credentials",
+                                    "client_id" : "KRJ2ZCd6dxBNPCBKeIxmYfJ25_VU-Z8ULVudhct3MKI",
+                                    "client_secret" : "xYP0CsERedn2I_MWXnY3pOaPbjP4ty2o38WHkSEUYq4"
+                                },
+                                headers=headers
+                            )
+                            
+                            token = await auth_response.json()
+                            if token:
+                                self.env['ir.config_parameter'].sudo().set_param('skydropx_token', json.dumps(token))
+                            else:
+                                _logger.warning('No se pudo obtener el token de Skydropx')
+                        _logger.info(f"token: {token}")
+                        headers['Authorization'] = f'Bearer {token["access_token"]}'
                         async with session.post(url, json=params, headers=headers) as response:
                             _logger.info(f"response: {response}")
                             respuesta = await response.json()
@@ -599,12 +624,13 @@ class PurchaseOrder(models.Model):
                                                     if additional["code"] == "FUEL_SURCHARGE_FEE":
                                                         aux["fuelSurcharge"] = additional["value"]/1.16
                                                         tax += aux["fuelSurcharge"]*.16
-                                                    elif additional["additionalService"] == "PEAK_SEASON_FEE":
-                                                        aux["peakSeason"] = additional["value"]/1.16
-                                                        tax += aux["peakSeason"]*.16
-                                                    elif additional["additionalService"] == "REMOTE_AREA_FEE":
-                                                        aux["remoteArea"] = additional["value"]/1.16
-                                                        tax += aux["remoteArea"]*.16
+                                                    elif "additionalService" in additional:
+                                                        if additional["additionalService"] == "PEAK_SEASON_FEE":
+                                                            aux["peakSeason"] = additional["value"]/1.16
+                                                            tax += aux["peakSeason"]*.16
+                                                        elif additional["additionalService"] == "REMOTE_AREA_FEE":
+                                                            aux["remoteArea"] = additional["value"]/1.16
+                                                            tax += aux["remoteArea"]*.16
                                                     else:
                                                         aux["other"] += additional["value"]/1.16
                                                         tax += aux["other"]*.16
@@ -619,6 +645,8 @@ class PurchaseOrder(models.Model):
                                         await asyncio.sleep(4)
 
                     elif handler == 'Envia':
+                        
+                        headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
                         async with session.post(url, data=params, headers=headers) as response:
                             respuesta = await response.json()
                             
@@ -736,50 +764,23 @@ class PurchaseOrder(models.Model):
                         tasks = []
 
                         # DHL
-                        # tasks.append(fetch(session, urlDHL, paramsDHL, headersDHL, "DHL", "DHL"))
+                        tasks.append(fetch(session, urlDHL, paramsDHL, headersDHL, "DHL", "DHL"))
 
                         # obtener el token guardado localmente
                         # si no existe el token solicitad uno a skydropx
                         # si existe el token, solicitar cotización a skydropx
+                        
                         # Skydropx
-
-                        # Obtener el token guardado localmente
-                        token = self.env['ir.config_parameter'].sudo().get_param('skydropx_token')
-
-                        if token:
-                            token_data = json.loads(token)
-                            if 'expires_in' in token_data and token_data['expires_in'] < datetime.now().timestamp():
-                                token = None
-                        if not token:
-                            # Solicitar un nuevo token a Skydropx
-                            auth_response = await session.post(
-                                urlSkydropx + 'api/v1/oauth/token',
-                                json={
-                                    "grant_type": "client_credentials",
-                                    "client_id" : "KRJ2ZCd6dxBNPCBKeIxmYfJ25_VU-Z8ULVudhct3MKI",
-                                    "client_secret" : "xYP0CsERedn2I_MWXnY3pOaPbjP4ty2o38WHkSEUYq4"
-                                },
-                                headers=headers
-                            )
-                            
-                            token = await auth_response.json()
-                            if token:
-                                self.env['ir.config_parameter'].sudo().set_param('skydropx_token', json.dumps(token))
-                            else:
-                                _logger.warning('No se pudo obtener el token de Skydropx')
-                        _logger.info(f"token: {token}")
-                        headers['Authorization'] = f'Bearer {token["access_token"]}'
-
                         tasks.append(fetch(session, urlSkydropx+"api/v1/quotations", paramsSkydropx, headers, "Skydropx", "Skydropx"))
                         
-                        # headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
-                        # for courier in couriers:
-                        #     paramsEnvia['shipment'] = {
-                        #         "carrier": courier,
-                        #         "type": 0
-                        #     }
-                        #     _logger.info(f"Paquetería: {courier}")
-                        #     tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia", courier))
+                        # Envia
+                        for courier in couriers:
+                            paramsEnvia['shipment'] = {
+                                "carrier": courier,
+                                "type": 0
+                            }
+                            _logger.info(f"Paquetería: {courier}")
+                            tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia", courier))
                         await asyncio.gather(*tasks)
 
                 loop = asyncio.new_event_loop()
@@ -848,7 +849,7 @@ class PurchaseOrder(models.Model):
                 "reference": "",
             },
             "packages": [{
-                "content": self.campaign_product.name or '',
+                "content": ', '.join(self.campaign_product.mapped('name')) or '',
                 "amount": 1,
                 "type": "box",
                 "weight": self.weight or 0,
@@ -970,39 +971,39 @@ class PurchaseOrder(models.Model):
 
         paramsSkydropx = {
             "shipment": {
-                "rate_id": metodo.rate_id,
-                "protected": True,
-                "declared_value": 1400,
-                "printing_format": "thermal",
-                "address_from": {
-                    "country_code": self.partner_id.country_code.lower(),
-                    "postal_code": self.partner_id.zip,
-                    "area_level1": self.partner_id.state_id.name,
-                    "area_level2": self.partner_id.city,
-                    "area_level3": self.partner_id.street2 or "",
-                    "street1": self.partner_id.street,
-                    "name": self.partner_id.name,
-                    "company": self.partner_id.company_id.name or "",
-                    "phone": self.partner_id.phone or "",
-                    "email": self.partner_id.email or "",
-                    "reference": self.partner_id.street2 or ""
-                },
-                "address_to": {
-                    "country_code": self.customer_id.country_code.lower(),
-                    "postal_code": self.customer_id.zip,
-                    "area_level1": self.customer_id.state_id.name,
-                    "area_level2": self.customer_id.city,
-                    "area_level3": self.customer_id.street2 or "",
-                    "street1": self.customer_id.street,
-                    "name": self.customer_id.name,
-                    "company": self.customer_id.company_id.name or "",
-                    "phone": self.customer_id.phone or "",
-                    "email": self.customer_id.email or "",
-                    "reference": self.customer_id.street2 or ""
-                },
-                "consignment_note": '53102400',
-                "package_type": "4G",
-                "products": []
+            "rate_id": metodo.rate_id,
+            "protected": True,
+            "declared_value": 1400,
+            "printing_format": "thermal",
+            "address_from": {
+                "country_code": self.partner_id.country_code.lower(),
+                "postal_code": self.partner_id.zip,
+                "area_level1": self.partner_id.state_id.name,
+                "area_level2": self.partner_id.city,
+                "area_level3": self.partner_id.street2 or "",
+                "street1": self.partner_id.street,
+                "name": ''.join(filter(str.isalpha, self.partner_id.name)),
+                "company": self.partner_id.company_id.name or "",
+                "phone": self.partner_id.phone or "",
+                "email": self.partner_id.email or "",
+                "reference": self.partner_id.street2 or ""
+            },
+            "address_to": {
+                "country_code": self.customer_id.country_code.lower(),
+                "postal_code": self.customer_id.zip,
+                "area_level1": self.customer_id.state_id.name,
+                "area_level2": self.customer_id.city,
+                "area_level3": self.customer_id.street2 or "",
+                "street1": self.customer_id.street,
+                "name": ''.join(filter(str.isalpha, self.customer_id.name)),
+                "company": self.customer_id.company_id.name or "",
+                "phone": self.customer_id.phone or "",
+                "email": self.customer_id.email or "",
+                "reference": self.customer_id.street2 or ""
+            },
+            "consignment_note": '53102400',
+            "package_type": "4G",
+            "products": []
             }
         }
 
@@ -1063,62 +1064,63 @@ class PurchaseOrder(models.Model):
                                                 _vid_t=qhWGY+HBm5l+5q5M4qU7BuvQ6gUo2Gvfr4uWwmSlHh/enwkh42v9Bv0rjU+dMfqCuoIOn8jM1tXMDrqvgGx2x4uLZiXb1rjAcmC2psM=; _ll_hub_session_staging=94298f9d1ae0c70a190ee517942bae6c; locale=es-MX; cf_clearance=tJG4j0KBgC8FNuO1yDRg.UTgwP80wLKnX3SsLlmksHo-1739300523-1.2.1.1-LsSiyY.4qHfj3ihmg.ctY9Xe1tbdsSAUXRTaxsPyEVpbRu1Cog9h7X_YSAPMCeeyKs6PsWhjy2PukYDBY9MyrXad4WxeTqxITJImF3ysPEKM3wQUoolR4GbyLrKPCgzvlU2kiK5i9w5fQ47z0vs2P8kqbd5UwK1FDexqCEpVkIBwKdnDKhKMyBSsIXi4IIdqE9Fx64UxN.9chvjRpVkoHDvNDxNezlIjzBV0Wk48J5C_rNkyXPvAslP6xO62P179kJ0_E76P5CQbWE2TTlTwe9OXIG4fLdbRkhGg5CR1qT0
                                             """
                                             headers = {
-                                                "Cookie": f"_vid_t=qhWGY+HBm5l+5q5M4qU7BuvQ6gUo2Gvfr4uWwmSlHh/enwkh42v9Bv0rjU+dMfqCuoIOn8jM1tXMDrqvgGx2x4uLZiXb1rjAcmC2psM=; _ll_hub_session_staging=94298f9d1ae0c70a190ee517942bae6c; locale=es-MX; cf_clearance=tJG4j0KBgC8FNuO1yDRg.UTgwP80wLKnX3SsLlmksHo-1739300523-1.2.1.1-LsSiyY.4qHfj3ihmg.ctY9Xe1tbdsSAUXRTaxsPyEVpbRu1Cog9h7X_YSAPMCeeyKs6PsWhjy2PukYDBY9MyrXad4WxeTqxITJImF3ysPEKM3wQUoolR4GbyLrKPCgzvlU2kiK5i9w5fQ47z0vs2P8kqbd5UwK1FDexqCEpVkIBwKdnDKhKMyBSsIXi4IIdqE9Fx64UxN.9chvjRpVkoHDvNDxNezlIjzBV0Wk48J5C_rNkyXPvAslP6xO62P179kJ0_E76P5CQbWE2TTlTwe9OXIG4fLdbRkhGg5CR1qT0",
-                                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+                                                "Cookie": f"_vid_t=qhWGY+HBm5l+5q5M4qU7BuvQ6gUo2Gvfr4uWwmSlHh/enwkh42v9Bv0rjU+dMfqCuoIOn8jM1tXMDrqvgGx2x4uLZiXb1rjAcmC2psM=; _ll_hub_session_staging=94298f9d1ae0c70a190ee517942bae6c; locale=es-MX; cf_clearance=6gS.LXToZq5JIRq5I54WMM35SwcIgVG2o3Gkc5ASUBw-1739343295-1.2.1.1-FGNJGcskc_CxWuD9XiF0lFp888wxt4NhPIsiKW7hJr5.DI5zNZjdSSiQzE7kCgp7EjLmgnYJFvljQ5xT3a0sAmAITW3AaoPv3lRSfzdQZzwLRbLFnVz8awX09MjO0zRacl_Xqa_JgZNsCvcsRaHOe6wPdN37uvd72kmAhZN.zhzKZdLo_Ru8X8cZP8TjsRD8XlMHGWU8FQ7C5CIdaWit8O9g_6eQxnRAKWO2Ezjs6su6Ypc52fbXVAthYH4KMNHxm7nlfqUZ3NxKOl3vFz0I6pfnqXHjHfpU3gBHX9bF9A8",
+                                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
                                             }
 
                                             _logger.info(f"encabezado: {headers}")
 
-                                            response = session.get(urlLabel, headers=headers)
+                                            async with session.get(urlLabel, headers=headers) as response:
+                                                _logger.info(f"response: {response}")
 
-                                            if response.status_code == 200:
-                                                pdf_content = response.content
-                                                _logger.info("Etiqueta descargada correctamente")
-                                            else:
-                                                _logger.info(f"Error en la descarga: {response.status_code} - {response.text}")
+                                                if response.status == 200:
+                                                    pdf_content = await response.read()
+                                                    _logger.info("Etiqueta descargada correctamente")
+                                                else:
+                                                    _logger.info(f"Error en la descarga: {response.status} - {await response.text()}")
 
-                                            if not pdf_content:
-                                                _logger.warning('No se pudo obtener la etiqueta de envío')
-                                            _logger.info(f"contenido del pdf:{pdf_content}")
-                                            # Adjuntar el PDF directamente al chatter
-                                            attachment = self.env['ir.attachment'].create({
-                                                'name': f'shipping_etiqueta_{self.name}.pdf',
-                                                'type': 'binary',
-                                                'datas': base64.b64encode(pdf_content),
-                                                'res_model': 'purchase.order',
-                                                'res_id': self.id,
-                                                'mimetype': 'application/pdf',
-                                            })
-                                            # Agregar el adjunto al chatter
-
-                                            envio = self.env['product.product'].search([
-                                                ('name', '=', 'Envío')
-                                            ])
-
-                                            existe = self.order_line.filtered(lambda line: line.product_id == envio)
-
-                                            if existe: 
-                                                existe.write({
-                                                    'price_unit': metodo.price,  # Actualizar el precio
-                                                    'name': envio.name + "\n" + metodo.name.split(" - $")[0],  # Nombre del producto
+                                                if not pdf_content:
+                                                    _logger.warning('No se pudo obtener la etiqueta de envío')
+                                                _logger.info(f"contenido del pdf:{pdf_content}")
+                                                # Adjuntar el PDF directamente al chatter
+                                                attachment = self.env['ir.attachment'].create({
+                                                    'name': f'shipping_etiqueta_{self.name}.pdf',
+                                                    'type': 'binary',
+                                                    'datas': base64.b64encode(pdf_content),
+                                                    'res_model': 'purchase.order',
+                                                    'res_id': self.id,
+                                                    'mimetype': 'application/pdf',
                                                 })
+                                                # Agregar el adjunto al chatter
 
-                                            else:
-                                                self.order_line.create({
-                                                    'order_id': self.id,  # Asociar la línea a esta orden de compra
-                                                    'product_id': envio.id,  # Producto "Envío"
-                                                    'name': envio.name + "\n" + metodo.name.split(" - $")[0],  # Nombre del producto
-                                                    'product_qty': 1.0,  # Cantidad
-                                                    'product_uom': envio.uom_id.id,  # Unidad de medida
-                                                    'price_unit': metodo.price,  # Precio del envío
-                                                })
+                                                envio = self.env['product.product'].search([
+                                                    ('name', '=', 'Envío')
+                                                ])
+
+                                                existe = self.order_line.filtered(lambda line: line.product_id == envio)
+
+                                                if existe: 
+                                                    existe.write({
+                                                        'price_unit': metodo.price,  # Actualizar el precio
+                                                        'name': envio.name + "\n" + metodo.name.split(" - $")[0],  # Nombre del producto
+                                                    })
+
+                                                else:
+                                                    self.order_line.create({
+                                                        'order_id': self.id,  # Asociar la línea a esta orden de compra
+                                                        'product_id': envio.id,  # Producto "Envío"
+                                                        'name': envio.name + "\n" + metodo.name.split(" - $")[0],  # Nombre del producto
+                                                        'product_qty': 1.0,  # Cantidad
+                                                        'product_uom': envio.uom_id.id,  # Unidad de medida
+                                                        'price_unit': metodo.price,  # Precio del envío
+                                                    })
 
 
-                                            self.message_post(
-                                                body=_("Se ha generado la orden de envío y se ha adjuntado la etiqueta."),
-                                                attachment_ids=[attachment.id]
-                                            )
-                                            break
+                                                self.message_post(
+                                                    body=_("Se ha generado la orden de envío y se ha adjuntado la etiqueta."),
+                                                    attachment_ids=[attachment.id]
+                                                )
+                                                break
 
                                         await asyncio.sleep(5)
                     
@@ -1284,12 +1286,12 @@ class PurchaseOrder(models.Model):
                     }
                 }
                 ],
-                "isCustomsDeclarable": "False",
+                "isCustomsDeclarable": False,
                 "description": "Shipment Description",
                 "incoterm": "DAP",
                 "unitOfMeasurement": "metric"
             },
-            "getTransliteratedResponse": "False",
+            "getTransliteratedResponse": False,
         }
 
         
