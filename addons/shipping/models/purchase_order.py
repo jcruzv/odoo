@@ -434,7 +434,6 @@ class PurchaseOrder(models.Model):
             ]
             }
         }
-
         paramsEnvia = {
             "origin": {
             "name": self.partner_id.name or '',
@@ -465,7 +464,7 @@ class PurchaseOrder(models.Model):
             "reference": "",
             },
             "packages": [{
-            "content": ', '.join(self.campaign_product.mapped('name')) or '',
+            "content": ', '.join(self.campaign_product.mapped('name')) or 'Productos',
             "amount": 1,
             "type": "box",
             "weight": self.weight or 0,
@@ -488,7 +487,7 @@ class PurchaseOrder(models.Model):
             }
         }
 
-        # _logger.info(f"paramsEnvia: {paramsEnvia}")
+        _logger.info(f"paramsEnvia: {paramsEnvia}")
         
         headersDHL = {
             'Content-Type': 'application/json',
@@ -649,7 +648,7 @@ class PurchaseOrder(models.Model):
                         headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
                         async with session.post(url, data=params, headers=headers) as response:
                             respuesta = await response.json()
-                            
+                            _logger.info(f"respuesta: {respuesta}")
                             if 'error' in respuesta or ('code' in respuesta and (respuesta["code"] == 500 or respuesta["code"] == 400)) or ("data" in respuesta and isinstance(respuesta["data"], str)):
                                 # _logger.warning(f"Error en la respuesta: {respuesta}")
                                 return
@@ -766,10 +765,6 @@ class PurchaseOrder(models.Model):
                         # DHL
                         tasks.append(fetch(session, urlDHL, paramsDHL, headersDHL, "DHL", "DHL"))
 
-                        # obtener el token guardado localmente
-                        # si no existe el token solicitad uno a skydropx
-                        # si existe el token, solicitar cotización a skydropx
-                        
                         # Skydropx
                         tasks.append(fetch(session, urlSkydropx+"api/v1/quotations", paramsSkydropx, headers, "Skydropx", "Skydropx"))
                         
@@ -849,7 +844,7 @@ class PurchaseOrder(models.Model):
                 "reference": "",
             },
             "packages": [{
-                "content": ', '.join(self.campaign_product.mapped('name')) or '',
+                "content": ', '.join(self.campaign_product.mapped('name')) or 'Productos',
                 "amount": 1,
                 "type": "box",
                 "weight": self.weight or 0,
@@ -1336,7 +1331,7 @@ class PurchaseOrder(models.Model):
                 ])
 
                 existe = self.order_line.filtered(lambda line: line.product_id == envio)
-
+                _logger.info(f"existe: {existe}")
                 if existe: 
                     existe.write({
                         'price_unit': metodo.price,  # Actualizar el precio

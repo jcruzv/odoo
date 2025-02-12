@@ -95,7 +95,6 @@
             </xpath>
 
             <xpath expr="//group[@name='studio_group_22g']" position="inside">
-                <h4>Productos de la campaña</h4>
                 <field name="campaign_product"/>
             </xpath>
         </field>
