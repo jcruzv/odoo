@@ -487,7 +487,8 @@ class PurchaseOrder(models.Model):
             }
         }
 
-        _logger.info(f"paramsEnvia: {paramsEnvia}")
+        # _logger.info(f"paramsEnvia: {paramsEnvia}")
+        _logger.info(f"paramsDHL: {paramsDHL}")
         
         headersDHL = {
             'Content-Type': 'application/json',
@@ -696,7 +697,9 @@ class PurchaseOrder(models.Model):
                             self.shipping_quote = self.shipping_method.price
 
                     elif handler == 'DHL':
-                        async with session.get(url, params=params, headers=headers, auth=aiohttp.BasicAuth('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n')) as response:
+                        query_params = '&'.join([f"{key}={value}" for key, value in params.items()])
+                        url_with_params = f"{url}?{query_params}"
+                        async with session.get(url_with_params, headers=headers, auth=aiohttp.BasicAuth('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n')) as response:
                             quote_data = await response.json()
                             
                             products = quote_data.get('products', [])
@@ -776,6 +779,8 @@ class PurchaseOrder(models.Model):
                             }
                             _logger.info(f"Paquetería: {courier}")
                             tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia", courier))
+                        # Termina Envia
+                        
                         await asyncio.gather(*tasks)
 
                 loop = asyncio.new_event_loop()
