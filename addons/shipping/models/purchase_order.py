@@ -27,6 +27,12 @@ class PurchaseOrder(models.Model):
         help='Selecciona un método de envío basado en las cotizaciones.'
     )
 
+    processedBy = fields.Char(
+        related='shipping_method.processedBy',
+        string='Procesado por',
+        store=True,
+    )
+
 
     customer_name = fields.Char(
         related='customer_id.name', 
@@ -780,7 +786,7 @@ class PurchaseOrder(models.Model):
                             _logger.info(f"Paquetería: {courier}")
                             tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia", courier))
                         # Termina Envia
-                        
+
                         await asyncio.gather(*tasks)
 
                 loop = asyncio.new_event_loop()
@@ -1364,6 +1370,15 @@ class PurchaseOrder(models.Model):
             raise UserError(_('No se pudo generar la orden: %s') % str(e))
         
     def track(self):
+        metodo = self.shipping_method
+        if metodo.processedBy == "dhl":
+            self.track_DHL()
+        elif metodo.processedBy == "Envia":
+            self.track_Envia()
+        elif metodo.processedBy == "Skydropx":
+            asyncio.run(self.track_Skydropx())
+
+    def track_DHL(self):
 
         import requests
         import logging
@@ -1403,177 +1418,7 @@ class PurchaseOrder(models.Model):
                 # self.shipping_status = data['shipments'][0]['estimatedDeliveryDate']
                 self.env['shipping.events'].search([('purchase_order', '=', self.id)]).unlink()
                 events = data.get('events', [])
-                if not events:
-                    events = [
-                        {
-                            "date": "2023-08-09",
-                            "time": "13:56:21",
-                            "typeCode": "PU",
-                            "description": "Shipment picked up",
-                            "serviceArea": [
-                                {
-                                    "code": "SYD",
-                                    "description": "SYDNEY-AU"
-                                }
-                            ]
-                        },
-                        {
-                            "date": "2023-08-09",
-                            "time": "18:47:01",
-                            "typeCode": "AF",
-                            "description": "Arrived at DHL Sort Facility - SYDNEY-AU",
-                            "serviceArea": [
-                                {
-                                    "code": "SYD",
-                                    "description": "SYDNEY-AU"
-                                }
-                            ]
-                        },
-                        {
-                            "date": "2023-08-09",
-                            "time": "19:40:02",
-                            "typeCode": "PL",
-                            "description": "Processed at- SYDNEY-AU",
-                            "serviceArea": [
-                                {
-                                    "code": "SYD",
-                                    "description": "SYDNEY-AU"
-                                }
-                            ]
-                        },
-                        {
-                            "date": "2023-08-09",
-                            "time": "21:28:58",
-                            "typeCode": "DF",
-                            "description": "Shipment has departed from a DHL facility- SYDNEY-AU",
-                            "serviceArea": [
-                                {
-                                    "code": "SYD",
-                                    "description": "SYDNEY-AU"
-                                }
-                            ],
-                            "remarks": [
-                                {
-                                    "value": "The shipment is on its way to the destination.",
-                                    "details": "Please continue to monitor the progress online. If you are the consignee and would like to change your delivery preference, please visit https://delivery.dhl.com."
-                                }
-                            ]
-                        },
-                        {
-                            "date": "2023-08-09",
-                            "time": "21:49:12",
-                            "typeCode": "RR",
-                            "description": "Customs clearance status updated. Note - The Customs clearance process may start while the shipment is in transit to the destination. ",
-                            "serviceArea": [
-                                {
-                                    "code": "AKL",
-                                    "description": "AUCKLAND-NZ"
-                                }
-                            ]
-                        },
-                        {
-                            "date": "2023-08-09",
-                            "time": "22:35:34",
-                            "typeCode": "RR",
-                            "description": "Customs clearance status updated. Note - The Customs clearance process may start while the shipment is in transit to the destination. ",
-                            "serviceArea": [
-                                {
-                                    "code": "AKL",
-                                    "description": "AUCKLAND-NZ"
-                                }
-                            ],
-                            "remarks": [
-                                {
-                                    "value": "Shipment has been given a release status by Customs.",
-                                    "details": "Unless there is an adhoc physical examination or a stop by another regulatory authority the shipment will proceed to DHL delivery facility. Please continue to monitor the progress online."
-                                }
-                            ]
-                        },
-                        {
-                            "date": "2023-08-10",
-                            "time": "04:09:01",
-                            "typeCode": "AF",
-                            "description": "Arrived at DHL Sort Facility - AUCKLAND-NZ",
-                            "serviceArea": [
-                                {
-                                    "code": "AKL",
-                                    "description": "AUCKLAND-NZ"
-                                }
-                            ]
-                        },
-                        {
-                            "date": "2023-08-10",
-                            "time": "04:18:00",
-                            "typeCode": "CR",
-                            "description": "Clearance processing complete at- AUCKLAND-NZ",
-                            "serviceArea": [
-                                {
-                                    "code": "AKL",
-                                    "description": "AUCKLAND-NZ"
-                                }
-                            ]
-                        },
-                        {
-                            "date": "2023-08-10",
-                            "time": "05:58:15",
-                            "typeCode": "PL",
-                            "description": "Processed at- AUCKLAND-NZ",
-                            "serviceArea": [
-                                {
-                                    "code": "AKL",
-                                    "description": "AUCKLAND-NZ"
-                                }
-                            ]
-                        },
-                        {
-                            "date": "2023-08-10",
-                            "time": "05:58:58",
-                            "typeCode": "DF",
-                            "description": "Shipment has departed from a DHL facility- AUCKLAND-NZ",
-                            "serviceArea": [
-                                {
-                                    "code": "AKL",
-                                    "description": "AUCKLAND-NZ"
-                                }
-                            ],
-                            "remarks": [
-                                {
-                                    "value": "The shipment is on its way to the destination.",
-                                    "details": "Please continue to monitor the progress online. If you are the consignee and would like to change your delivery preference, please visit https://delivery.dhl.com."
-                                }
-                            ]
-                        },
-                        {
-                            "date": "2023-08-10",
-                            "time": "09:50:00",
-                            "typeCode": "AR",
-                            "description": "Arrived at DHL Delivery Facility - AUCKLAND-NZ",
-                            "serviceArea": [
-                                {
-                                    "code": "AKL",
-                                    "description": "AUCKLAND-NZ"
-                                }
-                            ]
-                        },
-                        {
-                            "date": "2023-08-10",
-                            "time": "10:50:14",
-                            "typeCode": "WC",
-                            "description": "Shipment is out with courier for delivery",
-                            "serviceArea": [
-                                {
-                                    "code": "AKL",
-                                    "description": "AUCKLAND-NZ"
-                                }
-                            ],
-                            "remarks": [
-                                {
-                                    "value": "Shipment is taken out for delivery",
-                                    "details": "Expect delivery today"
-                                }
-                            ]
-                        },
-                    ]
+                
                 for event in events:
                     self.env['shipping.events'].create({
                         'purchase_order': self.id,
@@ -1605,3 +1450,178 @@ class PurchaseOrder(models.Model):
                 raise Exception(_('Error en la solicitud de tracking: %s \n %s') % (response.text, response.status_code))
         except Exception as e:
             raise models.UserError(_('No se pudo obtener el estado: %s') % str(e))
+    
+    def track_Envia(self):
+
+        import requests
+        import logging
+        _logger = logging.getLogger(__name__)  
+        
+
+        url = "https://api-test.envia.com/ship/generaltrack/"
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14'
+        }
+
+        payload = {
+            "trackingNumbers": [self.track_number]
+        }
+
+        classification = {
+            "Registrados": ["Created", "Pending"],
+            "Recolectados": ["Picked Up"],
+            "En tránsito": ["Shipped", "Out for Pickup"],
+            "Entrega en proceso": ["Out for Delivery", "Delivery Attempt"],
+            "Entregados": ["Delivered"],
+            "Incidencias": [
+                "Lost", "Damaged", "Redirected", "1 delivery attempt", "2 delivery attempts",
+                "3 delivery attempts", "Return problem", "Address error", "Undeliverable",
+                "Delayed", "Rejected", "1 pickup attempt", "N/A"
+            ],
+            "Cancelados": ["Canceled"],
+            "Devueltos": ["Returned", "Delivered at Origin"]
+        }
+
+
+        try:
+
+            response = requests.post(
+                url,
+                data=json.dumps(payload),
+                headers=headers
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                data = data["data"][0]
+
+                _logger.info(f"datos: {data}")
+                # self.shipping_status = data['shipments'][0]['estimatedDeliveryDate']
+                self.env['shipping.events'].search([('purchase_order', '=', self.id)]).unlink()
+                events = data.get('eventHistory', [])
+                
+                for event in events:
+                    self.env['shipping.events'].create({
+                        'purchase_order': self.id,
+                        'track_number': self.track_number,
+                        'name': event['description'],
+                        'date': event['date'].split(" ")[0],
+                        'time': event['date'].split(" ")[1],
+                        'code': '',
+                    })
+
+                classification_found = next(
+                    (state for state, codes in classification.items() if data["status"] in codes),
+                    None
+                )
+
+                self.shipping_status = classification_found
+            
+            else:
+                raise Exception(_('Error en la solicitud de tracking: %s \n %s') % (response.text, response.status_code))
+        except Exception as e:
+            raise models.UserError(_('No se pudo obtener el estado: %s') % str(e))
+
+    async def track_Skydropx(self):
+
+        import requests
+        import logging
+        _logger = logging.getLogger(__name__)
+        
+
+        urlSkydropx = f"https://sb-pro.skydropx.com/"
+        
+        token = self.env['ir.config_parameter'].sudo().get_param('skydropx_token')
+        
+        headers = {
+            'Content-Type': 'application/json',
+        }
+
+        classification = {
+            "Registrados": ['CREATED'],
+            "Recolectados": ['PICKED_UP'],
+            "En tránsito": ['IN_TRANSIT'],
+            "Entrega en proceso": ['LAST_MILE'],
+            "Entregados": ['DELIVERED'],
+            "Incidencias": ['EXCEPTION'],
+            "Cancelados": ['CANCELLED'],
+            "Devueltos": ['RETURNED']
+        }
+
+        
+        async with aiohttp.ClientSession() as session:
+
+            if token:
+                token_data = json.loads(token)
+                if 'expires_in' in token_data and token_data['expires_in'] < datetime.now().timestamp():
+                    token = None
+            if not token:
+                # Solicitar un nuevo token a Skydropx
+                async with session.post(
+                    urlSkydropx + 'api/v1/oauth/token',
+                    json={
+                        "grant_type": "client_credentials",
+                        "client_id" : "KRJ2ZCd6dxBNPCBKeIxmYfJ25_VU-Z8ULVudhct3MKI",
+                        "client_secret" : "xYP0CsERedn2I_MWXnY3pOaPbjP4ty2o38WHkSEUYq4"
+                    },
+                    headers=headers
+                ) as auth_response:
+                    token = await auth_response.json()
+                    if token:
+                        self.env['ir.config_parameter'].sudo().set_param('skydropx_token', json.dumps(token))
+                    else:
+                        _logger.warning('No se pudo obtener el token de Skydropx')
+
+            _logger.info(f"token: {token}")
+            headers['Authorization'] = f'Bearer {token["access_token"]}'
+
+            try:
+
+                async with session.get(
+                    urlSkydropx + f"api/v1/shipments/tracking?tracking_number={self.track_number}&carrier_name={self.shipping_method.courier}",
+                    headers=headers
+                ) as response:
+                    _logger.info(f"{urlSkydropx}api/v1/shipments/tracking?tracking_number={self.track_number}&carrier_name={self.shipping_method.courier}")
+                    data = await response.json()
+                    
+                    _logger.info(data)
+                    
+                    if 'error' in data or ('code' in data and (data["code"] == 500 or data["code"] == 400)) or ("data" in data and isinstance(data["data"], str)):
+                        _logger.warning(f"No se pudo obtener el estado: {data}")
+                        return
+
+                    # self.shipping_status = data['shipments'][0]['estimatedDeliveryDate']
+                    self.env['shipping.events'].search([('purchase_order', '=', self.id)]).unlink()
+                    events = data.get('events', [])
+                    
+                    for event in events:
+                        self.env['shipping.events'].create({
+                            'purchase_order': self.id,
+                            'track_number': self.track_number,
+                            'name': event['description'],
+                            'date': event['date'],
+                            'time': event['time'],
+                            'code': event['typeCode'],
+                        })
+                    if events:
+                        most_recent_event = max(
+                            events,
+                            key=lambda e: datetime.strptime(f"{e['date']} {e['time']}", "%Y-%m-%d %H:%M:%S")
+                        )
+
+                        # Obtener el código del evento más reciente
+                        most_recent_code = most_recent_event["typeCode"]
+                        classification_found = next(
+                            (state for state, codes in classification.items() if most_recent_code in codes),
+                            None
+                        )
+
+                        self.shipping_status = classification_found
+                    else:
+                        self.shipping_status = 'Registrado'
+                        
+            except Exception as e:
+                raise models.UserError(_('No se pudo obtener el estado: %s') % str(e))
+    

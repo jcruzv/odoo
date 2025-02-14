@@ -42,6 +42,9 @@
                 <field name="shipping_method" 
                     domain="[('purchase_order', '=', id)]"
                 />
+                <field name="processedBy" 
+                    readonly="1"
+                />
                 <field name="pickup"/>
                 <field name="pickup_customer_id"
                     invisible="pickup == False" 
