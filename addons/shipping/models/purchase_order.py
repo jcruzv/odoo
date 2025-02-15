@@ -371,10 +371,13 @@ class PurchaseOrder(models.Model):
         import logging
         _logger = logging.getLogger(__name__)  
         
+        testDHL = False
+        testEnvia = True
+        testSkydropx = True
 
-        urlDHL = "https://express.api.dhl.com/mydhlapi/test/rates"
-        urlSkydropx = "https://sb-pro.skydropx.com/"
-        urlEnvia = "https://api-test.envia.com/ship/rate/"
+        urlDHL = "https://express.api.dhl.com/mydhlapi/test/rates" if testDHL else "https://express.api.dhl.com/mydhlapi/rates"
+        urlEnvia = "https://api-test.envia.com/ship/rate/" if testEnvia else "https://api-test.envia.com/ship/rate/"
+        urlSkydropx = "https://sb-pro.skydropx.com/" if testSkydropx else "https://sb-pro.skydropx.com/"
 
         self.Validar()
 
@@ -1307,7 +1310,7 @@ class PurchaseOrder(models.Model):
 
         try:
             response = requests.post(
-                'https://express.api.dhl.com/mydhlapi/test/shipments',
+                'https://express.api.dhl.com/mydhlapi/shipments',
                 auth=('apT3cE5nH6mP9o', 'V#2nZ^1eH$8uU$7n'),
                 headers=headers,
                 data=json.dumps(payload)
