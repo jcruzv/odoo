@@ -1,6 +1,7 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from datetime import datetime, timedelta
+import nest_asyncio
 import io
 import zipfile
 import requests
@@ -9,6 +10,7 @@ import base64
 import math
 import asyncio
 import aiohttp
+nest_asyncio.apply()
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
@@ -272,20 +274,43 @@ class PurchaseOrder(models.Model):
         return True
 
     def execute_request_shipping_quote(self):
-        orders = self.env['purchase.order'].browse(self.env.context.get("active_ids"))
-        for order in orders:
-            order.request_shipping_quote()
+        orders = self.env['purchase.order'].search([
+            ('requestShipping', '=', True),
+            ('shipping_method', '=', False),
+        ])
+        async def request_shipping_quotes_async(orders):
+            semaphore = asyncio.Semaphore(30)  # Limitar a 30 llamadas por minuto
+
+            async def request_quote(order):
+                async with semaphore:
+                    order.request_shipping_quote()
+                    await asyncio.sleep(2)  # Esperar 2 segundos entre llamadas
+
+            tasks = [request_quote(order) for order in orders]
+            await asyncio.gather(*tasks)
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(request_shipping_quotes_async(orders))
         return True
 
     def execute_generate_shipping_order(self):
         
         orders = self.env['purchase.order'].browse(self.env.context.get("active_ids"))
-        for order in orders:
-            order.generate_shipping_order()
-        return True
+        async def generate_shipping_orders_async(orders):
+            semaphore = asyncio.Semaphore(30)  # Limitar a 30 llamadas por minuto
 
-    def button_request_shipping_quote(self):
-        return super().button_request_shipping_quote()
+            async def generate_order(order):
+                async with semaphore:
+                    order.generate_shipping_order()
+                    await asyncio.sleep(2)  # Esperar 2 segundos entre llamadas
+
+            tasks = [generate_order(order) for order in orders]
+            await asyncio.gather(*tasks)
+
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(generate_shipping_orders_async(orders))
+        return True
 
 
     @api.onchange('stored_selection_options')
@@ -371,13 +396,13 @@ class PurchaseOrder(models.Model):
         import logging
         _logger = logging.getLogger(__name__)  
         
-        testDHL = False
+        testDHL = True
         testEnvia = True
         testSkydropx = True
 
         urlDHL = "https://express.api.dhl.com/mydhlapi/test/rates" if testDHL else "https://express.api.dhl.com/mydhlapi/rates"
-        urlEnvia = "https://api-test.envia.com/ship/rate/" if testEnvia else "https://api-test.envia.com/ship/rate/"
-        urlSkydropx = "https://sb-pro.skydropx.com/" if testSkydropx else "https://sb-pro.skydropx.com/"
+        urlEnvia = "https://api-test.envia.com/ship/rate/" if testEnvia else "https://api.envia.com/ship/rate/"
+        urlSkydropx = "https://sb-pro.skydropx.com/" if testSkydropx else "https://pro.skydropx.com/"
 
         self.Validar()
 
@@ -778,7 +803,7 @@ class PurchaseOrder(models.Model):
                         tasks.append(fetch(session, urlDHL, paramsDHL, headersDHL, "DHL", "DHL"))
 
                         # Skydropx
-                        tasks.append(fetch(session, urlSkydropx+"api/v1/quotations", paramsSkydropx, headers, "Skydropx", "Skydropx"))
+                        # tasks.append(fetch(session, urlSkydropx+"api/v1/quotations", paramsSkydropx, headers, "Skydropx", "Skydropx"))
                         
                         # Envia
                         for courier in couriers:
@@ -896,7 +921,7 @@ class PurchaseOrder(models.Model):
         try:
             _logger.info(f"paramsEnvia: {paramsEnvia}")
             response = requests.post(
-                'https://api-test.envia.com/ship/generate/',
+                'https://api.envia.com/ship/generate/',
                 headers=headers,
                 json=paramsEnvia
             )
@@ -973,7 +998,7 @@ class PurchaseOrder(models.Model):
         self.shipping_quote = metodo.price
         
         
-        urlSkydropx = "https://sb-pro.skydropx.com/"
+        urlSkydropx = "https://pro.skydropx.com/"
         date = datetime.now() + timedelta(minutes=5)
         formatted_dt = date.strftime("%Y-%m-%dT%H:%M:%S GMT-06:00")
         _logger.info(f"fecha formato {formatted_dt}")
@@ -1049,29 +1074,7 @@ class PurchaseOrder(models.Model):
                                             urlLabel = urlSkydropx.rstrip('/') + data['included'][0]["attributes"]["label_url"]
 
                                             _logger.info(f"url del pdf {urlLabel}")
-                                            """
-                                            login_url = "https://sb-pro.skydropx.com/es-MX/users/sign_in"
-                                            credentials = {
-                                                "user": {
-                                                    "email": "champy.cruz@gmail.com",
-                                                    "password": "Siddhartha21."
-                                                }
-                                            }
-
-                                            # Iniciar sesión y guardar cookies
-                                            session = requests.Session()
-                                            login_response = session.post(login_url, json=credentials)
-
-                                            if login_response.status_code == 200:
-                                                _logger.info("Inicio de sesión exitoso")
-
-                                            cookies = session.cookies.get_dict()
-                                            _logger.info(f"Cookies después del login: {cookies}")
-                                            """
-                                            # Enviar la solicitud con las cookies manualmente
-                                            """
-                                                _vid_t=qhWGY+HBm5l+5q5M4qU7BuvQ6gUo2Gvfr4uWwmSlHh/enwkh42v9Bv0rjU+dMfqCuoIOn8jM1tXMDrqvgGx2x4uLZiXb1rjAcmC2psM=; _ll_hub_session_staging=94298f9d1ae0c70a190ee517942bae6c; locale=es-MX; cf_clearance=tJG4j0KBgC8FNuO1yDRg.UTgwP80wLKnX3SsLlmksHo-1739300523-1.2.1.1-LsSiyY.4qHfj3ihmg.ctY9Xe1tbdsSAUXRTaxsPyEVpbRu1Cog9h7X_YSAPMCeeyKs6PsWhjy2PukYDBY9MyrXad4WxeTqxITJImF3ysPEKM3wQUoolR4GbyLrKPCgzvlU2kiK5i9w5fQ47z0vs2P8kqbd5UwK1FDexqCEpVkIBwKdnDKhKMyBSsIXi4IIdqE9Fx64UxN.9chvjRpVkoHDvNDxNezlIjzBV0Wk48J5C_rNkyXPvAslP6xO62P179kJ0_E76P5CQbWE2TTlTwe9OXIG4fLdbRkhGg5CR1qT0
-                                            """
+                                            
                                             headers = {
                                                 "Cookie": f"_vid_t=qhWGY+HBm5l+5q5M4qU7BuvQ6gUo2Gvfr4uWwmSlHh/enwkh42v9Bv0rjU+dMfqCuoIOn8jM1tXMDrqvgGx2x4uLZiXb1rjAcmC2psM=; _ll_hub_session_staging=94298f9d1ae0c70a190ee517942bae6c; locale=es-MX; cf_clearance=6gS.LXToZq5JIRq5I54WMM35SwcIgVG2o3Gkc5ASUBw-1739343295-1.2.1.1-FGNJGcskc_CxWuD9XiF0lFp888wxt4NhPIsiKW7hJr5.DI5zNZjdSSiQzE7kCgp7EjLmgnYJFvljQ5xT3a0sAmAITW3AaoPv3lRSfzdQZzwLRbLFnVz8awX09MjO0zRacl_Xqa_JgZNsCvcsRaHOe6wPdN37uvd72kmAhZN.zhzKZdLo_Ru8X8cZP8TjsRD8XlMHGWU8FQ7C5CIdaWit8O9g_6eQxnRAKWO2Ezjs6su6Ypc52fbXVAthYH4KMNHxm7nlfqUZ3NxKOl3vFz0I6pfnqXHjHfpU3gBHX9bF9A8",
                                                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
@@ -1388,7 +1391,7 @@ class PurchaseOrder(models.Model):
         _logger = logging.getLogger(__name__)  
         
 
-        urlDHL = "https://express.api.dhl.com/mydhlapi/test/shipments/" + self.track_number + "/tracking"
+        urlDHL = "https://express.api.dhl.com/mydhlapi/shipments/" + self.track_number + "/tracking"
         
         headers = {
             'Content-Type': 'application/json',
@@ -1461,7 +1464,7 @@ class PurchaseOrder(models.Model):
         _logger = logging.getLogger(__name__)  
         
 
-        url = "https://api-test.envia.com/ship/generaltrack/"
+        url = "https://api.envia.com/ship/generaltrack/"
         
         headers = {
             'Content-Type': 'application/json',
@@ -1534,7 +1537,7 @@ class PurchaseOrder(models.Model):
         _logger = logging.getLogger(__name__)
         
 
-        urlSkydropx = f"https://sb-pro.skydropx.com/"
+        urlSkydropx = f"https://pro.skydropx.com/"
         
         token = self.env['ir.config_parameter'].sudo().get_param('skydropx_token')
         
