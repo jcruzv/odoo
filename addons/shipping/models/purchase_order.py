@@ -10,6 +10,13 @@ import base64
 import math
 import asyncio
 import aiohttp
+
+try:
+    loop = asyncio.get_running_loop()
+except RuntimeError:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
 nest_asyncio.apply()
 
 class PurchaseOrder(models.Model):
@@ -392,6 +399,7 @@ class PurchaseOrder(models.Model):
     def request_shipping_quote(self):
         
         from .address_info import state_code_2_digits, couriers
+        from .emissary_info import get_price_plans
         import requests
         import logging
         _logger = logging.getLogger(__name__)  
@@ -476,7 +484,7 @@ class PurchaseOrder(models.Model):
             "phone": self.partner_id.phone or '',
             "street": self.partner_id.street or '',
             "number": self.partner_id.street2 or '',
-            "district": self.partner_id.city or '',
+            "district": self.partner_id.street2 or '',
             "city": self.partner_id.city or '',
             "state": state_code_2_digits(self.partner_id.state_id.name) or '',
             "country": self.partner_id.country_code or '',
@@ -490,7 +498,7 @@ class PurchaseOrder(models.Model):
             "phone": self.customer_id.phone or '',
             "street": self.customer_id.street or '',
             "number": self.customer_id.street2 or '',
-            "district": self.customer_id.city or '',
+            "district": self.customer_id.street2 or '',
             "city": self.customer_id.city or '',
             "state": state_code_2_digits(self.customer_id.state_id.name) or '',
             "country": self.customer_id.country_code or '',
@@ -522,7 +530,7 @@ class PurchaseOrder(models.Model):
         }
 
         # _logger.info(f"paramsEnvia: {paramsEnvia}")
-        _logger.info(f"paramsDHL: {paramsDHL}")
+        # _logger.info(f"paramsDHL: {paramsDHL}")
         
         headersDHL = {
             'Content-Type': 'application/json',
@@ -578,6 +586,7 @@ class PurchaseOrder(models.Model):
             )
         # si no existe, hacer la solicitud a DHL y guardar los datos en shipping_methods
         else:
+            get_price_plans(self)
             # _logger.info(f"no existe, llamar api")
             tiempo = datetime.now()
             try:
@@ -609,9 +618,9 @@ class PurchaseOrder(models.Model):
                         _logger.info(f"token: {token}")
                         headers['Authorization'] = f'Bearer {token["access_token"]}'
                         async with session.post(url, json=params, headers=headers) as response:
-                            _logger.info(f"response: {response}")
+                            # _logger.info(f"response: {response}")
                             respuesta = await response.json()
-                            _logger.info(f"respuesta: {respuesta}")
+                            # _logger.info(f"respuesta: {respuesta}")
 
                             if 'error' in respuesta or ('code' in respuesta and (respuesta["code"] == 500 or respuesta["code"] == 400)) or ("data" in respuesta and isinstance(respuesta["data"], str)):
                                 return
@@ -680,8 +689,13 @@ class PurchaseOrder(models.Model):
 
                     elif handler == 'Envia':
                         
-                        headers["authorization"] = "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
+                        headers["authorization"] = "Bearer 6e97d9ea952439ed8d317a0bcb5bfa83a3bd556bd266312142f0ada54a3c82e4"
                         async with session.post(url, data=params, headers=headers) as response:
+                            if response.status == 500:
+                                return
+                            # _logger.info(f"response: {response}")
+                            # _logger.info(f"params: {params}")
+                            # _logger.info(f"texto respuesta: {await response.text()}")
                             respuesta = await response.json()
                             _logger.info(f"respuesta: {respuesta}")
                             if 'error' in respuesta or ('code' in respuesta and (respuesta["code"] == 500 or respuesta["code"] == 400)) or ("data" in respuesta and isinstance(respuesta["data"], str)):
@@ -811,7 +825,7 @@ class PurchaseOrder(models.Model):
                                 "carrier": courier,
                                 "type": 0
                             }
-                            _logger.info(f"Paquetería: {courier}")
+                            # _logger.info(f"Paquetería: {courier}")
                             tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia", courier))
                         # Termina Envia
 
@@ -821,7 +835,7 @@ class PurchaseOrder(models.Model):
                 asyncio.set_event_loop(loop)
                 loop.run_until_complete(fetch_all())
             except Exception as e:
-                _logger.error(f"Error fetching shipping quotes: {e}")
+                _logger.warning(f"Error fetching shipping quotes: {e}")
                 self.message_post(
                     body=_(f"Error fetching shipping quotes: {e}"),
                 )
@@ -915,7 +929,7 @@ class PurchaseOrder(models.Model):
         
         headers = {
             'Content-Type': 'application/json',
-            'authorization': "Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14"
+            'authorization': "Bearer 6e97d9ea952439ed8d317a0bcb5bfa83a3bd556bd266312142f0ada54a3c82e4"
         }
 
         try:
@@ -1468,7 +1482,7 @@ class PurchaseOrder(models.Model):
         
         headers = {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer fec0e63254d3ef6053c61fe504b33acd30d27838281e2624267b1aa14ebd3c14'
+            'Authorization': 'Bearer 6e97d9ea952439ed8d317a0bcb5bfa83a3bd556bd266312142f0ada54a3c82e4'
         }
 
         payload = {
