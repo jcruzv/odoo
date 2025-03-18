@@ -3,6 +3,9 @@
 import { patch } from "@web/core/utils/patch";
 import BarcodeModel from '@stock_barcode/models/barcode_model';
 import { _t } from "@web/core/l10n/translation";
+import { BarcodeObject } from "@stock_barcode/barcode_object";
+
+console.log(BarcodeObject)
 
 patch(BarcodeModel.prototype, {
     async updateLotName(line, lotName) {
@@ -196,6 +199,89 @@ patch(BarcodeModel.prototype, {
         this.trigger('update');
         await this.save(); // Call save after processing the barcode
     },
+
+    splitBarcode(barcode) {
+        console.log("barcode", barcode);
+        // If the barcode has multiple URI, separate them.
+        const matchedURI = [...barcode.matchAll(/urn:(?:[a-z0-9 -]+:){3} ?[0-9.]+/g)];
+        if (matchedURI.length > 1) {
+            return matchedURI.map(uri => uri[0]);
+        }
+        // If the barcode contains the separator, split it.
+        const sepRegex = RegExp(this.config.barcode_separator_regex);
+        const splitBarcodes = barcode.split(sepRegex).filter(bc => bc);
+        if (splitBarcodes.length > 1) {
+            return [...splitBarcodes];
+        }
+        return [barcode];
+    },
+    
+    async processBarcode(barcode, options={}) {
+        console.log({barcode});
+        if (!barcode) {
+            return; // Do nothing if no barcode given.
+        }
+        const { readingRFID } = options;
+        const barcodes = this.splitBarcode(barcode);
+        if (barcodes.length > 1 && barcode === this._currentBarcode) {
+            // Scanning multiple barcodes at once can take some time and the user may be
+            // tempted to scan again, thinking that the barcodes weren't scanned.
+            // To avoid processing the same group of barcodes multiple times, we keep the
+            // last scanned group of barcodes in memory and nothing will be done if the barcode
+            // is scanned again while previous one is still in process.
+            return;
+        }
+        this._currentBarcode = barcode;
+
+        // Filters out already scanned URI.
+        const filteredBarcodes = [];
+        for (const bc of barcodes) {
+            const matchedURI = bc.match(/^urn:.*$/);
+            if (matchedURI && this.uriInCache(matchedURI[0])) {
+                continue;
+            }
+            filteredBarcodes.push(bc);
+        }
+
+        if (barcodes.length > 1 && !readingRFID) {
+            this.trigger("addBarcodesCountToProcess", filteredBarcodes.length)
+        }
+        // Parse all barcodes.
+        const parsedBarcodes = [];
+        for (const bc of filteredBarcodes) {
+            const barcodeObject = BarcodeObject.forBarcode(bc);
+            await barcodeObject.setRecords();
+            parsedBarcodes.push(barcodeObject);
+        }
+        // Fetch all needed missing data and add them to the cache.
+        await this._getMissingRecords();
+
+        // Link parsed barcodes with missing information to the corresponding record(s).
+        const validBarcodes = [];
+        for (const barcodeObject of parsedBarcodes) {
+            if (barcodeObject.hasMissingRecords) {
+                await barcodeObject.setRecords();
+                if (barcodeObject.isURN && barcodeObject.hasMissingRecords &&
+                    barcodeObject.missingRecords.find(mr => mr.type === "product")) {
+                    // This barcode is linked to a product we don't have => We ignore it.
+                    // TODO: what to do with those barcodes ? Missing product => Barcode Lookup ?
+                    // TODO: already scanned SN should be managed here too ?
+                    this.trigger("updateBarcodesCountProcessed");
+                    continue;
+                }
+            }
+            validBarcodes.push(barcodeObject);
+        }
+
+        this.actionMutex.exec(async () => {
+            for (const barcodeObject of validBarcodes) {
+                // TODO: use already parsed barcode in `_processBarcode` instead of parse it again.
+                await this._processBarcode(barcodeObject.rawValue);
+                this.trigger("updateBarcodesCountProcessed");
+            }
+        });
+        this.postProcessBarcode();
+    }
     
     
 });

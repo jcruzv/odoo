@@ -18,6 +18,7 @@
         'web.assets_backend': [
             'barcode_patch/static/src/js/barcode_model_patch.js',  # Ruta de tu archivo JS
             'barcode_patch/static/src/js/barcode_picking_patch.js',  # Ruta de tu archivo JS
+            'barcode_patch/static/src/js/barcode_service_patch.js',  # Ruta de tu archivo JS
         ],
     },
     'installable': True,
