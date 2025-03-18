@@ -23,6 +23,53 @@ patch(BarcodeModel.prototype, {
     async _processBarcode(barcode) {
         console.log("Processing barcode", barcode);
 
+        const loadLot = async (lote) => {
+            console.log("loadLote", lote);
+            const records = await this.orm.searchRead("stock.lot", [["display_name", "=", lote]], ["id"]);
+            console.log(records);
+            if (records.length > 0) {
+                return records[0];
+            }
+        }
+
+        const loadRecord = async (lot_id) => {
+
+            console.log("buscando record", lot_id)
+            
+            // obentener el id del stock.move.line, primero obteniendo el stock.move desde el stock.picking
+
+            console.log("args", [["picking_id", "=", this.resId]])
+            
+            const records = await this.orm.searchRead("stock.move", [["picking_id", "=", this.resId]], ["id"]);
+            console.log(records);
+
+            const moves = records.map(x=>x.id)
+            
+            const records2 = await this.orm.searchRead("stock.move.line", [["move_id", "in", moves], ["lot_id", "=", lot_id]], ["id"]);
+            console.log(records2);
+            if (records2.length > 0) {
+                return records2[0];
+            }
+        }
+
+        const updateRecord = async (id) => {
+
+            console.log("actualizar record:" + id);
+
+            const producto = await this.orm.searchRead("stock.move.line", [["id", "=", id]], ["id", "product_id"]);
+
+            console.log({producto});
+            
+            const embalaje = await this.orm.searchRead("product.packaging", [["product_id", "=", producto[0].product_id[0]]], ["qty"]);
+            
+            console.log({embalaje});
+            
+            await this.orm.write("stock.move.line", [id], { quantity: embalaje[0].qty });
+        
+            // Opcional: Volver a cargar el registro para reflejar los cambios
+            // await this.loadRecord();
+        }
+
         let barcodeData = {};
         let currentLine = false;
         const filters = {};
@@ -37,10 +84,16 @@ patch(BarcodeModel.prototype, {
             company_id: [false].concat(this._getCompanyId() || []),
         };
 
+        // Add filter to search in "lotes"
+        filters['stock.lot'] = {
+            barcode: barcode,
+        };
+
         try {
             barcodeData = await this._parseBarcode(barcode, filters);
-            if (this._shouldSearchForAnotherLot(barcodeData, filters)) {
+            if(this._shouldSearchForAnotherLot(barcodeData, filters)){
                 const lot = await this.cache.getRecordByBarcode(barcode, 'stock.lot');
+                console.log({lot});
                 if (lot) {
                     Object.assign(barcodeData, { lot, match: true });
                 }
@@ -51,6 +104,21 @@ patch(BarcodeModel.prototype, {
 
         this.scanHistory.unshift(barcodeData);
 
+        if (this.cache.dbIdCache["stock.picking"][this.resId].partner_id == 260) {
+            this.trigger('flash');
+
+            const lot = await loadLot(barcode)
+
+            console.log({lot})
+            
+            const rec = await loadRecord(lot.id);
+
+            console.log({rec})
+
+            const actualizar = await updateRecord(rec.id);
+
+        }
+        
         if (barcodeData.match) {
             this.trigger('flash');
         }
@@ -128,4 +196,6 @@ patch(BarcodeModel.prototype, {
         this.trigger('update');
         await this.save(); // Call save after processing the barcode
     },
+    
+    
 });
