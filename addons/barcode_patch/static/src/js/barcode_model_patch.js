@@ -24,12 +24,32 @@ patch(BarcodeModel.prototype, {
     },
 
     async _processBarcode(barcode) {
-        console.log("Processing barcode", barcode);
+        //console.log("Processing barcode", barcode);
 
         const loadLot = async (lote) => {
-            console.log("loadLote", lote);
-            const records = await this.orm.searchRead("stock.lot", [["display_name", "=", lote]], ["id"]);
+
+            const records = await this.orm.searchRead("stock.move", [["picking_id", "=", this.resId]], ["id", "product_id", "display_name"]);
             console.log(records);
+
+            const products = records.map(x=>x.product_id[0])
+            
+            //console.log("loadLote", lote);
+
+            console.log("args lote:", [["display_name", "=", lote], ["product_id", "in", products]]);
+            
+            const lotes = await this.orm.searchRead("stock.lot", [["display_name", "=", lote], ["product_id", "in", products]], ["id", "product_id", "display_name"]);
+            console.log(lotes);
+            if (lotes.length > 0) {
+                return lotes[0];
+            }
+        }
+
+        const loadProduct = async (product) => {
+
+            const records = await this.orm.searchRead("product.product", [["id", "=", product]], ["id", "barcode", "categ_id", "code", "default_code", "display_name", "has_image", "is_storable", "tracking", "uom_id", "use_time"]);
+            console.log(records);
+
+            //console.log(lotes);
             if (records.length > 0) {
                 return records[0];
             }
@@ -37,19 +57,21 @@ patch(BarcodeModel.prototype, {
 
         const loadRecord = async (lot_id) => {
 
-            console.log("buscando record", lot_id)
+            //console.log("buscando record", lot_id)
             
             // obentener el id del stock.move.line, primero obteniendo el stock.move desde el stock.picking
 
-            console.log("args", [["picking_id", "=", this.resId]])
+            //console.log("args", [["picking_id", "=", this.resId]])
             
             const records = await this.orm.searchRead("stock.move", [["picking_id", "=", this.resId]], ["id"]);
-            console.log(records);
+            //console.log(records);
 
             const moves = records.map(x=>x.id)
+
+            //console.log("args line", [["move_id", "in", moves], ["lot_id", "=", lot_id]]);
             
             const records2 = await this.orm.searchRead("stock.move.line", [["move_id", "in", moves], ["lot_id", "=", lot_id]], ["id"]);
-            console.log(records2);
+            //console.log(records2);
             if (records2.length > 0) {
                 return records2[0];
             }
@@ -57,7 +79,7 @@ patch(BarcodeModel.prototype, {
 
         const updateRecord = async (id) => {
 
-            console.log("actualizar record:" + id);
+            //console.log("actualizar record:" + id);
 
             const producto = await this.orm.searchRead("stock.move.line", [["id", "=", id]], ["id", "product_id"]);
 
@@ -65,10 +87,11 @@ patch(BarcodeModel.prototype, {
             
             const embalaje = await this.orm.searchRead("product.packaging", [["product_id", "=", producto[0].product_id[0]]], ["qty"]);
             
-            console.log({embalaje});
+            //console.log({embalaje});
             
             await this.orm.write("stock.move.line", [id], { quantity: embalaje[0].qty });
-        
+
+            return embalaje[0];
             // Opcional: Volver a cargar el registro para reflejar los cambios
             // await this.loadRecord();
         }
@@ -88,15 +111,19 @@ patch(BarcodeModel.prototype, {
         };
 
         // Add filter to search in "lotes"
-        filters['stock.lot'] = {
-            barcode: barcode,
-        };
+        
+        // if (this.cache.dbIdCache["stock.picking"][this.resId].partner_id == 260) {
+        //     filters['stock.lot'] = {
+        //         barcode: barcode,
+        //     };
+        // }
 
         try {
             barcodeData = await this._parseBarcode(barcode, filters);
+            console.log("first", {barcodeData});
             if(this._shouldSearchForAnotherLot(barcodeData, filters)){
                 const lot = await this.cache.getRecordByBarcode(barcode, 'stock.lot');
-                console.log({lot});
+                //console.log({lot});
                 if (lot) {
                     Object.assign(barcodeData, { lot, match: true });
                 }
@@ -105,20 +132,75 @@ patch(BarcodeModel.prototype, {
             barcodeData.error = parseErrorMessage;
         }
 
+        console.log(this)
+        
+        console.log({barcodeData});
+        console.log({"DATA": JSON.stringify(barcodeData)});
+
         this.scanHistory.unshift(barcodeData);
 
-        if (this.cache.dbIdCache["stock.picking"][this.resId].partner_id == 260) {
-            this.trigger('flash');
+        if (this.cache.dbIdCache["stock.picking"][this.resId].partner_id == 260 &&
+               (
+                   barcodeData.error || 
+                   (barcodeData.lotName && barcodeData.lotName !== null) ||
+                   (barcodeData.lot && barcodeData.lot !== null)
+               )
+           ) {
+
+            console.log("partner_id")
 
             const lot = await loadLot(barcode)
 
             console.log({lot})
-            
-            const rec = await loadRecord(lot.id);
 
-            console.log({rec})
+            if(lot && lot?.product_id && lot?.product_id?.length != 0) {
 
-            const actualizar = await updateRecord(rec.id);
+                this.trigger('flash');
+                
+                const producto = await loadProduct(lot.product_id[0])
+
+                console.log({producto})
+                
+                const rec = await loadRecord(lot.id);
+
+                console.log({rec})
+
+                const actualizar = await updateRecord(rec.id);
+
+                console.log({actualizar})
+
+                const fieldsParams = {
+                    // "id": rec.id,
+                    "lot_id" : {
+                        "id" : lot.id,
+                        "name" : lot.display_name,
+                    },
+                    "lot_name" : lot.display_name,
+                    "product_id": {
+                        "id": producto.id,
+                        "barcode": producto.barcode,
+                        "categ_id": producto.categ_id[0],
+                        "code": producto.code,
+                        "default_code": producto.default_code,
+                        "display_name": producto.display_name,
+                        "has_image": producto.has_image || false,
+                        "is_storable": producto.is_storable || true,
+                        "tracking": producto.tracking || "none",
+                        "uom_id": producto.uom_id[0],
+                        "use_time": producto.use_time || 0
+                    },
+                    "qty_done": actualizar.qty
+                };
+
+                console.log({fieldsParams});
+
+                currentLine = await this.createNewLine({ fieldsParams });
+
+                console.log({currentLine})
+                console.log({"lineas": this.pageLines})
+                
+            }
+            return false;
 
         }
         
@@ -133,6 +215,32 @@ patch(BarcodeModel.prototype, {
         if (barcodeData.packaging) {
             Object.assign(barcodeData, this._retrievePackagingData(barcodeData));
         }
+        
+        if (barcodeData.package) {
+            // Object.assign(barcodeData, this._retrievePackageData(barcodeData));
+
+            console.log("asignando el paquete")
+            
+            console.log(this.pageLines)
+            // Assign the result_package_id to all lines that are not complete
+            for (const line of this.pageLines) {
+                console.log(line)
+                if (!line.result_package_id) {
+                    await this.updateLine(line, { result_package_id: barcodeData.package.id });
+                }
+            }
+
+            // Reload the content without reloading the page
+            // console.log(this.load, this.reloadingMoveLines)
+            
+            if(this.load)
+                await this.load();
+            // if(this.reloadingMoveLines)
+            //     await this.reloadingMoveLines();
+        }
+        
+        
+        
 
         const check = this._checkBarcode(barcodeData);
         if (check.error) {
@@ -182,6 +290,8 @@ patch(BarcodeModel.prototype, {
             }
         }
 
+        console.log("fieldsParams from barcode", this._convertDataToFieldsParams(barcodeData))
+
         if (currentLine) {
             await this.updateLine(currentLine, this._convertDataToFieldsParams(barcodeData));
             this.trigger("playSound", "success");
@@ -201,7 +311,7 @@ patch(BarcodeModel.prototype, {
     },
 
     splitBarcode(barcode) {
-        console.log("barcode", barcode);
+        //console.log("barcode", barcode);
         // If the barcode has multiple URI, separate them.
         const matchedURI = [...barcode.matchAll(/urn:(?:[a-z0-9 -]+:){3} ?[0-9.]+/g)];
         if (matchedURI.length > 1) {
@@ -217,7 +327,7 @@ patch(BarcodeModel.prototype, {
     },
     
     async processBarcode(barcode, options={}) {
-        console.log({barcode});
+        //console.log({barcode});
         if (!barcode) {
             return; // Do nothing if no barcode given.
         }

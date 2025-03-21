@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, api, _
+import logging
 from odoo.tools import html2plaintext, is_html_empty
 from odoo.exceptions import UserError
 
+_logger = logging.getLogger(__name__)
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
@@ -86,6 +88,7 @@ class StockPicking(models.Model):
         # Avoid to get the products full name because code and name are separate in the barcode app.
         self = self.with_context(display_default_code=False)
         move_lines = self.move_line_ids
+        _logger.info("move_lines: %s", move_lines)
         lots = move_lines.lot_id
         partners = move_lines.owner_id | self.partner_id
         # Fetch all implied products in `self` and adds last used products to avoid additional rpc.
