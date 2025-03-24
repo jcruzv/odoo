@@ -11,7 +11,7 @@ patch(BarcodePickingModel.prototype, {
         }
         const result = await super._processBarcode(barcode); // Usar super._processBarcode para llamar al método de la clase base
 
-        await this.save(); // Guardar después de procesar el código de barras
+        // await this.save(); // Guardar después de procesar el código de barras
         return result;
     },
 });

@@ -5,7 +5,7 @@ import BarcodeModel from '@stock_barcode/models/barcode_model';
 import { _t } from "@web/core/l10n/translation";
 import { BarcodeObject } from "@stock_barcode/barcode_object";
 
-console.log(BarcodeObject)
+console.log("TEST", BarcodeObject)
 
 patch(BarcodeModel.prototype, {
     async updateLotName(line, lotName) {
@@ -24,7 +24,7 @@ patch(BarcodeModel.prototype, {
     },
 
     async _processBarcode(barcode) {
-        //console.log("Processing barcode", barcode);
+        console.log("Processing barcode", barcode);
 
         const loadLot = async (lote) => {
 
@@ -95,6 +95,23 @@ patch(BarcodeModel.prototype, {
             // Opcional: Volver a cargar el registro para reflejar los cambios
             // await this.loadRecord();
         }
+        
+        const getPackage = async (id) => {
+            if(!id)
+                return false;
+            //console.log("actualizar record:" + id);
+            
+            const embalaje = await this.orm.searchRead("product.packaging", [["product_id", "=", id]], ["qty"]);
+
+            console.log(embalaje)
+            
+            if(embalaje.length!=0)
+                return embalaje[0]?.qty || 1;
+            else
+                return false;
+            // Opcional: Volver a cargar el registro para reflejar los cambios
+            // await this.loadRecord();
+        }
 
         let barcodeData = {};
         let currentLine = false;
@@ -138,7 +155,7 @@ patch(BarcodeModel.prototype, {
         console.log({"DATA": JSON.stringify(barcodeData)});
 
         this.scanHistory.unshift(barcodeData);
-
+            
         if (this.cache.dbIdCache["stock.picking"][this.resId].partner_id == 260 &&
                (
                    barcodeData.error || 
@@ -194,7 +211,21 @@ patch(BarcodeModel.prototype, {
 
                 console.log({fieldsParams});
 
-                currentLine = await this.createNewLine({ fieldsParams });
+                let encuentra = false;
+
+                for(const line of this.pageLines){
+                    // console.log(line, lot);
+                    if(line?.lot_id?.id == lot?.id){
+                        encuentra = true;
+                    }
+                }
+                console.log({encuentra})
+                if(!encuentra){   
+                    currentLine = await this.createNewLine({ fieldsParams });
+                }
+                else{
+                    window.alert("Esta caja ya fue escaneada");
+                }
 
                 console.log({currentLine})
                 console.log({"lineas": this.pageLines})
@@ -291,12 +322,27 @@ patch(BarcodeModel.prototype, {
         }
 
         console.log("fieldsParams from barcode", this._convertDataToFieldsParams(barcodeData))
+        console.log("currentLine", currentLine)
 
         if (currentLine) {
-            await this.updateLine(currentLine, this._convertDataToFieldsParams(barcodeData));
-            this.trigger("playSound", "success");
+            console.log("Ya hay linea")
+            if(currentLine?.lot_id?.id != barcodeData?.lot?.id){
+                const qty = await getPackage(barcodeData?.product?.id) || 1
+                currentLine = await this.createNewLine({fieldsParams: {...this._convertDataToFieldsParams(barcodeData), qty_done: qty}});
+                if (currentLine) {
+                    this.trigger("playSound", "success");
+                }
+            }
+            else{
+                
+                const qty = await getPackage(barcodeData?.product?.id) || 1
+                await this.updateLine(currentLine, {fieldsParams: {...this._convertDataToFieldsParams(barcodeData), qty_done: qty}});
+                this.trigger("playSound", "success");
+            }
         } else {
-            currentLine = await this.createNewLine({ fieldsParams: this._convertDataToFieldsParams(barcodeData) });
+            console.log("No hay linea")
+            const qty = await getPackage(barcodeData?.product?.id) || 1
+            currentLine = await this.createNewLine({fieldsParams: {...this._convertDataToFieldsParams(barcodeData), qty_done: qty}});
             if (currentLine) {
                 this.trigger("playSound", "success");
             }
