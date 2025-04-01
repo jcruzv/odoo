@@ -1,0 +1,25 @@
+<odoo>
+    <record id="view_stock_picking_tracking" model="ir.ui.view">
+        <field name="name">stock.picking.tracking</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                
+                <button name="request_jelp_location"
+                        string="Obtener Ubicación"
+                        type="object"
+                        class="btn-primary"/>
+                
+                <button name="action_open_custom_map_view"
+                        type="object"
+                        class="oe_highlight"
+                        string="Abrir Mapa"/>
+            </xpath>
+            
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="track_state"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
