@@ -2674,7 +2674,7 @@ msgstr "このチェックボックスにチェックを入れると、Odooは�
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.exception_on_mo
 msgid "Impacted Transfer(s):"
-msgstr "影響を受けた取引："
+msgstr "影響を受けた転送："
 
 #. module: mrp
 #. odoo-python
@@ -3335,7 +3335,7 @@ msgstr "製造リファレンス"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_stock_warehouse_orderpoint__manufacturing_visibility_days
 msgid "Manufacturing Visibility Days"
-msgstr "製造可視性日数"
+msgstr "製造先読み日数"
 
 #. module: mrp
 #: model_terms:ir.actions.act_window,help:mrp.mrp_workcenter_action
@@ -6131,7 +6131,7 @@ msgstr "顧客オーダや他の製造オーダへのプロダクト数量の表
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_stock_warehouse_orderpoint__manufacturing_visibility_days
 msgid "Visibility Days applied on the manufacturing routes."
-msgstr "製造ルートに適用される可視性日数。"
+msgstr "製造ルートに適用される先読み日数。"
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_production__reservation_state__confirmed
@@ -6262,7 +6262,7 @@ msgid ""
 "perfectly integrated into the process. Workers can trigger feedback loops, "
 "maintenance alerts, scrap products, etc."
 msgstr ""
-"Odoo作業区コントロールパネルを使用すると、作業者は店舗で作業オーダを開始し、ワークシートの指示に従うことができます。品質テストはプロセスに完全に組み込まれています。作業員はフィードバックループ、修理アラート、廃棄などをトリガできます。"
+"Odooの作業区コントロールパネルを使用すると、作業員は工場で作業指示を開始し、作業シートの指示に従うことができます。品質検査はプロセスに完全に統合されており、作業員はフィードバックループの開始、保守アラートの発信、不良品の廃棄などを行うことができます。"
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_consumption_warning

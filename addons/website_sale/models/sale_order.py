@@ -248,6 +248,22 @@ class SaleOrder(models.Model):
             # Recompute taxes on fpos change
             self._recompute_taxes()
 
+        # If the user has explicitly selected a valid pricelist, we don't want to change it
+        if selected_pricelist_id := request.session.get('website_sale_selected_pl_id'):
+            selected_pricelist = (
+                self.env['product.pricelist'].browse(selected_pricelist_id).exists()
+            )
+            if (
+                selected_pricelist
+                and selected_pricelist._is_available_on_website(self.website_id)
+                and selected_pricelist._is_available_in_country(
+                    self.partner_id.country_id.code
+                )
+            ):
+                self.pricelist_id = selected_pricelist
+            else:
+               request.session.pop('website_sale_selected_pl_id', None)
+
         if self.pricelist_id != pricelist_before or fpos_changed:
             # Pricelist may have been recomputed by the `partner_id` field update
             # we need to recompute the prices to match the new pricelist if it changed
@@ -329,7 +345,9 @@ class SaleOrder(models.Model):
 
         if (
             order_line
+            # Combo product lines will be checked after creating all of their combo item lines.
             and order_line.product_template_id.type != 'combo'
+            and not order_line.combo_item_id
             and order_line.price_unit == 0
             and self.website_id.prevent_zero_price_sale
             and product.service_tracking not in self.env['product.template']._get_product_types_allow_zero_price()
@@ -617,7 +635,7 @@ class SaleOrder(models.Model):
         :return: Whether the order has deliverable products.
         :rtype: bool
         """
-        return not self.only_services
+        return bool(self.order_line.product_id) and not self.only_services
 
     def _remove_delivery_line(self):
         super()._remove_delivery_line()

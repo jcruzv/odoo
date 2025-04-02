@@ -13,6 +13,7 @@ from odoo.fields import Command
 from odoo.http import request, route
 from odoo.osv import expression
 from odoo.tools import clean_context, float_round, groupby, lazy, single_email_re, str2bool, SQL
+from odoo.tools.image import image_data_uri
 from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.tools.translate import _
 
@@ -704,6 +705,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
                         pass
                     redirect_url = decoded_url.replace(query=url_encode(args)).to_url()
             request.session['website_sale_current_pl'] = pricelist.id
+            request.session['website_sale_selected_pl_id'] = pricelist.id
             order_sudo = request.website.sale_get_order()
             if order_sudo:
                 order_sudo._cart_update_pricelist(pricelist_id=pricelist.id)
@@ -719,12 +721,14 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 return request.redirect("%s?code_not_available=1" % redirect)
 
             request.session['website_sale_current_pl'] = pricelist_sudo.id
+            request.session['website_sale_selected_pl_id'] = pricelist_sudo.id
             order_sudo = request.website.sale_get_order()
             if order_sudo:
                 order_sudo._cart_update_pricelist(pricelist_id=pricelist_sudo.id)
         else:
             # Reset the pricelist if empty promo code is given
             request.session.pop('website_sale_current_pl', None)
+            request.session.pop('website_sale_selected_pl_id', None)
             order_sudo = request.website.sale_get_order()
             if order_sudo:
                 pl_before = order_sudo.pricelist_id
@@ -963,8 +967,18 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     def _get_additional_notification_information(self, line):
         # Only set the linked line id for combo items, not for optional products.
-        if line.combo_item_id:
-            return {'linked_line_id': line.linked_line_id.id}
+        if combo_item := line.combo_item_id:
+            infos = {'linked_line_id': line.linked_line_id.id}
+            # To sell a product type 'combo', one doesn't need to publish all combo choices. This
+            # causes an issue when public users access the image of each choice via the /web/image
+            # route. To bypass this access check, we send the raw image URL if the product is
+            # inaccessible to the current user.
+            if (
+                not combo_item.product_id.sudo(False).has_access('read')
+                and combo_item.product_id.image_128
+            ):
+                infos['image_url'] = image_data_uri(combo_item.product_id.image_128)
+            return infos
         return {}
 
     # ------------------------------------------------------
@@ -1597,7 +1611,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 use_delivery_as_billing=False,
                 order_sudo=order_sudo,
             )
-            with request.env.protecting(['pricelist_id'], order_sudo):
+            with request.env.protecting([order_sudo._fields['pricelist_id']], order_sudo):
                 order_sudo.partner_id = new_partner_sudo
 
             # Add the new partner as follower of the cart
@@ -1696,7 +1710,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         country = request.env["res.country"].search([
             ('code', '=', address.pop('country')),
         ], limit=1)
-        if state_code := address.pop('state'):
+        if state_code := address.pop('state', None):
             state = request.env['res.country.state'].search([
                 ('code', '=', state_code),
                 ('country_id', '=', country.id),
