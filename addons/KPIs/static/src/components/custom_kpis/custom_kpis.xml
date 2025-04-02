@@ -11,31 +11,31 @@
         </div>
         <div class="kpi-container">
             <div class="kpi-line">
-                <div class="kpi-item">
+                <div class="kpi-item" t-on-click="onClickRecibidasAyer">
                     <h2>Ordenes Recibidas (Ayer)</h2>
                     <div t-esc="state.registrosAyer.length"></div>
                 </div>
-                <div class="kpi-item">
+                <div class="kpi-item" t-on-click="onClickSurtidasAyer">
                     <h2>Ordenes Surtidas (Ayer)</h2>
                     <div t-esc="state.surtidasAyer.length"></div>
                 </div>
-                <div class="kpi-item">
+                <div t-att-class="state.clasePendientes" t-on-click="onClickPendientes">
                     <h2>Ordenes Pendientes</h2>
-                    <div t-esc="state.registrosAyer.length - state.surtidasAyer.length"></div>
+                    <div t-esc="state.registrosPendientes.length"></div>
                 </div>
             </div>
             <div class="kpi-line">
-                <div class="kpi-item">
+                <div t-att-class="state.claseRetraso" t-on-click="onClickRetrasoHoy">
                     <h2>Ordenes con Retraso</h2>
                     <div t-esc="state.retrasoHoy.length"></div>
                 </div>
-                <div class="kpi-item">
+                <div class="kpi-item" t-on-click="onClickOTIFHoy">
                     <h2>Ordenes OTIF</h2>
                     <div t-esc="state.otifHoy.length"></div>
                 </div>
                 <div class="kpi-item">
                     <h2>OTIF (%)</h2>
-                    <div t-esc="state.registrosAyer.length"></div>
+                    <div t-esc="state.otif + '%'"></div>
                 </div>
             </div>
         </div>

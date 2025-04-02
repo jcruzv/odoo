@@ -14,14 +14,14 @@ class CustomKPIs extends Component {
             registrosHoy: [],
             registrosAyer: [],
             retrasoHoy: [],
+            registrosPendientes: [],
             otifHoy: [],
             surtidasAyer: [],
+            clasePendientes: 'kpi-item',
+            claseRetraso: 'kpi-item',
             date : hoy.toISOString().split("T")[0]
         });
-    }
-
-    async willStart() {
-        await this.onDateChange({ target: { value: this.state.date } });
+        this.onDateChange({ target: { value: hoy.toISOString().split("T")[0] } })
     }
 
     // Método para actualizar el valor del KPI
@@ -75,12 +75,105 @@ class CustomKPIs extends Component {
 
         console.log("Registros de hoy:", registrosHoy)
 
-        this.state.registrosHoy = registrosHoy;
-        this.state.registrosAyer = registrosAyer;
-        this.state.retrasoHoy = retrasoHoy;
-        this.state.otifHoy = otifHoy;
-        this.state.surtidasAyer = surtidasAyer;
+        console.log("Registros de ayer:", registrosAyer)
+
+        const registrosPendientes = registrosAyer.filter((registro) => registro.state === "assigned" || registro.state === "waiting");
+
+        this.state.registrosHoy = registrosHoy || [];
+        this.state.registrosAyer = registrosAyer || [];
+        this.state.registrosPendientes = registrosPendientes || [];
+        this.state.retrasoHoy = retrasoHoy || [];
+        this.state.otifHoy = otifHoy || [];
+        if(registrosPendientes.length + registrosAyer.length > 0){
+            this.state.otif = otifHoy.length/(registrosPendientes.length + registrosAyer.length) * 100 || 0;
+        }
+        else{
+            this.state.otif = 0;
+        }
+        this.state.surtidasAyer = surtidasAyer || [];
+
+        this.state.clasePendientes = registrosPendientes.length > 10 ? 'kpi-item text-warning' : 'kpi-item';
+        this.state.clasePendientes = registrosPendientes.length > 20 ? 'kpi-item text-danger' : this.state.clasePendientes;
+
+        this.state.claseRetraso = retrasoHoy.length > 0 ? 'kpi-item text-warning' : 'kpi-item';
+        this.state.claseRetraso = retrasoHoy.length > 5 ? 'kpi-item text-danger' : this.state.claseRetraso;
+
         this.state.date = newDate;
+    }
+
+    onClickRecibidasAyer() {
+
+        if (this.state.registrosAyer && this.state.registrosAyer.length > 0) {
+            this.env.services.action.doAction({
+                type: "ir.actions.act_window",
+                name: "Recibidas Ayer",
+                res_model: "stock.picking",
+                view_mode: "list",
+                views: [[false, 'list'], [false, 'form']],
+                domain: [["id", "in", this.state.registrosAyer.map(r => r.id)]],
+            });
+        } else {
+            console.warn("No registrosAyer available for action.");
+        }
+    }
+
+    onClickSurtidasAyer() {
+        if (this.state.surtidasAyer && this.state.surtidasAyer.length > 0) {
+            this.env.services.action.doAction({
+                type: "ir.actions.act_window",
+                name: "Surtidas Ayer",
+                res_model: "stock.picking",
+                view_mode: "list",
+                views: [[false, 'list'], [false, 'form']],
+                domain: [["id", "in", this.state.surtidasAyer.map(r => r.id)]],
+            });
+        } else {
+            console.warn("No surtidasAyer available for action.");
+        }
+    }
+
+    onClickPendientes() {
+        if (this.state.registrosPendientes && this.state.registrosPendientes.length > 0) {
+            this.env.services.action.doAction({
+                type: "ir.actions.act_window",
+                name: "Pendientes Hoy",
+                res_model: "stock.picking",
+                view_mode: "list",
+                views: [[false, 'list'], [false, 'form']],
+                domain: [["id", "in", this.state.registrosPendientes.map(r => r.id)]],
+            });
+        } else {
+            console.warn("No registrosPendientes available for action.");
+        }
+    }
+
+    onClickRetrasoHoy() {
+        if (this.state.retrasoHoy && this.state.retrasoHoy.length > 0) {
+            this.env.services.action.doAction({
+                type: "ir.actions.act_window",
+                name: "Retraso Hoy",
+                res_model: "stock.picking",
+                view_mode: "list",
+                views: [[false, 'list'], [false, 'form']],
+                domain: [["id", "in", this.state.retrasoHoy.map(r => r.id)]],
+            });
+        } else {
+            console.warn("No retrasoHoy available for action.");
+        }
+    }
+
+    onClickOTIFHoy() {
+        if (this.state.otifHoy && this.state.otifHoy.length > 0) {
+            this.env.services.action.doAction({
+                type: "ir.actions.act_window",
+                name: "OTIF Hoy",
+                res_model: "stock.picking",
+                view_mode: "list",
+                domain: [["id", "in", this.state.otifHoy.map(r => r.id)]],
+            });
+        } else {
+            console.warn("No otifHoy available for action.");
+        }
     }
 }
 
