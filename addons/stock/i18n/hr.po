@@ -27,7 +27,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:36+0000\n"
+"POT-Creation-Date: 2025-01-27 13:02+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
 "Last-Translator: Luka Carević <luka@uvid.hr>, 2025\n"
 "Language-Team: Croatian (https://app.transifex.com/odoo/teams/41243/hr/)\n"
@@ -2821,8 +2821,6 @@ msgid ""
 "of the product in this packaging: whether it will be bought, manufactured, "
 "replenished on order, etc."
 msgstr ""
-"Ovisno o instaliranim modulima ovo će omogućiti definiranje rute proizvoda: "
-"hoće li se kupiti, proizvoditi, nadopunjavati po narudžbi i sl."
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_product_product__route_ids
@@ -2832,8 +2830,6 @@ msgid ""
 "of the product: whether it will be bought, manufactured, replenished on "
 "order, etc."
 msgstr ""
-"Ovisno o instaliranim modulima ovo će omogućiti definiranje rute proizvoda: "
-"hoće li se kupiti, proizvoditi, nadopunjavati po narudžbi i sl."
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_lot__note
@@ -6423,7 +6419,7 @@ msgstr ""
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.view_picking_internal_search
 msgid "Planning Issues"
-msgstr "Kašnjenja"
+msgstr ""
 
 #. module: stock
 #. odoo-python
@@ -8850,14 +8846,6 @@ msgstr ""
 
 #. module: stock
 #. odoo-python
-#: code:addons/stock/models/stock_picking.py:0
-msgid ""
-"The Picking Operations report has been deleted so you cannot print at this "
-"time unless the report is restored."
-msgstr ""
-
-#. module: stock
-#. odoo-python
 #: code:addons/stock/models/stock_quant.py:0
 msgid ""
 "The Serial Number (%(serial_number)s) is already used in location(s): %(location_list)s.\n"
@@ -9354,8 +9342,6 @@ msgid ""
 "This user will be responsible of the next activities related to logistic "
 "operations for this product."
 msgstr ""
-"Ovaj korisnik bit će odgovoran za sljedeće aktivnosti povezane s logističkim"
-" operacijama za ovaj proizvod."
 
 #. module: stock
 #: model_terms:ir.ui.view,arch_db:stock.inventory_warning_reset_view

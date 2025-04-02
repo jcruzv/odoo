@@ -5,16 +5,14 @@
 # Translators:
 # Tereza Mokrá, 2024
 # Wil Odoo, 2024
-# Vojtěch Olšan, 2025
-# Radim Bílý, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:37+0000\n"
+"POT-Creation-Date: 2025-02-10 13:24+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Radim Bílý, 2025\n"
+"Last-Translator: Wil Odoo, 2024\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -33,12 +31,6 @@ msgstr ""
 msgid ""
 "%s is not available anymore, it has thus been removed from your order. "
 "Please review your order and validate it again."
-msgstr ""
-
-#. module: pos_self_order
-#. odoo-python
-#: code:addons/pos_self_order/models/pos_config.py:0
-msgid "(require Odoo Enterprise)"
 msgstr ""
 
 #. module: pos_self_order
@@ -199,7 +191,7 @@ msgstr "Zrušit"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/components/cancel_popup/cancel_popup.xml:0
 msgid "Cancel Order"
-msgstr "Zrušit objednávku"
+msgstr ""
 
 #. module: pos_self_order
 #. odoo-javascript
@@ -254,12 +246,12 @@ msgstr "Zavřít relaci"
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/order_history_page/order_history_page.xml:0
 msgid "Combo"
-msgstr "Kombinace"
+msgstr ""
 
 #. module: pos_self_order
 #: model:ir.model.fields,field_description:pos_self_order.field_pos_order_line__combo_id
 msgid "Combo reference"
-msgstr "Reference kombinace"
+msgstr ""
 
 #. module: pos_self_order
 #: model:ir.model,name:pos_self_order.model_res_config_settings
@@ -1116,7 +1108,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/pos_self_order/static/src/app/pages/eating_location_page/eating_location_page.xml:0
 msgid "Take Out"
-msgstr "S sebou"
+msgstr ""
 
 #. module: pos_self_order
 #. odoo-javascript

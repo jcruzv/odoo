@@ -126,7 +126,7 @@ export class PartnerList extends Component {
             const search_fields = [
                 "name",
                 "parent_name",
-                ...this.getPhoneSearchTerms(),
+                "phone_mobile_search",
                 "email",
                 "barcode",
                 "street",
@@ -148,9 +148,5 @@ export class PartnerList extends Component {
         });
 
         return result;
-    }
-
-    getPhoneSearchTerms() {
-        return ["phone", "mobile"];
     }
 }

@@ -25,11 +25,11 @@
 # Uri Segman, 2024
 # Mendi Soudry, 2024
 # Lilach Gilliam <lilach.gilliam@gmail.com>, 2025
+# MichaelHadar, 2025
+# or balmas, 2025
 # ZVI BLONDER <ZVIBLONDER@gmail.com>, 2025
 # Yihya Hugirat <hugirat@gmail.com>, 2025
 # Yoram Lavi, 2025
-# or balmas, 2025
-# MichaelHadar, 2025
 # 
 msgid ""
 msgstr ""
@@ -37,7 +37,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-02-10 13:24+0000\n"
 "PO-Revision-Date: 2024-09-25 09:42+0000\n"
-"Last-Translator: MichaelHadar, 2025\n"
+"Last-Translator: Yoram Lavi, 2025\n"
 "Language-Team: Hebrew (https://app.transifex.com/odoo/teams/41243/he/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1631,7 +1631,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/user_switch/user_switch.xml:0
 msgid "Choose a user"
-msgstr "בחר משתמש"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -3064,7 +3064,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/week_days/week_days.js:0
 msgid "Fri"
-msgstr "שישי"
+msgstr "יום שישי"
 
 #. module: web
 #. odoo-javascript
@@ -4234,7 +4234,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/week_days/week_days.js:0
 msgid "Mon"
-msgstr "שני"
+msgstr "יום שני"
 
 #. module: web
 #. odoo-javascript
@@ -5703,7 +5703,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/week_days/week_days.js:0
 msgid "Sat"
-msgstr "שבת"
+msgstr "יום שבת"
 
 #. module: web
 #. odoo-javascript
@@ -6294,7 +6294,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/week_days/week_days.js:0
 msgid "Sun"
-msgstr "ראשון"
+msgstr "יום ראשון"
 
 #. module: web
 #. odoo-javascript
@@ -6644,7 +6644,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/week_days/week_days.js:0
 msgid "Thu"
-msgstr "חמישי"
+msgstr "יום חמישי"
 
 #. module: web
 #. odoo-javascript
@@ -6813,7 +6813,7 @@ msgstr "נסה להוסיף כמה רשומות, או וודא שאין מסנן
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/week_days/week_days.js:0
 msgid "Tue"
-msgstr "שלישי"
+msgstr "יום שלישי"
 
 #. module: web
 #. odoo-javascript
@@ -7057,7 +7057,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/user_switch/user_switch.xml:0
 msgid "Use another user"
-msgstr "השתמש במשתמש אחר "
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -7296,7 +7296,7 @@ msgstr "אתר אינטרנט"
 #. odoo-javascript
 #: code:addons/web/static/src/views/widgets/week_days/week_days.js:0
 msgid "Wed"
-msgstr "רביעי"
+msgstr "יום רביעי"
 
 #. module: web
 #. odoo-javascript
@@ -7923,7 +7923,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/tree_editor/tree_editor.xml:0
 msgid "any"
-msgstr "לפחות אחד"
+msgstr "כל"
 
 #. module: web
 #. odoo-javascript
@@ -18014,37 +18014,37 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "muscle"
-msgstr "שריר"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "museum"
-msgstr "מוזיאון "
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "mushroom"
-msgstr "פטריה"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "music"
-msgstr "מוזיקה"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "musical keyboard"
-msgstr "מקלדת מוזיקלית"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "musical note"
-msgstr "תו מוזיקלי"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18062,13 +18062,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "mute"
-msgstr "השתק"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "muted speaker"
-msgstr "רמקול מושתק "
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18152,13 +18152,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "necklace"
-msgstr "שרשרת"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "necktie"
-msgstr "עניבה"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18182,7 +18182,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "nervous"
-msgstr "לחוץ"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18194,13 +18194,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "neutral"
-msgstr "נטרלי"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "neutral face"
-msgstr "פנים ניטרליות "
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18224,19 +18224,19 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/views/view_dialogs/export_data_dialog.xml:0
 msgid "new_template"
-msgstr "תבנית_חדשה"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "news"
-msgstr "חדשות"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "newspaper"
-msgstr "עיתון"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18266,13 +18266,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "night"
-msgstr "לילה"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "night with stars"
-msgstr "לילה עם כוכבים"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18314,7 +18314,7 @@ msgstr "לא נרשם תיאור"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "no entry"
-msgstr "אין כניסה"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18326,7 +18326,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "no mobile phones"
-msgstr "השימוש בטלפונים אסור"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18338,13 +18338,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "no pedestrians"
-msgstr "כניסת הולכי רגל אסורה"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "no smoking"
-msgstr "העישון אסור"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18441,13 +18441,13 @@ msgstr "הערה"
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "notebook"
-msgstr "מחברת"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "notebook with decorative cover"
-msgstr "מחברת עם כריכה מעוצבת"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18465,7 +18465,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "nurse"
-msgstr "אחות"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18507,7 +18507,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "octopus"
-msgstr "תמנון"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18549,7 +18549,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "office worker"
-msgstr "עובד משרדי"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18609,7 +18609,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "older person"
-msgstr "אדם מבוגר יותר"
+msgstr ""
 
 #. module: web
 #. odoo-javascript
@@ -18705,7 +18705,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/web/static/src/core/emoji_picker/emoji_data.js:0
 msgid "onion"
-msgstr "בצל"
+msgstr ""
 
 #. module: web
 #. odoo-javascript

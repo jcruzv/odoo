@@ -103,8 +103,6 @@ class AccountMoveLine(models.Model):
         check_company=True,
         tracking=True,
     )
-    account_name = fields.Char(related='account_id.name') # Used for easy configuration of consolidation in the reports
-    account_code = fields.Char(related='account_id.code') # Used for easy configuration of consolidation in the reports
     name = fields.Char(
         string='Label',
         compute='_compute_name', store=True, readonly=False, precompute=True,
@@ -1162,7 +1160,10 @@ class AccountMoveLine(models.Model):
             line.id for line in self if line.parent_state == "posted"
         ])
         lines_to_modify.analytic_line_ids.unlink()
-        lines_to_modify._create_analytic_lines()
+
+        context = dict(self.env.context)
+        context.pop('default_account_id', None)
+        lines_to_modify.with_context(context)._create_analytic_lines()
 
     @api.onchange('account_id')
     def _inverse_account_id(self):
@@ -3024,9 +3025,7 @@ class AccountMoveLine(models.Model):
         for line in self:
             analytic_line_vals.extend(line._prepare_analytic_lines())
 
-        context = dict(self.env.context)
-        context.pop('default_account_id', None)
-        self.env['account.analytic.line'].with_context(context).create(analytic_line_vals)
+        self.env['account.analytic.line'].create(analytic_line_vals)
 
     def _prepare_analytic_lines(self):
         self.ensure_one()

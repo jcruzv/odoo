@@ -6,18 +6,7 @@
     'countries': ['bd'],
     'version': '1.0',
     'category': 'Accounting/Localizations/Account Charts',
-    'description': """
-This is the base module to manage the accounting chart for Bangladesh in Odoo
-==============================================================================
-
-Bangladesh accounting basic charts and localization.
-
-Activates:
-
-- Chart of accounts
-- Taxes
-- Tax report
-""",
+    'description': ' This is the base module to manage chart of accounts and localization for the Bangladesh ',
     'depends': [
         'account',
     ],

@@ -830,13 +830,10 @@ class AccountTax(models.Model):
             # t2: price-included 10% tax
             # On a price unit of 122, base amount of t2 is computed as 122 - 1 = 121
             if special_mode in (False, 'total_included'):
-                if tax.include_base_amount:
+                if not tax.include_base_amount:
                     for other_tax in get_tax_after():
-                        if not other_tax.is_base_affected:
+                        if other_tax.price_include:
                             add_extra_base(other_tax, -1)
-                else:
-                    for other_tax in get_tax_after():
-                        add_extra_base(other_tax, -1)
                 for other_tax in get_tax_before():
                     add_extra_base(other_tax, -1)
 
@@ -854,10 +851,9 @@ class AccountTax(models.Model):
             # With special_mode = 'total_excluded' 109 is provided as price unit.
             # To compute the base amount of t2, we need to add the tax amount of t1 first
             else:  # special_mode == 'total_excluded'
-                if tax.include_base_amount:
-                    for other_tax in get_tax_after():
-                        if other_tax.is_base_affected:
-                            add_extra_base(other_tax, 1)
+                for other_tax in get_tax_after():
+                    if not other_tax.price_include or tax.include_base_amount:
+                        add_extra_base(other_tax, 1)
 
         elif not tax.price_include:
 
@@ -987,7 +983,7 @@ class AccountTax(models.Model):
         def add_tax_amount_to_results(tax, tax_amount):
             taxes_data[tax.id]['tax_amount'] = tax_amount
             if rounding_method == 'round_per_line':
-                taxes_data[tax.id]['tax_amount'] = float_round(taxes_data[tax.id]['tax_amount'], precision_rounding=precision_rounding)
+                taxes_data[tax.id]['tax_amount'] = float_round(taxes_data[tax.id]['tax_amount'], precision_rounding=precision_rounding or self.env.company.currency_id.rounding)
             if tax.has_negative_factor:
                 reverse_charge_taxes_data[tax.id]['tax_amount'] = -taxes_data[tax.id]['tax_amount']
             sorted_taxes._propagate_extra_taxes_base(tax, taxes_data, special_mode=special_mode)
@@ -1042,7 +1038,7 @@ class AccountTax(models.Model):
 
         raw_base = quantity * price_unit
         if rounding_method == 'round_per_line':
-            raw_base = float_round(raw_base, precision_rounding=precision_rounding)
+            raw_base = float_round(raw_base, precision_rounding=precision_rounding or self.env.company.currency_id.rounding)
 
         evaluation_context = {
             'product': sorted_taxes._eval_taxes_computation_turn_to_product_values(product=product),
@@ -1728,7 +1724,6 @@ class AccountTax(models.Model):
             'account_id': tax_rep_data['account'].id or base_line_grouping_key['account_id'],
             'tax_ids': [Command.set(tax_rep_data['taxes'].ids)],
             'tax_tag_ids': [Command.set(tax_rep_data['tax_tags'].ids)],
-            '__keep_zero_line': False,
         }
 
     @api.model
@@ -1771,7 +1766,7 @@ class AccountTax(models.Model):
         :param include_caba_tags:       Indicate if the cash basis tags need to be taken into account.
         """
         is_refund = base_line['is_refund']
-        currency = base_line['currency_id']
+        currency = base_line['currency_id'] or company.currency_id
         product = base_line['product_id']
         company_currency = company.currency_id
         if is_refund:
@@ -2386,13 +2381,11 @@ class AccountTax(models.Model):
 
         # Remove tax lines having a zero amount.
         tax_lines_mapping = {
-            frozendict({grouping_k: k[grouping_k] for grouping_k in k if not grouping_k.startswith('__')}): v
+            k: v
             for k, v in tax_lines_mapping.items()
             if (
-                k['__keep_zero_line'] or (
-                    not self.env['res.currency'].browse(k['currency_id']).is_zero(v['amount_currency'])
-                    or not company.currency_id.is_zero(v['balance'])
-                )
+                k.get('currency_id') and not self.env['res.currency'].browse(k['currency_id']).is_zero(v['amount_currency'])
+                or not company.currency_id.is_zero(v['balance'])
             )
         }
 

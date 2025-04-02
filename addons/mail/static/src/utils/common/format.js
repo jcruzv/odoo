@@ -10,7 +10,7 @@ import { markup } from "@odoo/owl";
 import { stateToUrl } from "@web/core/browser/router";
 import { loadEmoji } from "@web/core/emoji_picker/emoji_picker";
 import { htmlEscape, setElementContent } from "@web/core/utils/html";
-import { escapeRegExp, unaccent } from "@web/core/utils/strings";
+import { escape, escapeRegExp, unaccent } from "@web/core/utils/strings";
 import { setAttributes } from "@web/core/utils/xml";
 
 const urlRegexp =
@@ -216,10 +216,9 @@ function generateMentionsLinks(body, { partners = [], threads = [], specialMenti
         body = htmlReplace(body, text, placeholder);
     }
     for (const special of specialMentions) {
-        body = htmlReplace(
-            body,
-            `@${special}`,
-            markup(`<a href="#" class="o-discuss-mention">@${htmlEscape(special)}</a>`)
+        body = body.replace(
+            `@${escape(special)}`,
+            `<a href="#" class="o-discuss-mention">@${escape(special)}</a>`
         );
     }
     for (const mention of mentions) {

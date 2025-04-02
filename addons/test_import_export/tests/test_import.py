@@ -89,8 +89,8 @@ class TestBasicFields(BaseImportCase):
         self.assertEqualFields(self.get_fields('m2o'), make_field(
             field_type='many2one', comodel_name='import.m2o.related', model_name='import.m2o',
             fields=[
-                {'id': 'value', 'name': 'id', 'string': 'External ID', 'required': False, 'fields': [], 'type': 'id', 'model_name': 'import.m2o.related'},
-                {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': False, 'fields': [], 'type': 'id', 'model_name': 'import.m2o.related'},
+                {'id': 'value', 'name': 'id', 'string': 'External ID', 'required': False, 'fields': [], 'type': 'id', 'model_name': 'import.m2o'},
+                {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': False, 'fields': [], 'type': 'id', 'model_name': 'import.m2o'},
         ]))
 
     def test_m2o_required(self):
@@ -101,17 +101,19 @@ class TestBasicFields(BaseImportCase):
         self.assertEqualFields(self.get_fields('m2o.required'), make_field(
             field_type='many2one', required=True, comodel_name='import.m2o.required.related', model_name='import.m2o.required',
             fields=[
-                {'id': 'value', 'name': 'id', 'string': 'External ID', 'required': True, 'fields': [], 'type': 'id', 'model_name': 'import.m2o.required.related'},
-                {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': True, 'fields': [], 'type': 'id', 'model_name': 'import.m2o.required.related'},
+                {'id': 'value', 'name': 'id', 'string': 'External ID', 'required': True, 'fields': [], 'type': 'id', 'model_name': 'import.m2o.required'},
+                {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': True, 'fields': [], 'type': 'id', 'model_name': 'import.m2o.required'},
         ]))
 
 
 class TestO2M(BaseImportCase):
 
+    def get_fields(self, field):
+        return self.env['base_import.import'].get_fields_tree(f"import.{field}")
+
     def test_shallow(self):
         self.assertEqualFields(
-            self.env['base_import.import'].get_fields_tree("import.o2m"), 
-            [
+            self.get_fields('o2m'), [
                 get_id_field("import.o2m"),
                 {'id': 'name', 'name': 'name', 'string': "Name", 'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.o2m'},
                 {
@@ -123,10 +125,10 @@ class TestO2M(BaseImportCase):
                             'id': 'parent_id', 'name': 'parent_id', 'model_name': 'import.o2m.child',
                             'string': 'Parent', 'type': 'many2one', 'comodel_name': 'import.o2m',
                             'required': False, 'fields': [
-                                {'id': 'parent_id', 'name': 'id', 'model_name': 'import.o2m',
+                                {'id': 'parent_id', 'name': 'id', 'model_name': 'import.o2m.child',
                                  'string': 'External ID', 'required': False,
                                  'fields': [], 'type': 'id'},
-                                {'id': 'parent_id', 'name': '.id', 'model_name': 'import.o2m',
+                                {'id': 'parent_id', 'name': '.id', 'model_name': 'import.o2m.child',
                                  'string': 'Database ID', 'required': False,
                                  'fields': [], 'type': 'id'},
                             ]
@@ -138,39 +140,6 @@ class TestO2M(BaseImportCase):
                 }
             ]
         )
-
-    def test_shallow_debug(self):
-        with self.debug_mode():
-            self.assertEqualFields(
-                self.env['base_import.import'].get_fields_tree("import.o2m"),
-                [
-                    get_id_field("import.o2m"),
-                    {'id': 'name', 'name': 'name', 'string': "Name", 'required': False, 'fields': [], 'type': 'char', 'model_name': 'import.o2m'},
-                    {
-                        'id': 'value', 'name': 'value', 'string': 'Value', 'model_name': 'import.o2m',
-                        'required': False, 'type': 'one2many', 'comodel_name': 'import.o2m.child',
-                        'fields': [
-                            get_id_field("import.o2m.child"),
-                            {
-                                'id': 'parent_id', 'name': 'parent_id', 'model_name': 'import.o2m.child',
-                                'string': 'Parent', 'type': 'many2one', 'comodel_name': 'import.o2m',
-                                'required': False, 'fields': [
-                                    {'id': 'parent_id', 'name': 'id', 'model_name': 'import.o2m',
-                                    'string': 'External ID', 'required': False,
-                                    'fields': [], 'type': 'id'},
-                                    {'id': 'parent_id', 'name': '.id', 'model_name': 'import.o2m',
-                                    'string': 'Database ID', 'required': False,
-                                    'fields': [], 'type': 'id'},
-                                ]
-                            },
-                            {'id': 'value', 'name': 'value', 'string': 'Value',
-                            'required': False, 'fields': [], 'type': 'integer', 'model_name': 'import.o2m.child',
-                            },
-                            {'id': 'value', 'name': '.id', 'string': 'Database ID', 'required': False, 'fields': [], 'type': 'id', 'model_name': 'import.o2m.child'}
-                        ]
-                    }
-                ]
-            )
 
 
 class TestMatchHeadersSingle(TransactionCase):

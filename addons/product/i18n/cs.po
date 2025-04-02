@@ -8,7 +8,6 @@
 # Aleš Fiala <f.ales1@seznam.cz>, 2025
 # Jiří Podhorecký <jirka.p@volny.cz>, 2025
 # Vojtěch Olšan, 2025
-# Radim Bílý, 2025
 # 
 msgid ""
 msgstr ""
@@ -16,7 +15,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-01-27 13:04+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Radim Bílý, 2025\n"
+"Last-Translator: Vojtěch Olšan, 2025\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -844,12 +843,12 @@ msgstr "Kombinace indikátorů"
 #: model:ir.model.fields.selection,name:product.selection__product_template__type__combo
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 msgid "Combo"
-msgstr "Kombinace"
+msgstr ""
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_combo_view_form
 msgid "Combo Choice"
-msgstr "Kombinovaná nabídka"
+msgstr ""
 
 #. module: product
 #: model:ir.actions.act_window,name:product.product_combo_action
@@ -857,23 +856,23 @@ msgstr "Kombinovaná nabídka"
 #: model:ir.model.fields,field_description:product.field_product_template__combo_ids
 #: model_terms:ir.ui.view,arch_db:product.product_combo_view_tree
 msgid "Combo Choices"
-msgstr "Kombinované nabídky"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo__combo_item_ids
 msgid "Combo Item"
-msgstr "Položka kombinace"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo__base_price
 msgid "Combo Price"
-msgstr "Cena kombinace"
+msgstr ""
 
 #. module: product
 #. odoo-python
 #: code:addons/product/models/product_template.py:0
 msgid "Combo products can't have attributes."
-msgstr "Kombinované produkty nemohou mít atributy."
+msgstr ""
 
 #. module: product
 #. odoo-python
@@ -2647,12 +2646,12 @@ msgstr "Produktová kategorie"
 #. module: product
 #: model:ir.model,name:product.model_product_combo
 msgid "Product Combo"
-msgstr "Kombinovaný produkt"
+msgstr ""
 
 #. module: product
 #: model:ir.model,name:product.model_product_combo_item
 msgid "Product Combo Item"
-msgstr "Položka kombinovaného produktu"
+msgstr ""
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_combo__combo_item_count

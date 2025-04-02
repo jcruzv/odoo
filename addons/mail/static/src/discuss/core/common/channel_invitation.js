@@ -6,7 +6,6 @@ import { Component, onMounted, onWillStart, useRef, useState } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { useSequential } from "@mail/utils/common/hooks";
-import { useDebounced } from "@web/core/utils/timing";
 
 export class ChannelInvitation extends Component {
     static components = { ImStatus, ActionPanel };
@@ -19,7 +18,6 @@ export class ChannelInvitation extends Component {
         this.discussCoreCommonService = useState(useService("discuss.core.common"));
         this.orm = useService("orm");
         this.store = useState(useService("mail.store"));
-        this.rtc = useService("discuss.rtc");
         this.notification = useService("notification");
         this.suggestionService = useService("mail.suggestion");
         this.ui = useService("ui");
@@ -31,7 +29,6 @@ export class ChannelInvitation extends Component {
             selectedPartners: [],
             searchResultCount: 0,
         });
-        this.debouncedFetchPartnersToInvite = useDebounced(this.fetchPartnersToInvite.bind(this), 250);
         onWillStart(() => {
             if (this.store.self.type === "partner") {
                 this.fetchPartnersToInvite();
@@ -65,7 +62,7 @@ export class ChannelInvitation extends Component {
 
     onInput() {
         this.searchStr = this.inputRef.el.value;
-        this.debouncedFetchPartnersToInvite();
+        this.fetchPartnersToInvite();
     }
 
     onClickSelectablePartner(partner) {
@@ -103,7 +100,6 @@ export class ChannelInvitation extends Component {
         } else {
             await this.orm.call("discuss.channel", "add_members", [[this.props.thread.id]], {
                 partner_ids: this.state.selectedPartners.map((partner) => partner.id),
-                invite_to_rtc_call: this.rtc.state.channel?.eq(this.props.thread),
             });
         }
         this.props.close();

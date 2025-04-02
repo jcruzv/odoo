@@ -11,7 +11,6 @@
                     t-as="filter"
                     t-foreach="filters"
                     t-key="filter.id"
-                    showTitle="true"
                 />
             </t>
             <t t-set-slot="control-panel-navigation-additional" t-if="!state.activeDashboard?.isSample">

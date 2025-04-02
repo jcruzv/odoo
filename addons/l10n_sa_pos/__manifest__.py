@@ -3,10 +3,9 @@
 {
     'name': 'Saudi Arabia - Point of Sale',
     'category': 'Accounting/Localizations/Point of Sale',
-    'countries': ['sa'],
     'description': """
-Saudi Arabia POS Localization
-===========================================================
+K.S.A. POS Localization
+=======================================================
     """,
     'license': 'LGPL-3',
     'depends': [

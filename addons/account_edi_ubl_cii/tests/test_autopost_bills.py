@@ -1,6 +1,5 @@
 import base64
 from datetime import datetime
-from xml.etree import ElementTree as et
 
 from odoo import fields
 from odoo.tests import tagged
@@ -12,16 +11,12 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 @tagged('post_install', '-at_install')
 class TestAutoPostBills(AccountTestInvoicingCommon):
 
-    def import_facturx(self, filename='facturx_out_invoice.xml', ref=None):
+    def import_facturx(self, filename='facturx_out_invoice.xml'):
         self.env.cr._now = datetime.now()  # reset transaction's NOW, otherwise all move will have the same create_date
-        with (file_open(f"account_edi_ubl_cii/tests/test_files/{filename}", 'rb', filter_ext=('.xml',)) as file):
-            file_read = file.read()
-            tree = et.ElementTree(et.fromstring(file_read.decode()))
-            if ref:
-                tree.find('./{*}ExchangedDocument/{*}ID').text = ref
+        with file_open(f"account_edi_ubl_cii/tests/test_files/{filename}", 'rb', filter_ext=('.xml',)) as file:
             attachment = self.env['ir.attachment'].create({
                 'name': 'test_file.xml',
-                'datas': base64.encodebytes(et.tostring(tree.getroot())),
+                'datas': base64.encodebytes(file.read()),
             })
             return self.company_data['default_journal_purchase'].with_context(disable_abnormal_invoice_detection=False)._create_document_from_attachment(attachment.id)
 
@@ -80,7 +75,7 @@ class TestAutoPostBills(AccountTestInvoicingCommon):
         wizard.action_automate_partner()
 
         # Create 4th bill without changes with automation enabled => should automatically post, no popup
-        move = self.import_facturx(ref="refbill4")  # new ref to avoid duplicates
+        move = self.import_facturx()
         self.assertEqual(move.state, 'posted')
 
         # Reset
@@ -120,13 +115,9 @@ class TestAutoPostBills(AccountTestInvoicingCommon):
         move.company_id.autopost_bills = True
         move.partner_id.autopost_bills = 'always'
 
-        # If the bill has a duplicate, don't autopost it
-        move = self.import_facturx(ref="refbill4")  # same ref as previous
-        self.assertEqual(move.state, "draft")
-
         # If there is a significant difference (see abnormal_amount), don't autopost even if 'always' is set
-        for i in range(10):  # See test_unexpected_invoice
-            move = self.import_facturx(ref=f"ref{i}")  # automatically posted
+        for _ in range(10):  # See test_unexpected_invoice
+            move = self.import_facturx()  # automatically posted
             self.assertEqual(move.state, "posted")
 
         move = self.import_facturx(filename='facturx_out_invoice_abnormal.xml')  # amounts * 100 here, a bit abnormal...

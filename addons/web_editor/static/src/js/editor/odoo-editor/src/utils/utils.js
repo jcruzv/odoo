@@ -69,7 +69,7 @@ export const PROTECTED_BLOCK_TAG = ['TR','TD','TABLE','TBODY','UL','OL','LI'];
  * override of the font-size.
  */
 export const FONT_SIZE_CLASSES = ["display-1-fs", "display-2-fs", "display-3-fs", "display-4-fs", "h1-fs",
-    "h2-fs", "h3-fs", "h4-fs", "h5-fs", "h6-fs", "base-fs", "o_small-fs", "small", "o_small_twelve-fs", "o_small_ten-fs", "o_small_eight-fs"];
+    "h2-fs", "h3-fs", "h4-fs", "h5-fs", "h6-fs", "base-fs", "o_small-fs", "small"];
 
 /**
  * Array of all the classes used by the editor to change the text style.
@@ -1325,11 +1325,8 @@ export const formatSelection = (editor, formatName, {applyStyle, formatProps} = 
 
             parentNode = currentNode.parentElement;
         }
-        const isFormatted =
-            formatName === "setFontSizeClassName" && !formatProps
-                ? hasAnyFontSizeClass
-                : formatSpec.isFormatted;
-        const firstBlockOrClassHasFormat = isFormatted(parentNode, formatProps);
+
+        const firstBlockOrClassHasFormat = formatSpec.isFormatted(parentNode, formatProps);
         if (firstBlockOrClassHasFormat && !applyStyle) {
             formatSpec.addNeutralStyle && formatSpec.addNeutralStyle(getOrCreateSpan(node, inlineAncestors));
         } else if (!firstBlockOrClassHasFormat && applyStyle) {
@@ -1338,7 +1335,7 @@ export const formatSelection = (editor, formatName, {applyStyle, formatProps} = 
                 node.after(tag);
                 tag.append(node);
 
-                if (!isFormatted(tag, formatProps)) {
+                if (!formatSpec.isFormatted(tag, formatProps)) {
                     tag.after(node);
                     tag.remove();
                     formatSpec.addStyle(getOrCreateSpan(node, inlineAncestors), formatProps);
@@ -1630,17 +1627,6 @@ export function hasClass(node, props) {
     const element = closestElement(node);
     return element.classList.contains(props.className);
 }
-
-/**
- * Return true if the given node has any font-size class.
- *
- * @param {Node} node A node to check for font-size classes.
- * @returns {boolean}
- */
-export function hasAnyFontSizeClass(node) {
-    return FONT_SIZE_CLASSES.find((cls) => node?.classList?.contains(cls));
-}
-
 /**
  * Return true if the given node appears in a different direction than that of
  * the editable ('ltr' or 'rtl').
@@ -1668,8 +1654,7 @@ export function hasAnyFontSizeClass(node) {
 export function isSelectionFormat(editable, format) {
     const selectedNodes = getTraversedNodes(editable)
         .filter((n) => n.nodeType === Node.TEXT_NODE && n.nodeValue.replaceAll(ZWNBSP_CHAR, '').length);
-    const isFormatted =
-        format === "setFontSizeClassName" ? hasAnyFontSizeClass : formatsSpecs[format].isFormatted;
+    const isFormatted = formatsSpecs[format].isFormatted;
     return selectedNodes.length && selectedNodes.every(n => isFormatted(n, editable));
 }
 

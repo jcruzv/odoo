@@ -193,10 +193,7 @@ export class ProductScreen extends Component {
         return this.env.utils.formatCurrency(this.currentOrder?.get_total_with_tax() ?? 0);
     }
     get items() {
-        return this.env.utils.formatProductQty(
-            this.currentOrder.lines?.reduce((items, line) => items + line.qty, 0) ?? 0,
-            false
-        );
+        return this.currentOrder.lines?.reduce((items, line) => items + line.qty, 0) ?? 0;
     }
     getProductName(product) {
         const productTmplValIds = product.attribute_line_ids
@@ -379,7 +376,7 @@ export class ProductScreen extends Component {
             }
         }
 
-        return this.searchWord === ""
+        return this.searchWord !== ""
             ? filteredList
             : filteredList.sort((a, b) => a.display_name.localeCompare(b.display_name));
     }
@@ -390,9 +387,17 @@ export class ProductScreen extends Component {
             ? this.getProductsByCategory(this.pos.selectedCategory)
             : this.products;
 
-        return products.filter((p) =>
+        const exactMatches = products.filter((product) => product.exactMatch(words));
+
+        if (exactMatches.length > 0 && words.length > 2) {
+            return exactMatches;
+        }
+
+        const matches = products.filter((p) =>
             unaccent(p.searchString, false).toLowerCase().includes(words)
         );
+
+        return Array.from(new Set([...exactMatches, ...matches]));
     }
 
     addMainProductsToDisplay(products) {
@@ -426,8 +431,13 @@ export class ProductScreen extends Component {
             this.state.currentOffset = 0;
         }
         const result = await this.loadProductFromDB();
-        if (result.length === 0) {
-            this.notification.add(_t('No other products found for "%s".', searchProductWord), 3000);
+        if (result.length > 0) {
+            this.notification.add(
+                _t('%s product(s) found for "%s".', result.length, searchProductWord),
+                3000
+            );
+        } else {
+            this.notification.add(_t('No more product found for "%s".', searchProductWord));
         }
         if (this.state.previousSearchWord === searchProductWord) {
             this.state.currentOffset += result.length;
@@ -437,8 +447,14 @@ export class ProductScreen extends Component {
         }
     }
 
-    loadProductFromDBDomain(searchProductWord) {
-        return [
+    async loadProductFromDB() {
+        const { searchProductWord } = this.pos;
+        if (!searchProductWord) {
+            return;
+        }
+
+        this.pos.setSelectedCategory(0);
+        const domain = [
             "|",
             "|",
             ["name", "ilike", searchProductWord],
@@ -447,16 +463,6 @@ export class ProductScreen extends Component {
             ["available_in_pos", "=", true],
             ["sale_ok", "=", true],
         ];
-    }
-
-    async loadProductFromDB() {
-        const { searchProductWord } = this.pos;
-        if (!searchProductWord) {
-            return;
-        }
-
-        this.pos.setSelectedCategory(0);
-        const domain = this.loadProductFromDBDomain(searchProductWord);
 
         const { limit_categories, iface_available_categ_ids } = this.pos.config;
         if (limit_categories && iface_available_categ_ids.length > 0) {

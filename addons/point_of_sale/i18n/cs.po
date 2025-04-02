@@ -9,18 +9,16 @@
 # Tereza Mokrá, 2024
 # Tiffany Chang, 2024
 # Aleš Fiala <f.ales1@seznam.cz>, 2025
-# Petr Vojta <petvoj@gmail.com>, 2025
-# Vojtěch Olšan, 2025
-# Radim Bílý, 2025
 # Wil Odoo, 2025
+# Petr Vojta <petvoj@gmail.com>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:36+0000\n"
+"POT-Creation-Date: 2025-02-10 13:22+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
+"Last-Translator: Petr Vojta <petvoj@gmail.com>, 2025\n"
 "Language-Team: Czech (https://app.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -87,12 +85,6 @@ msgstr "%(payment_method)s POS platba %(partner)s v %(session)s"
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
-msgid "%(product_name)s: Deleted line (quantity: %(qty)s)"
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-python
-#: code:addons/point_of_sale/models/pos_order.py:0
 msgid "%(product_name)s: Ordered quantity: %(old_qty)s"
 msgstr ""
 
@@ -125,6 +117,18 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/debug/debug_widget.js:0
 msgid "%s orders imported"
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/screens/product_screen/product_screen.js:0
+msgid "%s product(s) found for \"%s\"."
+msgstr "%s nalezené produkt(y) pro \"%s\"."
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_order.py:0
+msgid "%s: Deleted line"
 msgstr ""
 
 #. module: point_of_sale
@@ -319,8 +323,6 @@ msgid ""
 "             %(pos_name)s amounting in %(amount)s from %(company_name)s. "
 "</p>"
 msgstr ""
-"<p>Vážený %(client_name)s,<br/>Zde je váš doklad %(is_invoiced)sk"
-"             %(pos_name)s ve výši %(amount)s od %(company_name)s. </p>"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_pos_form
@@ -1021,7 +1023,7 @@ msgstr "Počet příloh"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/store/product_configurator_popup/product_configurator_popup.xml:0
 msgid "Attribute selection"
-msgstr "Výběr atributů"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.ui.menu,name:point_of_sale.pos_menu_products_attribute_action
@@ -1063,7 +1065,7 @@ msgstr "Automaticky otevřete pokladnu."
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid "Automatically validate order"
-msgstr "Automaticky potvrdit objednávku"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_res_config_settings__pos_auto_validate_terminal_payment
@@ -1071,7 +1073,7 @@ msgstr "Automaticky potvrdit objednávku"
 #: model:ir.model.fields,help:point_of_sale.field_res_config_settings__pos_auto_validate_terminal_payment
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid "Automatically validates orders paid with a payment terminal."
-msgstr "Automaticky potvrdí objednávku zaplacenou platebním terminálem"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__module_pos_avatax
@@ -1087,7 +1089,7 @@ msgstr "Dostupný"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order__available_payment_method_ids
 msgid "Available Payment Methods"
-msgstr "Dostupné platební metody"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__iface_available_categ_ids
@@ -1273,7 +1275,7 @@ msgstr ""
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_payment__card_brand
 msgid "Brand of card"
-msgstr "Značka karty"
+msgstr ""
 
 #. module: point_of_sale
 #: model:pos.category,name:point_of_sale.pos_category_breads
@@ -1300,7 +1302,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/store/order_change_receipt_template.xml:0
 msgid "By:"
-msgstr "Od:"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__iface_print_via_proxy
@@ -1318,7 +1320,7 @@ msgstr "HOTOVOST"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/models/pos_order.js:0
 msgid "CHANGE"
-msgstr "VRÁTIT"
+msgstr "ZMĚNA"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1341,19 +1343,19 @@ msgstr "Zrušit"
 #: code:addons/point_of_sale/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
 #: model:ir.actions.server,name:point_of_sale.pos_order_set_cancel
 msgid "Cancel Order"
-msgstr "Zrušit objednávku"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/navbar/closing_popup/closing_popup.js:0
 msgid "Cancel Orders"
-msgstr "Zrušit objednávky"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/utils/qr_code_popup/qr_code_popup.js:0
 msgid "Cancel Payment"
-msgstr "Zrušit platbu"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1379,18 +1381,6 @@ msgstr "Spropitné nelze upravit"
 #: code:addons/point_of_sale/static/src/app/screens/payment_screen/payment_screen.js:0
 msgid "Cannot return change without a cash payment method"
 msgstr "Drobné nelze vrátit bez způsobu platby v hotovosti"
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/scale_screen/scale_service.js:0
-msgid "Cannot weigh product - IoT Box is disconnected"
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/scale_screen/scale_service.js:0
-msgid "Cannot weigh product - Scale is not connected to IoT Box"
-msgstr ""
 
 #. module: point_of_sale
 #. odoo-python
@@ -1662,7 +1652,7 @@ msgstr "Židle"
 #: code:addons/point_of_sale/static/src/app/screens/payment_screen/payment_status/payment_status.xml:0
 #: code:addons/point_of_sale/static/src/customer_display/customer_display.xml:0
 msgid "Change"
-msgstr "Vrátit"
+msgstr "Změnit"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1930,16 +1920,8 @@ msgstr ""
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_category__color
 #: model:product.attribute,name:point_of_sale.product_attribute_color
-#: model_terms:ir.ui.view,arch_db:point_of_sale.product_product_view_form_normalized_pos
-#: model_terms:ir.ui.view,arch_db:point_of_sale.product_template_form_view
 msgid "Color"
 msgstr "Barva"
-
-#. module: point_of_sale
-#: model:ir.model.fields,field_description:point_of_sale.field_product_product__color
-#: model:ir.model.fields,field_description:point_of_sale.field_product_template__color
-msgid "Color Index"
-msgstr "Barevný index"
 
 #. module: point_of_sale
 #. odoo-python
@@ -1950,27 +1932,27 @@ msgstr "kombinovat %(payment_method)s platby POS z %(session)s"
 #. module: point_of_sale
 #: model:product.template,description_sale:point_of_sale.product_t_shirt_pants_product_template
 msgid "Combo"
-msgstr "Kombinace"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.ui.menu,name:point_of_sale.menu_product_combo
 msgid "Combo Choices"
-msgstr "Kombinované nabídky"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order_line__combo_item_id
 msgid "Combo Item"
-msgstr "Položka kombinace"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order_line__combo_line_ids
 msgid "Combo Lines"
-msgstr "Řádky kombinace"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order_line__combo_parent_id
 msgid "Combo Parent"
-msgstr "Nadřazená kombinace"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model,name:point_of_sale.model_res_company
@@ -2075,12 +2057,6 @@ msgstr "Připojování k Proxy"
 
 #. module: point_of_sale
 #. odoo-javascript
-#: code:addons/point_of_sale/static/src/customer_display/utils.js:0
-msgid "Connecting to the IoT Box"
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/errors/error_handlers.js:0
 msgid "Connection Lost"
 msgstr ""
@@ -2090,18 +2066,6 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
 msgid "Connection error"
 msgstr "Chyba připojení"
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/customer_display/utils.js:0
-msgid "Connection failed"
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/customer_display/utils.js:0
-msgid "Connection successful"
-msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -2859,6 +2823,8 @@ msgid "Edited order(s) during the session:%s"
 msgstr ""
 
 #. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/debug/debug_widget.xml:0
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__iface_electronic_scale
 #: model:ir.model.fields,field_description:point_of_sale.field_res_config_settings__pos_iface_electronic_scale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_config_view_form
@@ -3199,12 +3165,6 @@ msgid "Generation of your order references"
 msgstr "Generování odkazů na objednávku"
 
 #. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/scale_screen/scale_screen.xml:0
-msgid "Get Weight"
-msgstr ""
-
-#. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.ticket_validation_screen
 msgid "Get my invoice"
 msgstr "Získejte mou fakturu"
@@ -3274,11 +3234,6 @@ msgstr "Skupina produktů v prodejním místě"
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid "Group items in the cart according to their category"
 msgstr ""
-
-#. module: point_of_sale
-#: model:ir.model,name:point_of_sale.model_ir_http
-msgid "HTTP Routing"
-msgstr "HTTP Routing"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -4182,12 +4137,6 @@ msgstr "Název"
 
 #. module: point_of_sale
 #. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/navbar/navbar.js:0
-msgid "Navigate to your PoS Customer Display on the other computer"
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
 msgid "Need an invoice for your purchase ?"
 msgstr ""
@@ -4365,6 +4314,12 @@ msgid "No more customer found for \"%s\"."
 msgstr "Pro „%s“ nebyl nalezen žádný další zákazník."
 
 #. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/screens/product_screen/product_screen.js:0
+msgid "No more product found for \"%s\"."
+msgstr "Pro „%s“ nebyl nalezen žádný další produkt."
+
+#. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
 msgid ""
@@ -4376,12 +4331,6 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:point_of_sale.action_pos_pos_form
 msgid "No orders found"
 msgstr "Nebyly nalezeny žádné objednávky"
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/product_screen/product_screen.js:0
-msgid "No other products found for \"%s\"."
-msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -5323,12 +5272,6 @@ msgid "Please select the Customer"
 msgstr "Zvolte prosím zákazníka"
 
 #. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/navbar/navbar.js:0
-msgid "PoS Customer Display opened in a new window"
-msgstr ""
-
-#. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid "PoS Interface"
 msgstr "Rozhraní PoS"
@@ -5939,12 +5882,12 @@ msgstr "Produktová kategorie"
 #. module: point_of_sale
 #: model:ir.model,name:point_of_sale.model_product_combo
 msgid "Product Combo"
-msgstr "Kombinovaný produkt"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model,name:point_of_sale.model_product_combo_item
 msgid "Product Combo Item"
-msgstr "Položka kombinovaného produktu"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_product_product__public_description
@@ -6383,6 +6326,12 @@ msgid "Rescue Sessions"
 msgstr ""
 
 #. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/debug/debug_widget.xml:0
+msgid "Reset"
+msgstr "Resetovat"
+
+#. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__activity_user_id
 msgid "Responsible User"
 msgstr "Zodpovědný uživatel"
@@ -6600,12 +6549,6 @@ msgstr "Uložte tuto stránku a vraťte se pro nastavení funkcionality."
 #: code:addons/point_of_sale/static/src/app/navbar/proxy_status/proxy_status.js:0
 msgid "Scale"
 msgstr "Měřítko"
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/scale_screen/scale_screen.js:0
-msgid "Scale error"
-msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -6849,6 +6792,12 @@ msgid "Set Maximum Difference"
 msgstr "Nastavit maximální rozdíl"
 
 #. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/debug/debug_widget.xml:0
+msgid "Set Weight"
+msgstr "Nastavit hmotnost"
+
+#. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid ""
 "Set a maximum difference allowed between the expected and counted money "
@@ -6882,13 +6831,13 @@ msgstr "Nastavit více cen za produkt, automatizované slevy atd."
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "Set the new discount"
-msgstr "Nastavit novou slevu"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "Set the new price"
-msgstr "Nastavit novou cenu"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -6923,7 +6872,7 @@ msgstr "Odeslat později"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order__shipping_date
 msgid "Shipping Date"
-msgstr "Datum odeslání"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__picking_policy
@@ -7020,7 +6969,7 @@ msgstr "Přihlásit se"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid "Six"
-msgstr "Six"
+msgstr "Šest"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_res_config_settings__module_pos_six
@@ -7282,7 +7231,7 @@ msgstr ""
 #. module: point_of_sale
 #: model:product.template,name:point_of_sale.product_t_shirt_pants_product_template
 msgid "T-shirt & Pants Combo"
-msgstr "Kombinace tričko a kalhoty"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -7306,7 +7255,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/store/order_change_receipt_template.xml:0
 msgid "Take Out"
-msgstr "S sebou"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -7342,7 +7291,7 @@ msgstr "Zobrazení daně"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order_line__price_subtotal
 msgid "Tax Excl."
-msgstr "Bez daně"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model,name:point_of_sale.model_account_tax_group
@@ -7358,7 +7307,7 @@ msgstr ""
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order_line__price_subtotal_incl
 msgid "Tax Incl."
-msgstr "Včetně daně"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model,name:point_of_sale.model_account_fiscal_position_tax
@@ -7438,7 +7387,7 @@ msgstr "Tel:"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/customer_display/customer_display.xml:0
 msgid "Thank you."
-msgstr "Děkujeme"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-python
@@ -7989,16 +7938,15 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/account_journal.py:0
 msgid ""
-"This journal is associated with a payment method. You cannot modify its type"
-msgstr "Tento deník je spojen se způsobem platby. Nemůžete změnit jeho typ"
+"This journal is associated with a payment method. You cannot archive it"
+msgstr "Tento deník se svázán s platební metodou. Nelze jej archivovat..."
 
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/account_journal.py:0
 msgid ""
-"This journal is associated with payment method %(payment_method)s that is "
-"being used by order %(pos_order)s in the active pos session %(pos_session)s"
-msgstr ""
+"This journal is associated with a payment method. You cannot modify its type"
+msgstr "Tento deník je spojen se způsobem platby. Nemůžete změnit jeho typ"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -8426,12 +8374,6 @@ msgid "Unknown Error"
 msgstr "Neznámá chyba"
 
 #. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/scale_screen/scale_service.js:0
-msgid "Unnamed Product"
-msgstr ""
-
-#. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.product_product_view_form_normalized_pos
 msgid "Unsaleable"
 msgstr ""
@@ -8640,9 +8582,9 @@ msgstr "Webová historie komunikace"
 
 #. module: point_of_sale
 #. odoo-javascript
-#: code:addons/point_of_sale/static/src/customer_display/customer_display.xml:0
-msgid "Weighing Product:"
-msgstr ""
+#: code:addons/point_of_sale/static/src/app/debug/debug_widget.xml:0
+msgid "Weighing"
+msgstr "Váhy"
 
 #. module: point_of_sale
 #: model:ir.model.fields.selection,name:point_of_sale.selection__barcode_rule__type__weight
@@ -8910,7 +8852,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/product.py:0
 msgid "You must first remove this product from the %s combo"
-msgstr "Nejprve musíte odstranit tento produkt z %s produktové kombinace."
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-python

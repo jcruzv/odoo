@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Tiffany Chang, 2024
+# Ryoko Tsuda <ryoko@quartile.co>, 2024
 # Wil Odoo, 2024
 # Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2025
 # Junko Augias, 2025
@@ -1616,7 +1617,7 @@ msgstr "ゴールドメンバー価格表"
 #: model_terms:ir.ui.view,arch_db:product.product_template_search_view
 #: model_terms:ir.ui.view,arch_db:product.product_view_search_catalog
 msgid "Goods"
-msgstr "商品"
+msgstr "物品"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product__type

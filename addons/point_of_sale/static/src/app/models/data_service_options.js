@@ -91,10 +91,4 @@ export class DataServiceOptions {
             "pos.pack.operation.lot",
         ];
     }
-
-    get prohibitedAutoLoadedFields() {
-        return {
-            "res.partner": ["property_product_pricelist"],
-        };
-    }
 }

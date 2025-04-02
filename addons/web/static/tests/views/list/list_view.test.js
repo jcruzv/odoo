@@ -47,7 +47,6 @@ import {
     getService,
     installLanguages,
     makeServerError,
-    MockServer,
     mockService,
     models,
     mountView,
@@ -2063,7 +2062,6 @@ test(`enabling archive in list when groupby m2m field`, async () => {
     });
 });
 
-test.tags("desktop");
 test(`enabling archive in list when groupby m2m field and multi selecting the same record`, async () => {
     onRpc("has_group", () => false);
     onRpc("action_archive", ({ args }) => {
@@ -2141,7 +2139,6 @@ test(`enabling duplicate in list when groupby m2m field`, async () => {
     });
 });
 
-test.tags("desktop");
 test(`enabling duplicate in list when groupby m2m field and multi selecting the same record`, async () => {
     onRpc("has_group", () => false);
     onRpc("copy", ({ args }) => {
@@ -2219,7 +2216,6 @@ test(`enabling delete in list when groupby m2m field`, async () => {
     });
 });
 
-test.tags("desktop");
 test(`enabling delete in list when groupby m2m field and multi selecting the same record`, async () => {
     onRpc("has_group", () => false);
     onRpc("unlink", ({ args }) => {
@@ -2305,7 +2301,6 @@ test(`enabling unarchive in list when groupby m2m field`, async () => {
     });
 });
 
-test.tags("desktop");
 test(`enabling unarchive in list when groupby m2m field and multi selecting the same record`, async () => {
     onRpc("has_group", () => false);
     onRpc("action_unarchive", ({ args }) => {
@@ -3047,9 +3042,11 @@ test(`editable list view: basic char field edition`, async () => {
     expect(`.o_field_cell:eq(0)`).toHaveText("abc", {
         message: "changes should be saved correctly",
     });
-    expect(`.o_data_row:eq(0)`).not.toHaveClass("o_selected_row");
     expect(`.o_data_row:eq(1)`).toHaveClass("o_selected_row");
-    expect(MockServer.env["foo"].browse(1)[0].foo).toBe("abc", {
+    expect(`.o_data_row`).not.toHaveClass("o_selected_row", {
+        message: "saved row should be in readonly mode",
+    });
+    expect(Foo._records[0].foo).toBe("abc", {
         message: "the edition should have been properly saved",
     });
 });
@@ -4610,13 +4607,15 @@ test(`fields are translatable in list view`, async () => {
         fr_BE: "Frenglish",
     });
 
-    onRpc("/web/dataset/call_kw/foo/get_field_translations", () => [
-        [
-            { lang: "en_US", source: "yop", value: "yop" },
-            { lang: "fr_BE", source: "yop", value: "valeur français" },
-        ],
-        { translation_type: "char", translation_show_source: false },
-    ]);
+    onRpc("/web/dataset/call_kw/foo/get_field_translations", () => {
+        return [
+            [
+                { lang: "en_US", source: "yop", value: "yop" },
+                { lang: "fr_BE", source: "yop", value: "valeur français" },
+            ],
+            { translation_type: "char", translation_show_source: false },
+        ];
+    });
 
     await mountView({
         resModel: "foo",
@@ -11871,7 +11870,7 @@ test(`char field edition in editable grouped list`, async () => {
     await contains(`.o_data_cell`).click();
     await contains(`.o_selected_row .o_data_cell [name=foo] input`).edit("pla");
     await contains(`.o_list_button_save`).click();
-    expect(MockServer.env["foo"].browse(4)[0].foo).toBe("pla", {
+    expect(Foo._records[3].foo).toBe("pla", {
         message: "the edition should have been properly saved",
     });
     expect(`.o_data_row:eq(0):contains(pla)`).toHaveCount(1);
@@ -13698,7 +13697,6 @@ test(`list view with optional fields and async rendering`, async () => {
     expect(`.o-dropdown--menu input:checked`).toHaveCount(1);
 });
 
-test.tags("desktop");
 test(`change the viewType of the current action`, async () => {
     defineActions([
         {
@@ -15067,30 +15065,6 @@ test(`view widgets are rendered in list view`, async () => {
     expect(queryAllTexts`.test_widget`).toEqual(["true", "true", "true", "false"]);
 });
 
-test(`view widget with options in list view`, async () => {
-    class TestWidget extends Component {
-        static template = xml`<div class="test_widget" t-esc="props.x"/>`;
-        static props = ["*"];
-    }
-    registry.category("view_widgets").add("test_widget", {
-        component: TestWidget,
-        extractProps: ({ options }) => ({
-            x: options.x,
-        }),
-    });
-
-    await mountView({
-        resModel: "foo",
-        type: "list",
-        arch: `
-            <list>
-                <widget name="test_widget" options="{'x': 'y'}"/>
-            </list>
-        `,
-    });
-    expect(queryAllTexts`.test_widget`).toEqual(["y", "y", "y", "y"]);
-});
-
 test(`edit a record then select another record with a throw error when saving`, async () => {
     onRpc("web_save", () => {
         throw makeServerError({ message: "Can't write" });
@@ -15216,18 +15190,12 @@ test(`list view with default_group_by`, async () => {
         readGroupCount++;
         expect.step(`web_read_group${readGroupCount}`);
         switch (readGroupCount) {
-            case 1: {
-                expect(kwargs.groupby).toEqual(["bar"]);
-                break;
-            }
-            case 2: {
-                expect(kwargs.groupby).toEqual(["m2m"]);
-                break;
-            }
-            case 3: {
-                expect(kwargs.groupby).toEqual(["bar"]);
-                break;
-            }
+            case 1:
+                return expect(kwargs.groupby).toEqual(["bar"]);
+            case 2:
+                return expect(kwargs.groupby).toEqual(["m2m"]);
+            case 3:
+                return expect(kwargs.groupby).toEqual(["bar"]);
         }
     });
 
@@ -15363,7 +15331,7 @@ test(`Properties: boolean`, async () => {
     await contains(`.o_field_cell.o_boolean_cell`).click();
     await contains(`.o_field_cell.o_boolean_cell input`).click();
     await contains(`.o_list_button_save`).click();
-    expect(`.o_field_cell.o_boolean_cell input:first`).not.toBeChecked();
+    expect(`.o_field_cell.o_boolean_cell input`).not.toBeChecked();
     expect.verifySteps(["web_save"]);
 });
 

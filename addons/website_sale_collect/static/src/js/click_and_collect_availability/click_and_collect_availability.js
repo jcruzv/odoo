@@ -11,13 +11,9 @@ export class ClickAndCollectAvailability extends Component {
     static template = 'website_sale_collect.ClickAndCollectAvailability';
     static props = {
         productId: Number,
-        active: {type: Boolean, optional: true},
         zipCode: { type: String, optional: true },
         selectedWhLocation: { type: Object, optional: true },
         inStoreStock: { type: Object, optional: true },
-    }
-    static defaultProps = {
-        active: true,
     }
     setup() {
         super.setup();
@@ -26,7 +22,6 @@ export class ClickAndCollectAvailability extends Component {
             productId: this.props.productId,
             selectedWhLocation: this.props.selectedWhLocation,
             inStoreStock: this.props.inStoreStock,
-            active: this.props.active,
         });
         const updateState = this._updateStateWithCombinationInfo.bind(this);
         this.env.bus.addEventListener('updateCombinationInfo', res => updateState(res.detail));
@@ -43,7 +38,6 @@ export class ClickAndCollectAvailability extends Component {
     _updateStateWithCombinationInfo (combinationInfo) {
         this.state.productId = combinationInfo.product_id;
         this.state.inStoreStock = combinationInfo.in_store_stock;
-        this.state.active = combinationInfo.is_combination_possible;
     }
 
     /**

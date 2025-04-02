@@ -176,9 +176,7 @@ export class TablePlugin extends Plugin {
         const columnIndex = getColumnIndex(reference);
         const table = closestElement(reference, "table");
         const tableWidth = table.style.width && parseFloat(table.style.width);
-        const referenceColumn = table.querySelectorAll(
-            `tr td:nth-of-type(${columnIndex + 1}), tr th:nth-of-type(${columnIndex + 1})`
-        );
+        const referenceColumn = table.querySelectorAll(`tr td:nth-of-type(${columnIndex + 1})`);
         const referenceCellWidth = reference.style.width
             ? parseFloat(reference.style.width)
             : reference.clientWidth;
@@ -203,7 +201,7 @@ export class TablePlugin extends Plugin {
             }
         }
         referenceColumn.forEach((cell, rowIndex) => {
-            const newCell = this.document.createElement(cell.tagName);
+            const newCell = this.document.createElement("td");
             const baseContainer = this.dependencies.baseContainer.createBaseContainer();
             baseContainer.append(this.document.createElement("br"));
             newCell.append(baseContainer);
@@ -235,11 +233,11 @@ export class TablePlugin extends Plugin {
         if (referenceRowHeight) {
             newRow.style.height = referenceRowHeight + "px";
         }
-        const cells = reference.querySelectorAll("td, th");
+        const cells = reference.querySelectorAll("td");
         const referenceRowWidths = [...cells].map((cell) => cell.style.width);
         newRow.append(
-            ...Array.from(cells).map((cell) => {
-                const td = this.document.createElement(cell.tagName);
+            ...Array.from(Array(cells.length)).map(() => {
+                const td = this.document.createElement("td");
                 const baseContainer = this.dependencies.baseContainer.createBaseContainer();
                 baseContainer.append(this.document.createElement("br"));
                 td.append(baseContainer);
@@ -738,11 +736,6 @@ export class TablePlugin extends Plugin {
             }
             for (const td of selectedTds) {
                 this.dependencies.color.colorElement(td, color, mode);
-                if (color) {
-                    td.style["color"] = getComputedStyle(td).color;
-                } else {
-                    td.style["color"] = "";
-                }
             }
         }
     }

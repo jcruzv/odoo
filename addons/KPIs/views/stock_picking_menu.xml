@@ -1,0 +1,15 @@
+<odoo>
+    <data>
+        
+        <record id="action_kpis_client" model="ir.actions.client"> <!-- Changed id to action_kpis_client -->
+            <field name="name">KPIs Surtidos</field>
+            <field name="tag">custom_kpis</field>  <!-- Asegúrate de que coincida con el registro en JS -->
+        </record>
+
+
+        <menuitem id="menu_filtered_purchase_orders" 
+                  name="KPIs" 
+                  parent="stock.menu_stock_root" 
+                  action="action_kpis_client"/> <!-- Updated action to match the new id -->
+    </data>
+</odoo>

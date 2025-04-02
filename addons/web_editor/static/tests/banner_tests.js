@@ -6,7 +6,6 @@ import { Wysiwyg } from "@web_editor/js/wysiwyg/wysiwyg";
 import {
     triggerEvent,
     insertText,
-    deleteBackward,
 } from "@web_editor/js/editor/odoo-editor/test/utils";
 
 function onMount() {;
@@ -142,7 +141,7 @@ QUnit.module(
             insertText(editor, 'Test2');
             triggerEvent(editor.editable, "keydown", { key: "a", ctrlKey: true });
             await nextTick();
-            await deleteBackward(editor);
+            triggerEvent(editor.editable, "input", { inputType: "deleteContentBackward" });
             await nextTick();
             assert.strictEqual(
                 editable.innerHTML,

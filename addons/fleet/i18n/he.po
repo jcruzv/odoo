@@ -753,7 +753,7 @@ msgstr "תאריך"
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle__acquisition_date
 msgid "Date of vehicle registration"
-msgstr "תאריך רישום של הרכב"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,help:fleet.field_fleet_vehicle_log_contract__date
@@ -791,7 +791,7 @@ msgstr "מחיקה"
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_service_2
 msgid "Depreciation and Interests"
-msgstr "פחת וריביות"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_services__description
@@ -988,7 +988,7 @@ msgstr "פג תוקף"
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle_log_contract__expires_today
 msgid "Expires Today"
-msgstr "פג תוקף היום"
+msgstr ""
 
 #. module: fleet
 #: model:ir.model.fields,field_description:fleet.field_fleet_vehicle__first_contract_date
@@ -1081,7 +1081,7 @@ msgstr "דלק"
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_22
 msgid "Fuel Injector Replacement"
-msgstr "החלפת מזרק דלק"
+msgstr ""
 
 #. module: fleet
 #: model:fleet.service.type,name:fleet.type_service_23

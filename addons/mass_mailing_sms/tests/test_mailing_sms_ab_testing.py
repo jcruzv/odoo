@@ -4,12 +4,12 @@
 from datetime import datetime
 
 from odoo.addons.mass_mailing_sms.tests.common import MassSMSCommon
-from odoo.addons.mass_mailing.tests.test_mailing_ab_testing import TestMailingABTestingCommon
+from odoo.addons.mass_mailing.tests.test_mailing_ab_testing import TestMailingABTesting
 from odoo.tests import tagged
 
 
 @tagged('post_install', '-at_install')
-class TestMailingSMSABTesting(MassSMSCommon, TestMailingABTestingCommon):
+class TestMailingSMSABTesting(MassSMSCommon, TestMailingABTesting):
     def setUp(self):
         super().setUp()
         self.ab_testing_mailing_sms_1 = self.env['mailing.mailing'].create({

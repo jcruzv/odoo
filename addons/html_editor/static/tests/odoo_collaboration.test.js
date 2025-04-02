@@ -125,7 +125,7 @@ class Wysiwygs extends Component {
         <div>
             <t t-foreach="this.props.peerIds" t-as="peerId" t-key="peerId">
                 <Wysiwyg
-                    config="getConfig({peerId, content: this.props.content})"
+                    config="getConfig({peerId})"
                     t-key="peerId"
                     iframe="true"
                     onLoad="(editor) => this.onLoad(peerId, editor)"
@@ -137,7 +137,6 @@ class Wysiwygs extends Component {
     static props = {
         peerIds: Array,
         pool: Object,
-        content: String,
     };
     setup() {
         this.peerResolvers = {};
@@ -153,7 +152,7 @@ class Wysiwygs extends Component {
         });
         this.lastStepId = 0;
     }
-    getConfig({ peerId, content }) {
+    getConfig({ peerId }) {
         const busService = {
             subscribe() {},
             unsubscribe() {},
@@ -164,7 +163,7 @@ class Wysiwygs extends Component {
         };
         return {
             Plugins: [...MAIN_PLUGINS, ...COLLABORATION_PLUGINS],
-            content: content.replaceAll("[]", ""),
+            content: initialValue.replaceAll("[]", ""),
             collaboration: {
                 peerId,
                 busService,
@@ -281,12 +280,12 @@ class Wysiwygs extends Component {
             // if (configSelection) {
             //     editable.focus();
             // }
-            setSelection(getSelection(editable, this.props.content));
+            setSelection(getSelection(editable, initialValue));
         };
     }
 }
 
-async function createPeers(peerIds, content = initialValue) {
+async function createPeers(peerIds) {
     /**
      * @type PeerPool
      */
@@ -299,7 +298,6 @@ async function createPeers(peerIds, content = initialValue) {
         props: {
             peerIds,
             pool,
-            content,
         },
     });
     await wysiwygs.peerPromises;
@@ -359,7 +357,7 @@ describe("Focus", () => {
         expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
             message: "p1 should have the same document as p2",
         });
-        expect(peers.p2.getValue()).toBe(`<p>a[]b</p>`, {
+        expect(peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
             message: "p2 should have the same document as p1",
         });
         expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
@@ -380,7 +378,7 @@ describe("Focus", () => {
         expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
             message: "p1 should have the same document as p2",
         });
-        expect(peers.p2.getValue()).toBe(`<p>a[]b</p>`, {
+        expect(peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
             message: "p2 should have the same document as p1",
         });
         expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
@@ -412,7 +410,7 @@ describe("Stale detection & recovery", () => {
             expect(peers.p2.plugins.collaborationOdoo.isDocumentStale).toBe(false, {
                 message: "p2 should not have a stale document",
             });
-            expect(peers.p2.getValue()).toBe(`<p>a[]b</p>`, {
+            expect(peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
                 message: "p2 should have the same document as p1",
             });
 
@@ -481,10 +479,10 @@ describe("Stale detection & recovery", () => {
                 expect(peers.p1.getValue()).toBe(`<p>a[]</p>`, {
                     message: "p1 should have the same document as p2",
                 });
-                expect(peers.p2.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p2.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p2 should have the same document as p1",
                 });
-                expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should have the same document as p1",
                 });
 
@@ -495,10 +493,10 @@ describe("Stale detection & recovery", () => {
                 expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
                     message: "p1 should have the same document as p2",
                 });
-                expect(peers.p2.getValue()).toBe(`<p>a[]b</p>`, {
+                expect(peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
                     message: "p2 should have the same document as p1",
                 });
-                expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should not have the same document as p1",
                 });
 
@@ -531,10 +529,10 @@ describe("Stale detection & recovery", () => {
                 expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
                     message: "p1 should have the same document as p2",
                 });
-                expect(peers.p2.getValue()).toBe(`<p>a[]b</p>`, {
+                expect(peers.p2.getValue()).toBe(`<p>[]ab</p>`, {
                     message: "p2 should have the same document as p1",
                 });
-                expect(peers.p3.getValue()).toBe(`<p>a[]b</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]ab</p>`, {
                     message: "p3 should have the same document as p1",
                 });
             });
@@ -575,10 +573,10 @@ describe("Stale detection & recovery", () => {
                 expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
                     message: "p1 have inserted char b",
                 });
-                expect(peers.p2.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p2.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p2 should not have the same document as p1",
                 });
-                expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should not have the same document as p1",
                 });
 
@@ -601,7 +599,7 @@ describe("Stale detection & recovery", () => {
                 expect(peers.p2.getValue()).toBe(`[]<p>ab</p>`, {
                     message: "p2 should have the same document as p1",
                 });
-                expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should not have the same document as p1",
                 });
 
@@ -673,10 +671,10 @@ describe("Stale detection & recovery", () => {
                 expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
                     message: "p1 have inserted char b",
                 });
-                expect(peers.p2.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p2.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p2 should not have the same document as p1",
                 });
-                expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should not have the same document as p1",
                 });
 
@@ -697,7 +695,7 @@ describe("Stale detection & recovery", () => {
                 expect(peers.p2.getValue()).toBe(`[]<p>ab</p>`, {
                     message: "p2 should have the same document as p1",
                 });
-                expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should not have the same document as p1",
                 });
 
@@ -774,10 +772,10 @@ describe("Stale detection & recovery", () => {
                 expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
                     message: "p1 have inserted char b",
                 });
-                expect(peers.p2.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p2.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p2 should not have the same document as p1",
                 });
-                expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should not have the same document as p1",
                 });
 
@@ -857,7 +855,7 @@ describe("Stale detection & recovery", () => {
                 expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
                     message: "p1 have inserted char b",
                 });
-                expect(peers.p2.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p2.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p2 should not have the same document as p1",
                 });
 
@@ -932,10 +930,10 @@ describe("Stale detection & recovery", () => {
                 expect(peers.p1.getValue()).toBe(`<p>ab[]</p>`, {
                     message: "p1 have inserted char b",
                 });
-                expect(peers.p2.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p2.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p2 should not have the same document as p1",
                 });
-                expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should not have the same document as p1",
                 });
 
@@ -959,7 +957,7 @@ describe("Stale detection & recovery", () => {
                 expect(peers.p2.getValue()).toBe(`[]<p>ab</p>`, {
                     message: "p2 should have the same document as p1",
                 });
-                expect(peers.p3.getValue()).toBe(`<p>a[]</p>`, {
+                expect(peers.p3.getValue()).toBe(`<p>[]a</p>`, {
                     message: "p3 should not have the same document as p1",
                 });
 
@@ -1094,7 +1092,7 @@ describe("Snapshot", () => {
 
         await peers.p2.openDataChannel(peers.p3);
 
-        expect(peers.p3.getValue()).toBe(`<p>a[]b</p>`, {
+        expect(peers.p3.getValue()).toBe(`<p>[]ab</p>`, {
             message: "p3 should have the steps from the first snapshot of p2",
         });
     });
@@ -1152,33 +1150,6 @@ describe("History steps Ids", () => {
             `<p>a</p><p><br></p><p placeholder='Type "/" for commands' class="o-we-hint">[]<br></p>`
         );
         editor.destroy();
-    });
-});
-
-describe("Indent List", () => {
-    test("should sync `li` indent properly", async () => {
-        const pool = await createPeers(["p1", "p2"], `<ul><li>a[]</li></ul>`);
-        const peers = pool.peers;
-
-        await peers.p1.focus();
-        await peers.p2.focus();
-        await peers.p1.openDataChannel(peers.p2);
-        await peers.p2.openDataChannel(peers.p1);
-
-        peers.p1.editor.editable.dispatchEvent(
-            new KeyboardEvent("keydown", {
-                key: "Tab",
-                code: "Tab",
-                bubbles: true,
-            })
-        );
-        await peers.p2.focus();
-        expect(peers.p2.getValue()).toBe(
-            `<ul><li class="oe-nested"><ul><li>a[]</li></ul></li></ul>`,
-            {
-                message: "p2 should not have the same document as p1",
-            }
-        );
     });
 });
 

@@ -20,7 +20,6 @@ import { FontSelector } from "./font_selector";
 import { getBaseContainerSelector } from "@html_editor/utils/base_container";
 import { withSequence } from "@html_editor/utils/resource";
 import { reactive } from "@odoo/owl";
-import { FontSizeSelector } from "./font_size_selector";
 
 export const fontItems = [
     {
@@ -180,7 +179,7 @@ export class FontPlugin extends Plugin {
                             tagName: item.tagName,
                             extraClass: item.extraClass,
                         });
-                        this.updateFontSelectorParams();
+                        this.updateFontParams();
                     },
                 },
             },
@@ -188,23 +187,16 @@ export class FontPlugin extends Plugin {
                 id: "font-size",
                 groupId: "font-size",
                 title: _t("Font size"),
-                Component: FontSizeSelector,
+                Component: FontSelector,
                 props: {
                     getItems: () => this.fontSizeItems,
                     getDisplay: () => this.fontSize,
-                    onFontSizeInput: (size) => {
-                        this.dependencies.format.formatSelection("fontSize", {
-                            formatProps: { size },
-                            applyStyle: true,
-                        });
-                        this.updateFontSizeSelectorParams();
-                    },
                     onSelected: (item) => {
                         this.dependencies.format.formatSelection("setFontSizeClassName", {
                             formatProps: { className: item.className },
                             applyStyle: true,
                         });
-                        this.updateFontSizeSelectorParams();
+                        this.updateFontParams();
                     },
                 },
             },
@@ -249,18 +241,9 @@ export class FontPlugin extends Plugin {
 
         /** Handlers */
         input_handlers: this.onInput.bind(this),
-        selectionchange_handlers: [
-            this.updateFontSelectorParams.bind(this),
-            this.updateFontSizeSelectorParams.bind(this),
-        ],
-        post_undo_handlers: [
-            this.updateFontSelectorParams.bind(this),
-            this.updateFontSizeSelectorParams.bind(this),
-        ],
-        post_redo_handlers: [
-            this.updateFontSelectorParams.bind(this),
-            this.updateFontSizeSelectorParams.bind(this),
-        ],
+        selectionchange_handlers: this.updateFontParams.bind(this),
+        post_undo_handlers: this.updateFontParams.bind(this),
+        post_redo_handlers: this.updateFontParams.bind(this),
 
         /** Overrides */
         split_element_block_overrides: [
@@ -502,12 +485,8 @@ export class FontPlugin extends Plugin {
             this.dependencies.dom.setTag({ tagName: headingToBe });
         }
     }
-
-    updateFontSelectorParams() {
+    updateFontParams() {
         this.font.displayName = this.fontName;
-    }
-
-    updateFontSizeSelectorParams() {
         this.fontSize.displayName = this.fontSizeName;
     }
 }

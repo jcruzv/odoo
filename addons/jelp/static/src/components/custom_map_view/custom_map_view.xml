@@ -1,0 +1,9 @@
+<t t-name="custom_map_view.Template">
+    <div class="custom-map-view">
+        <!-- <h2 t-esc="track_state"></h2> -->
+        <h2 t-esc="state.trackState"></h2>
+        <!-- <span t-esc="state.url"/> -->
+        <a t-att-href="state.url" target="_blank" rel="noopener noreferrer">Open Map</a>
+        <!-- <iframe></iframe> -->
+    </div>
+</t>

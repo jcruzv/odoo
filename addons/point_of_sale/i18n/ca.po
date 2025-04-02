@@ -18,7 +18,6 @@
 # RGB Consulting <odoo@rgbconsulting.com>, 2024
 # martioodo hola, 2024
 # Iván Infantes Castarnado, 2024
-# Eugeni Chafer <eugeni@chafer.cat>, 2024
 # oscaryuu, 2024
 # José Cabrera Lozano <jose.cabrera@edukative.es>, 2024
 # Marc Tormo i Bochaca <mtbochaca@gmail.com>, 2024
@@ -26,24 +25,25 @@
 # Arnau Ros, 2024
 # Quim - coopdevs <quim.rebull@coopdevs.org>, 2024
 # Manel Fernandez Ramirez <manelfera@outlook.com>, 2024
+# Eugeni Chafer <eugeni@chafer.cat>, 2024
 # Ivan Espinola, 2024
 # marcescu, 2024
 # Martin Trigaux, 2024
 # Josep Anton Belchi, 2024
 # Jonatan Gk, 2024
 # Xavier, 2024
-# Óscar Fonseca <tecnico@pyming.com>, 2025
-# EstudiTIC - estuditic.com <odoo@estuditic.com>, 2025
-# Noemi Pla, 2025
 # Wil Odoo, 2025
+# Noemi Pla, 2025
+# EstudiTIC - estuditic.com <odoo@estuditic.com>, 2025
+# Óscar Fonseca <tecnico@pyming.com>, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-19 20:36+0000\n"
+"POT-Creation-Date: 2025-02-10 13:22+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Wil Odoo, 2025\n"
+"Last-Translator: Óscar Fonseca <tecnico@pyming.com>, 2025\n"
 "Language-Team: Catalan (https://app.transifex.com/odoo/teams/41243/ca/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -110,12 +110,6 @@ msgstr "Pagament TPV %(payment_method)s de %(partner)s a %(session)s"
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
-msgid "%(product_name)s: Deleted line (quantity: %(qty)s)"
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-python
-#: code:addons/point_of_sale/models/pos_order.py:0
 msgid "%(product_name)s: Ordered quantity: %(old_qty)s"
 msgstr ""
 
@@ -129,7 +123,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/receipt_screen/receipt/receipt_header/receipt_header.js:0
 msgid "%(vatLabel)s: %(vatId)s"
-msgstr "%(vatLabel)s: %(vatId)s"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -152,9 +146,21 @@ msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/screens/product_screen/product_screen.js:0
+msgid "%s product(s) found for \"%s\"."
+msgstr "%s producte(s) trobats per \"%s\"."
+
+#. module: point_of_sale
+#. odoo-python
+#: code:addons/point_of_sale/models/pos_order.py:0
+msgid "%s: Deleted line"
+msgstr ""
+
+#. module: point_of_sale
+#. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/ticket_screen/ticket_screen.xml:0
 msgid "'Select an order'"
-msgstr "'Seleccionar una comanda'"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -170,12 +176,12 @@ msgstr "+ Botiga nova"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "0.00"
-msgstr "0.00"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.ticket_request_with_code
 msgid "00014-001-0001"
-msgstr "00014-001-0001"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
@@ -185,27 +191,27 @@ msgstr "10"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "100.00"
-msgstr "100.00"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "1000"
-msgstr "1000"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "10000"
-msgstr "10000"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "10000.00"
-msgstr "10000.00"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "123.45"
-msgstr "123.45"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.report_userlabel
@@ -215,22 +221,22 @@ msgstr "1234567890"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "2-03-2000 9:00 AM"
-msgstr "2-03-2000 9:00 AM"
+msgstr ""
 
 #. module: point_of_sale
 #: model:product.attribute.value,name:point_of_sale.product_attribute_value_39
 msgid "39"
-msgstr "39"
+msgstr ""
 
 #. module: point_of_sale
 #: model:product.attribute.value,name:point_of_sale.product_attribute_value_40
 msgid "40"
-msgstr "40"
+msgstr ""
 
 #. module: point_of_sale
 #: model:product.attribute.value,name:point_of_sale.product_attribute_value_41
 msgid "41"
-msgstr "41"
+msgstr ""
 
 #. module: point_of_sale
 #: model:product.attribute.value,name:point_of_sale.product_attribute_value_42
@@ -240,12 +246,12 @@ msgstr "42"
 #. module: point_of_sale
 #: model:product.attribute.value,name:point_of_sale.product_attribute_value_43
 msgid "43"
-msgstr "43"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "45"
-msgstr "45"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.fields,help:point_of_sale.field_pos_order__ticket_code
@@ -266,37 +272,37 @@ msgstr ""
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "5.00"
-msgstr "5.00"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "50.00"
-msgstr "50.00"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "567789"
-msgstr "567789"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "7897"
-msgstr "7897"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "95.00"
-msgstr "95.00"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "987657"
-msgstr "987657"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "99.99"
-msgstr "99.99"
+msgstr ""
 
 #. module: point_of_sale
 #: model:mail.template,body_html:point_of_sale.pos_email_marketing_template
@@ -319,8 +325,6 @@ msgid ""
 "<i class=\"fa fa-fw fa-shopping-bag me-1\" aria-label=\"Shopping cart\" "
 "role=\"img\" title=\"Shopping cart\"/>"
 msgstr ""
-"<i class=\"fa fa-fw fa-shopping-bag me-1\" aria-label=\"Shopping cart\" "
-"role=\"img\" title=\"Shopping cart\"/>"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
@@ -358,18 +362,16 @@ msgid ""
 "<span class=\"o_form_label\">Barcodes</span>\n"
 "                                <i class=\"fa fa-info-circle me-1\" title=\"This setting is common to all PoS.\" pos-data-toggle=\"tooltip\"/>"
 msgstr ""
-"<span class=\"o_form_label\">Codis de barres</span>\n"
-"<i class=\"fa fa-info-circle me-1\" title=\"This setting is common to all PoS.\" pos-data-toggle=\"tooltip\"/>"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_session_form
 msgid "<span class=\"o_stat_text\">Cash Register</span>"
-msgstr "<span class=\"o_stat_text\">Caixa Registradora</span>"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_session_form
 msgid "<span class=\"o_stat_text\">Journal Items</span>"
-msgstr "<span class=\"o_stat_text\">Apunts Contables</span>"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
@@ -384,7 +386,7 @@ msgstr "<span>Saldo</span>"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_config_kanban
 msgid "<span>Closing</span>"
-msgstr "<span>Tancant</span>"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
@@ -445,7 +447,7 @@ msgstr "<strong>Obertura de la nota de temporada:</strong>"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.report_invoice_document
 msgid "<strong>Source Invoice</strong>"
-msgstr "<strong>Factura origen</strong>"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
@@ -651,7 +653,7 @@ msgstr "Accions"
 #: model:ir.model.fields,help:point_of_sale.field_pos_config__module_pos_sms
 #: model:ir.model.fields,help:point_of_sale.field_res_config_settings__pos_module_pos_sms
 msgid "Activate SMS feature for point_of_sale"
-msgstr "Activar la funció SMS per al point_of_sale"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__active
@@ -747,13 +749,13 @@ msgstr "Afegeix notes internes a les línies de comanda per a la cuina"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/store/combo_configurator_popup/combo_configurator_popup.xml:0
 msgid "Add to order"
-msgstr "Afegir a la comanda"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
 msgid "Added %(payment_method)s with %(amount)s"
-msgstr "Afegir el %(payment_method)samb %(amount)s"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.ticket_validation_screen
@@ -806,7 +808,7 @@ msgstr "Terminal de pagament Adyen"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/partner_list/partner_line/partner_line.xml:0
 msgid "All Orders"
-msgstr "Totes les Comandes"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -829,7 +831,7 @@ msgstr ""
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid "All notes"
-msgstr "Totes les notes"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-python
@@ -972,7 +974,7 @@ msgstr "Una altra sessió està oberta en aquest punt de venda. "
 #. module: point_of_sale
 #: model:product.template,name:point_of_sale.product_apple_pie_product_template
 msgid "Apple Pie"
-msgstr "Pastís de Poma"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1303,7 +1305,7 @@ msgstr ""
 #. module: point_of_sale
 #: model:pos.category,name:point_of_sale.pos_category_breads
 msgid "Breads"
-msgstr "Pans"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1367,19 +1369,19 @@ msgstr "Cancel·la"
 #: code:addons/point_of_sale/static/src/app/screens/product_screen/control_buttons/control_buttons.xml:0
 #: model:ir.actions.server,name:point_of_sale.pos_order_set_cancel
 msgid "Cancel Order"
-msgstr "Cancel·lar la comanda"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/navbar/closing_popup/closing_popup.js:0
 msgid "Cancel Orders"
-msgstr "Cancel·lar les comandes"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/utils/qr_code_popup/qr_code_popup.js:0
 msgid "Cancel Payment"
-msgstr "Cancel·lar el pagament"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1398,7 +1400,7 @@ msgstr "Cancel·lat"
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/product_screen/order_summary/order_summary.js:0
 msgid "Cannot modify a tip"
-msgstr "No es pot modificar una propina"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -1406,18 +1408,6 @@ msgstr "No es pot modificar una propina"
 msgid "Cannot return change without a cash payment method"
 msgstr ""
 "No es pot tornar canvi si no es tracta d'un mètode de pagament en efectiu"
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/scale_screen/scale_service.js:0
-msgid "Cannot weigh product - IoT Box is disconnected"
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/scale_screen/scale_service.js:0
-msgid "Cannot weigh product - Scale is not connected to IoT Box"
-msgstr ""
 
 #. module: point_of_sale
 #. odoo-python
@@ -1959,16 +1949,8 @@ msgstr ""
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_category__color
 #: model:product.attribute,name:point_of_sale.product_attribute_color
-#: model_terms:ir.ui.view,arch_db:point_of_sale.product_product_view_form_normalized_pos
-#: model_terms:ir.ui.view,arch_db:point_of_sale.product_template_form_view
 msgid "Color"
 msgstr "Color"
-
-#. module: point_of_sale
-#: model:ir.model.fields,field_description:point_of_sale.field_product_product__color
-#: model:ir.model.fields,field_description:point_of_sale.field_product_template__color
-msgid "Color Index"
-msgstr "Índex de color"
 
 #. module: point_of_sale
 #. odoo-python
@@ -2104,12 +2086,6 @@ msgstr "Connectant al proxy"
 
 #. module: point_of_sale
 #. odoo-javascript
-#: code:addons/point_of_sale/static/src/customer_display/utils.js:0
-msgid "Connecting to the IoT Box"
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/errors/error_handlers.js:0
 msgid "Connection Lost"
 msgstr ""
@@ -2119,18 +2095,6 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/app/screens/payment_screen/payment_lines/payment_lines.xml:0
 msgid "Connection error"
 msgstr "Error de connexió"
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/customer_display/utils.js:0
-msgid "Connection failed"
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/customer_display/utils.js:0
-msgid "Connection successful"
-msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -2892,6 +2856,8 @@ msgid "Edited order(s) during the session:%s"
 msgstr ""
 
 #. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/debug/debug_widget.xml:0
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_config__iface_electronic_scale
 #: model:ir.model.fields,field_description:point_of_sale.field_res_config_settings__pos_iface_electronic_scale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_config_view_form
@@ -3233,12 +3199,6 @@ msgid "Generation of your order references"
 msgstr "Generació de les vostres referències de comanda"
 
 #. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/scale_screen/scale_screen.xml:0
-msgid "Get Weight"
-msgstr "Obtenir pes"
-
-#. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.ticket_validation_screen
 msgid "Get my invoice"
 msgstr "Obtén la meva factura"
@@ -3310,11 +3270,6 @@ msgstr "Grup de productes al TPV"
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
 msgid "Group items in the cart according to their category"
 msgstr ""
-
-#. module: point_of_sale
-#: model:ir.model,name:point_of_sale.model_ir_http
-msgid "HTTP Routing"
-msgstr "Enrutament HTTP"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -4225,12 +4180,6 @@ msgstr "Nom"
 
 #. module: point_of_sale
 #. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/navbar/navbar.js:0
-msgid "Navigate to your PoS Customer Display on the other computer"
-msgstr ""
-
-#. module: point_of_sale
-#. odoo-javascript
 #: code:addons/point_of_sale/static/src/app/screens/receipt_screen/receipt/order_receipt.xml:0
 msgid "Need an invoice for your purchase ?"
 msgstr ""
@@ -4408,6 +4357,12 @@ msgid "No more customer found for \"%s\"."
 msgstr "No s'ha trobat cap client més per a \"%s\"."
 
 #. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/screens/product_screen/product_screen.js:0
+msgid "No more product found for \"%s\"."
+msgstr "No s'ha trobat cap més producte per a \"%s\"."
+
+#. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/pos_order.py:0
 msgid ""
@@ -4419,12 +4374,6 @@ msgstr ""
 #: model_terms:ir.actions.act_window,help:point_of_sale.action_pos_pos_form
 msgid "No orders found"
 msgstr "No s'han trobat comandes"
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/product_screen/product_screen.js:0
-msgid "No other products found for \"%s\"."
-msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -4633,7 +4582,7 @@ msgstr "Obre les sessions de TPV que utilitzen aquest mètode de pagament."
 #: code:addons/point_of_sale/static/src/app/store/opening_control_popup/opening_control_popup.xml:0
 #: model_terms:ir.ui.view,arch_db:point_of_sale.view_pos_config_kanban
 msgid "Open Register"
-msgstr "Obre Caixa Registradora"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -5364,12 +5313,6 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/app/screens/payment_screen/payment_screen.js:0
 msgid "Please select the Customer"
 msgstr "Si us plau seleccioneu el client"
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/navbar/navbar.js:0
-msgid "PoS Customer Display opened in a new window"
-msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
@@ -6426,6 +6369,12 @@ msgid "Rescue Sessions"
 msgstr ""
 
 #. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/debug/debug_widget.xml:0
+msgid "Reset"
+msgstr "Reinicia"
+
+#. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_session__activity_user_id
 msgid "Responsible User"
 msgstr "Usuari responsable"
@@ -6643,12 +6592,6 @@ msgstr "Guardeu aquesta pàgina i torneu per a configurar la característica."
 #: code:addons/point_of_sale/static/src/app/navbar/proxy_status/proxy_status.js:0
 msgid "Scale"
 msgstr "Balança"
-
-#. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/scale_screen/scale_screen.js:0
-msgid "Scale error"
-msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -6890,6 +6833,12 @@ msgstr "Sessions "
 #: model:ir.model.fields,field_description:point_of_sale.field_res_config_settings__pos_set_maximum_difference
 msgid "Set Maximum Difference"
 msgstr "Estableix la diferència màxima"
+
+#. module: point_of_sale
+#. odoo-javascript
+#: code:addons/point_of_sale/static/src/app/debug/debug_widget.xml:0
+msgid "Set Weight"
+msgstr "Estableix pes"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
@@ -7401,7 +7350,7 @@ msgstr ""
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_order_line__price_subtotal_incl
 msgid "Tax Incl."
-msgstr "Impostos inclosos"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.model,name:point_of_sale.model_account_fiscal_position_tax
@@ -7464,12 +7413,12 @@ msgstr "Impostos:"
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "Technical Stuff"
-msgstr "Personal Tècnic"
+msgstr ""
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.pos_session_sales_details
 msgid "Technical Stuffs"
-msgstr "Personals Tècnics"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -7481,7 +7430,7 @@ msgstr "Telf: "
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/customer_display/customer_display.xml:0
 msgid "Thank you."
-msgstr "Gràcies."
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-python
@@ -8037,18 +7986,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/point_of_sale/models/account_journal.py:0
 msgid ""
-"This journal is associated with a payment method. You cannot modify its type"
+"This journal is associated with a payment method. You cannot archive it"
 msgstr ""
-"Aquest diari està associat amb un mètode de pagament. No podeu modificar el "
-"tipus"
+"Aquest diari està associat amb un mètode de pagament. No pots arxivar-lo."
 
 #. module: point_of_sale
 #. odoo-python
 #: code:addons/point_of_sale/models/account_journal.py:0
 msgid ""
-"This journal is associated with payment method %(payment_method)s that is "
-"being used by order %(pos_order)s in the active pos session %(pos_session)s"
+"This journal is associated with a payment method. You cannot modify its type"
 msgstr ""
+"Aquest diari està associat amb un mètode de pagament. No podeu modificar el "
+"tipus"
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -8477,12 +8426,6 @@ msgid "Unknown Error"
 msgstr "Error Desconegut "
 
 #. module: point_of_sale
-#. odoo-javascript
-#: code:addons/point_of_sale/static/src/app/screens/scale_screen/scale_service.js:0
-msgid "Unnamed Product"
-msgstr ""
-
-#. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.product_product_view_form_normalized_pos
 msgid "Unsaleable"
 msgstr ""
@@ -8693,9 +8636,9 @@ msgstr "Historial de comunicacions del lloc web"
 
 #. module: point_of_sale
 #. odoo-javascript
-#: code:addons/point_of_sale/static/src/customer_display/customer_display.xml:0
-msgid "Weighing Product:"
-msgstr ""
+#: code:addons/point_of_sale/static/src/app/debug/debug_widget.xml:0
+msgid "Weighing"
+msgstr "Pes"
 
 #. module: point_of_sale
 #: model:ir.model.fields.selection,name:point_of_sale.selection__barcode_rule__type__weight

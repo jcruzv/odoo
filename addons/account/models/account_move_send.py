@@ -384,7 +384,7 @@ class AccountMoveSend(models.AbstractModel):
         attachments = self.env['ir.attachment'].create(attachment_to_create)
         res_id_to_attachment = {attachment.res_id: attachment for attachment in attachments}
 
-        for invoice, invoice_data in invoices_data.items():
+        for invoice, invoice_date in invoices_data.items():
             if attachment := res_id_to_attachment.get(invoice.id):
                 invoice.message_main_attachment_id = attachment
                 invoice.invalidate_recordset(fnames=['invoice_pdf_report_id', 'invoice_pdf_report_file'])
@@ -524,11 +524,7 @@ class AccountMoveSend(models.AbstractModel):
 
         self._generate_dynamic_reports(moves_data)
 
-        for move, move_data in [
-            (move, move_data)
-            for move, move_data in moves_data.items()
-            if move.partner_id.email or move_data.get('mail_partner_ids')
-        ]:
+        for move, move_data in [(move, move_data) for move, move_data in moves_data.items() if move.partner_id.email]:
             mail_template = move_data['mail_template']
             mail_lang = move_data['mail_lang']
             mail_params = self._get_mail_params(move, move_data)

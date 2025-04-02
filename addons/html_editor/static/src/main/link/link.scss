@@ -11,7 +11,7 @@
         cursor: text;
     }
 
-    [contenteditable=false] .btn {
+    [contenteditable=false] .btn.btn-link {
         cursor: pointer;
     }
 }

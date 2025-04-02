@@ -41,17 +41,17 @@
 # Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2024
 # Richard Mouthier (RMO) <rmo@odoo.com>, 2024
 # Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2025
-# Wil Odoo, 2025
 # Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2025
 # Jessica Jakara, 2025
+# Wil Odoo, 2025
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-03 11:38+0000\n"
+"POT-Creation-Date: 2025-02-10 16:32+0000\n"
 "PO-Revision-Date: 2024-09-25 09:41+0000\n"
-"Last-Translator: Jessica Jakara, 2025\n"
+"Last-Translator: Wil Odoo, 2025\n"
 "Language-Team: Finnish (https://app.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -562,7 +562,7 @@ msgstr ""
 "Huom:\n"
 "-----\n"
 "\n"
-"* Verokannat \"内税\" ja \"外税\" on lisätty kassajärjestelmän käyttöönotosta mahdollisesti aiheutuvien erityisvaatimusten käsittelemiseksi. [1] Normaalioloissa näitä ei välttämättä tarvitse käyttää lainkaan.\n"
+"* Veropositiot \"内税\" ja \"外税\" on lisätty kassajärjestelmän käyttöönotosta mahdollisesti aiheutuvien erityisvaatimusten käsittelemiseksi. [1] Normaalioloissa näitä ei välttämättä tarvitse käyttää lainkaan.\n"
 "\n"
 "[1] Katso lisätietoja osoitteesta https://github.com/odoo/odoo/pull/6470.\n"
 "\n"
@@ -1254,12 +1254,12 @@ msgstr ""
 #: model:ir.module.module,description:base.module_l10n_sa_hr_payroll_account
 msgid ""
 "\n"
-"Accounting Data for Saudi Arabia Payroll Rules.\n"
+"Accounting Data for KSA Payroll Rules.\n"
 "=======================================================\n"
 "\n"
 msgstr ""
 "\n"
-"Kirjanpidolliset tiedot Saudi Arabian palkkasäännöksistä.\n"
+"KSA:n palkanlaskentasääntöjen kirjanpitotiedot.\n"
 "=======================================================\n"
 "\n"
 
@@ -1497,13 +1497,9 @@ msgstr ""
 msgid ""
 "\n"
 "Accounting reports for Bangladesh\n"
-"============================================\n"
-"- Corporate tax report\n"
 msgstr ""
 "\n"
-"Kirjanpitoraportit Bangladeshille\n"
-"============================================\n"
-"- Yritysveroraportti\n"
+"Bangladeshin kirjanpitoraportit\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_reports
@@ -1813,10 +1809,10 @@ msgstr ""
 #: model:ir.module.module,description:base.module_l10n_pk_reports
 msgid ""
 "\n"
-"Accounting Reports for Pakistan (Profit and Loss report and Balance Sheet)\n"
+"Accounting reports for Pakistan\n"
 msgstr ""
 "\n"
-"Pakistanin kirjanpitoraportit (Tuloslaskelma ja tase)\n"
+"Pakistanin kirjanpitoraportit\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_pl_reports
@@ -3127,16 +3123,12 @@ msgid ""
 "\n"
 "Bangladesh Payroll Rules.\n"
 "=========================\n"
-"- Salary rules calculation\n"
-"- Income tax credits handling\n"
-"- Introduced the income tax slabs calculations\n"
+"\n"
 msgstr ""
 "\n"
-"Bangladeshin palkkasäännöt.\n"
+"Bangladeshin palkanlaskentasäännöt.\n"
 "=========================\n"
-"- Palkkasäännösten laskenta\n"
-"- Tuloverohyvitysten käsittely\n"
-"- Tuloveroasteikkojen laskenta\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_et
@@ -3910,7 +3902,7 @@ msgstr ""
 "Tämä moduuli sisältää myös:\n"
 "* Veroryhmät,\n"
 "* Yleisimmät latvialaiset verot,\n"
-"* Verokannat,\n"
+"* Verotukselliset kannat,\n"
 "* Latvian pankkiluettelo.\n"
 "\n"
 "kirjoittaja on Allegro IT (lisätietoja osoitteessa https://www.allegro.lv)\n"
@@ -3938,7 +3930,7 @@ msgstr ""
 "* Luettelo käytettävissä olevista pankeista Liettuassa.\n"
 "* Veroryhmät.\n"
 "* Yleisimmät Liettuan verot.\n"
-"* Verokannat.\n"
+"* Verotusasemat.\n"
 "* Tilin tunnisteet.\n"
 
 #. module: base
@@ -4446,7 +4438,7 @@ msgid ""
 "- Základní fiskální pozice pro českou legislativu\n"
 msgstr ""
 "\n"
-"Tšekin kirjanpitokaavio ja lokalisointi.  Tilikartan kanssa verojen ja perusverkantojen kanssa.\n"
+"Tšekin kirjanpitokaavio ja lokalisointi.  Tilikartan kanssa verojen ja verotuksen peruskantojen kanssa.\n"
 "\n"
 "Tento modul definuje:\n"
 "\n"
@@ -4721,10 +4713,10 @@ msgstr ""
 #: model:ir.module.module,description:base.module_l10n_sa_edi_pos
 msgid ""
 "\n"
-"E-invoice implementation for Saudi Arabia; Integration with ZATCA (POS)\n"
+"E-invoice implementation for the Kingdom of Saudi Arabia (PoS)\n"
 msgstr ""
 "\n"
-"E-laskujen käyttöönotto Saudi-Arabiassa; integraatio ZATCA:n (POS) kanssa\n"
+"E-laskujen käyttöönotto Saudi-Arabian kuningaskunnassa (kassa)\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_skills_slides
@@ -4970,7 +4962,7 @@ msgstr ""
 "Heinäkuun 1. päivästä 2021 alkaen EU:n yritysten, jotka myyvät EU:n sisällä yli 10 000 euron arvosta tavaroita toisessa EU:n jäsenvaltiossa sijaitseville ostajille, on rekisteröidyttävä ja maksettava arvonlisävero ostajan jäsenvaltiossa.\n"
 "Tämän uuden EU:n laajuisen kynnysarvon alapuolella voit edelleen soveltaa rajat ylittävään myyntiin kotimaan arvonlisäverosääntöjä. Tämän EU-direktiivin soveltamisen yksinkertaistamiseksi yhden luukun järjestelmässä (One Stop Shop, OSS) yritykset voivat tehdä ainutlaatuisen veroilmoituksen.\n"
 "\n"
-"Tämä moduuli mahdollistaa sen auttamalla vaadittujen EU:n verokantojen ja verojen luomisessa, jotta vaaditut verot voidaan soveltaa ja kirjata automaattisesti.\n"
+"Tämä moduuli mahdollistaa sen auttamalla vaadittujen EU:n veropositioiden ja verojen luomisessa, jotta vaaditut verot voidaan soveltaa ja kirjata automaattisesti.\n"
 "\n"
 "Sinun tarvitsee vain tarkistaa, että ehdotettu kartoitus sopii myymillesi tuotteille ja palveluille.\n"
 "\n"
@@ -5012,24 +5004,12 @@ msgid ""
 "\n"
 "Egypt Payroll and End of Service rules.\n"
 "=======================================\n"
-"- Basic calculation\n"
-"- End of service calculation\n"
-"- Other inputs (overtime, salary attachments, etc.)\n"
-"- Social insurance calculation\n"
-"- End of service provisions\n"
-"- Tax break calculations and deductions\n"
-"- Master payroll export\n"
+"\n"
 msgstr ""
 "\n"
-"Egyptin palkka- ja työsuhteen päättymisen säännöt.\n"
+"Egyptin palkanlaskentaa ja palvelussuhteen päättymistä koskevat säännöt.\n"
 "=======================================\n"
-"- Peruslaskelma\n"
-"- Työsuhteen päättymisen laskelma\n"
-"- Muut panostukset (ylityöt, palkkaliitteet jne.)\n"
-"- Sosiaalivakuutuslaskelma\n"
-"- Työsuhteen päättymisen korvaukset\n"
-"- Verovähennykset ja -helpotukset\n"
-"- Pääpalkanlaskennan vientiraportti\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_edi
@@ -5741,7 +5721,7 @@ msgstr ""
 "\n"
 "* Argentiinan verot ja tiliveroryhmät (arvonlisäverot, joissa on olemassa olevat aliquotit ja muut tyypit)\n"
 "* AFIP-vastuutyypit\n"
-"* Verokannat (verojen kartoittamiseksi)\n"
+"* Fiscal Positions (verojen kartoittamiseksi)\n"
 "* Argentiinan oikeudellisten asiakirjojen tyypit\n"
 "* Argentiinassa voimassa olevat henkilöllisyystyypit.\n"
 "* Maakohtaiset AFIP-koodit ja maakohtaiset alv-koodit oikeushenkilöille, luonnollisille henkilöille ja muille\n"
@@ -5797,14 +5777,14 @@ msgstr ""
 "Kohokohdat:\n"
 "* Asennetaan automaattisesti Ecuadorin tilikartta, joka perustuu Super Intendencia de Compañíasin antamaan esimerkkiin\n"
 "* Luettelo veroista (mukaan lukien ennakonpidätykset) asennetaan myös, voit kytkeä pois ne, joita yrityksesi ei käytä\n"
-"* Verokanta, asiakirjatyypit, luettelo paikallisista pankeista, luettelo paikallisista osavaltioista jne. asennetaan myös\n"
+"* Verotuksellinen asema, asiakirjatyypit, luettelo paikallisista pankeista, luettelo paikallisista osavaltioista jne. asennetaan myös\n"
 "\n"
 "Tekninen\n"
 "---------\n"
 "Master Data:\n"
 "* Tilikartta, joka perustuu Super Cíasin suositukseen\n"
 "* Ecuadorin verot, verotunnisteet ja veroryhmät\n"
-"* Ecuadorin verokannat\n"
+"* Ecuadorin veropositiot\n"
 "* Asiakirjatyypit (Ecuadorissa on noin 41 ostoasiakirjatyyppiä)\n"
 "* Tunnistustyypit\n"
 "* Ecuadorin pankit\n"
@@ -6641,30 +6621,22 @@ msgstr ""
 msgid ""
 "\n"
 "Jordan Payroll and Tax Rules\n"
-"========================================\n"
-"\n"
-"- Supports basic calculation\n"
-"- Tax income brackets\n"
-"- National contribution tax and social security\n"
+"============================\n"
 msgstr ""
 "\n"
 "Jordanian palkka- ja verosäännöt\n"
-"========================================\n"
-"\n"
-"- Tukee peruslaskelmaa\n"
-"- Tuloveroluokat\n"
-"- Kansallinen veropanos ja sosiaaliturva\n"
+"============================\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_sa_pos
 msgid ""
 "\n"
-"Saudi Arabia POS Localization\n"
-"===========================================================\n"
+"K.S.A. POS Localization\n"
+"=======================================================\n"
 msgstr ""
 "\n"
-"Saudi-Arabian POS-lokalisaatio\n"
-"===========================================================\n"
+"K.S.A. POS-lokalisointi\n"
+"=======================================================\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_appointment_hr_recruitment
@@ -6717,28 +6689,14 @@ msgstr ""
 #: model:ir.module.module,description:base.module_l10n_sa_hr_payroll
 msgid ""
 "\n"
-"Saudi Arabia Payroll and End of Service rules.\n"
+"Kingdom of Saudi Arabia Payroll and End of Service rules.\n"
 "===========================================================\n"
-"- Basic Calculation\n"
-"- End of Service Calculation\n"
-"- Other Input Rules (Overtime, Salary Attachments, etc.)\n"
-"- Split Structures for EOS and Monthly Salaries\n"
-"- GOSI Employee Deduction and company contributions\n"
-"- Unpaid leaves\n"
-"- WPS\n"
-"- Master Payroll Export\n"
+"\n"
 msgstr ""
 "\n"
-"Saudi-Arabian palkkasäännöt ja työsuhteen päättymisen laskelmat.\n"
+"Saudi-Arabian kuningaskunnan palkanlaskentaa ja palvelussuhteen päättymistä koskevat säännöt.\n"
 "===========================================================\n"
-"- Peruslaskelma\n"
-"- Työsuhteen päättymisen laskelma\n"
-"- Muut tulosäännöt (ylityöt, palkkaliitteet jne.)\n"
-"- Erittele rakenteet työsuhteen päättymiselle ja kuukausipalkoille\n"
-"- GOSI-työntekijän vähennykset ja yrityksen maksut\n"
-"- Palkattomat poissaolot\n"
-"- WPS (Wage Protection System)\n"
-"- Pääpalkanlaskennan vientiraportti\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_stock_landed_costs
@@ -8018,30 +7976,10 @@ msgstr ""
 #: model:ir.module.module,description:base.module_l10n_sa
 msgid ""
 "\n"
-"Saudi Arabia Accounting Module\n"
-"===========================================================\n"
-"Saudi Arabia Accounting Basic Charts and Localization\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of Accounts\n"
-"- Taxes\n"
-"- Vat Filling Report\n"
-"- Withholding Tax Report\n"
-"- Fiscal Positions\n"
+"Odoo Arabic localization for most Saudi Arabia.\n"
 msgstr ""
 "\n"
-"Saudi-Arabian Kirjanpito-moduuli \n"
-"===========================================================\n"
-"Saudi-Arabian Kirjanpidon Perustaulukot ja lokalisaatio\n"
-"\n"
-"Toiminnat:\n"
-"\n"
-"- Tilikartta\n"
-"- Verot\n"
-"- ALV-täydennys veroraportti\n"
-"- Ennakkoveroraportti\n"
-"- Verokannat\n"
+"Odoo arabian kielen lokalisointi useimmille Saudi-Arabiassa.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_web_enterprise
@@ -8265,14 +8203,10 @@ msgid ""
 "\n"
 "Pakistan Payroll and End of Service rules\n"
 "=========================================\n"
-"- Basic salaries calculations.\n"
-"- Tax bracket calculations/deductions\n"
 msgstr ""
 "\n"
-"Pakistanin palkkasäännöt ja työsuhteen päättymisen laskelmat\n"
+"Pakistanin palkanlaskentaa ja palvelussuhteen päättymistä koskevat säännöt\n"
 "=========================================\n"
-"- Peruspalkan laskelmat.\n"
-"- Tuloveroasteikkojen laskenta ja vähennykset\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_pa
@@ -8638,7 +8572,7 @@ msgstr ""
 "- Tilikartan (COA)\n"
 "- Verot\n"
 "- Veroraportti\n"
-"- Verokannat\n"
+"- Verotilanne\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_nl_reports_sbr_icp
@@ -8969,7 +8903,7 @@ msgid ""
 msgstr ""
 "\n"
 "Slovakian tilikartta ja lokalisointi: Tilikartta 2020, arvonlisäveron peruskannat +\n"
-"verokannat.\n"
+"verotukselliset kannat.\n"
 "\n"
 "Tento modul definuje:\n"
 "- Slovenskú účtovú osnovu za rok 2020\n"
@@ -9218,7 +9152,7 @@ msgstr ""
 "- Tilikartan (COA)\n"
 "- Verot\n"
 "- Veroraportti\n"
-"- Verokanta\n"
+"- Verotilanne\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_mrp_product_expiry
@@ -9642,7 +9576,7 @@ msgstr ""
 "\n"
 "Kun olet asentanut tämän moduulin, saat käyttöösi seuraavat toiminnot:\n"
 "    * Suomalainen tilikartta\n"
-"    * Verokannat\n"
+"    * Verotukselliset kannat\n"
 "    * Laskun maksun viitetyypit (suomalainen vakioviite & suomalainen velkojan viite (RF))\n"
 "    * Myyntitilausten suomalainen viitetietomuoto\n"
 "\n"
@@ -9739,7 +9673,7 @@ msgstr ""
 " - Tilikartta\n"
 " - Verot\n"
 " - Veroraportit\n"
-" - Verokanta\n"
+" - Verotukselliset positiot\n"
 " - Valtiot\n"
 
 #. module: base
@@ -9807,34 +9741,12 @@ msgstr ""
 #: model:ir.module.module,description:base.module_l10n_eg
 msgid ""
 "\n"
-"Egypt Accounting Module\n"
+"This is the base module to manage the accounting chart for Egypt in Odoo.\n"
 "==============================================================================\n"
-"Egypt Accounting Basic Charts and Localization.\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of Accounts\n"
-"- Taxes\n"
-"- VAT Return\n"
-"- Withholding Tax Report\n"
-"- Schedule Tax Report\n"
-"- Other Taxes Report\n"
-"- Fiscal Positions\n"
 msgstr ""
 "\n"
-"Egyptin Kirjanpito-moduuli \n"
+"Tämä on perusmoduuli, jolla hallitaan Egyptin tilikarttaa Odoossa.\n"
 "==============================================================================\n"
-"Egyptin Kirjanpidolliset perustaulukot ja lokalisaatio.\n"
-"\n"
-"Toiminnat:\n"
-"\n"
-"- Tilikartta\n"
-"- Verot\n"
-"- ALV-palautus\n"
-"- Ennakkoveroraportti\n"
-"- Aikataulutettu veroraportti\n"
-"- Muut veroraportit\n"
-"- Verokannat\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ee
@@ -9950,7 +9862,7 @@ msgstr ""
 "\n"
 "- Veroraportti\n"
 "\n"
-"- Verokannat\n"
+"- Verotukselliset kannat\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_kw
@@ -9988,7 +9900,7 @@ msgstr ""
 "Aktivoidaan:\n"
 "* Tilikartta\n"
 "* Verot\n"
-"* Verokannat\n"
+"* Verotukselliset asemat\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_lu
@@ -10134,7 +10046,7 @@ msgstr ""
 "==============================================================================================\n"
 "    - Tilikartta\n"
 "    - Verot\n"
-"    - Verokannat\n"
+"    - Verotukselliset kannat\n"
 "    - Oletusasetukset\n"
 
 #. module: base
@@ -10154,7 +10066,7 @@ msgstr ""
 "================================================================================\n"
 "    - Tilikartta\n"
 "    - Verot\n"
-"    - Verokannat\n"
+"    - Verotukselliset kannat\n"
 "    - Oletusasetukset\n"
 "    - Veroraportti\n"
 
@@ -10174,7 +10086,7 @@ msgstr ""
 "================================================================================\n"
 "    - Tilikartta\n"
 "    - Verot\n"
-"    - Verokannat\n"
+"    - Veropositiot\n"
 "    - Oletusasetukset\n"
 
 #. module: base
@@ -10300,11 +10212,11 @@ msgstr ""
 "\n"
 "Kanadan kirjanpitokaaviot ja lokalisoinnit.\n"
 "\n"
-"Verokannat\n"
+"Fiskaaliset kannat\n"
 "----------------\n"
 "\n"
 "Sovellettavia veroja harkittaessa merkitystä on sillä maakunnalla, jossa toimitus tapahtuu.\n"
-"Sen vuoksi päätimme implementoida verokantojen yleisimmän tapauksen: toimitus on\n"
+"Sen vuoksi päätimme toteuttaa veropositioissa yleisimmän tapauksen: toimitus on\n"
 "myyjän vastuulla ja tapahtuu asiakkaan toimipaikassa.\n"
 "\n"
 "Joitakin esimerkkejä:\n"
@@ -11901,25 +11813,12 @@ msgstr ""
 #: model:ir.module.module,description:base.module_l10n_eg_edi_eta
 msgid ""
 "\n"
-"Egypt Tax Authority Invoice Integration\n"
-"==============================================================================\n"
-"Integrates with the ETA portal to automatically send and sign the Invoices to the Tax Authority.\n"
+"This module integrate with the ETA Portal to automatically sign and send your invoices to the tax Authority.\n"
+"Special thanks to Plementus <info@plementus.com> for their help in developing this module.\n"
 msgstr ""
 "\n"
-"Egyptin veroviranomaisten laskutuksen integraatio\n"
-"==============================================================================\n"
-"Integrointi ETA-portaaliin laskujen automaattista lähetystä ja allekirjoitusta varten.\n"
-
-#. module: base
-#: model:ir.module.module,summary:base.module_l10n_eg_edi_eta
-msgid ""
-"\n"
-"            Egyptian Tax Authority Invoice Integration\n"
-"        "
-msgstr ""
-"\n"
-"            Egyptin veroviranomaisen laskujen integrointi\n"
-"        "
+"Tämä moduuli on integroitu ETA-portaaliin, jotta laskut voidaan allekirjoittaa ja lähettää automaattisesti veroviranomaiselle.\n"
+"Erityiskiitokset Plementukselle <info@plementus.com> avusta tämän moduulin kehittämisessä.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_urban_piper_swiggy
@@ -12501,12 +12400,10 @@ msgid ""
 "\n"
 "United Arab Emirates Corporate Tax Report\n"
 "=======================================================\n"
-"Adds the Corporate Tax Report which can be accessed by going to Accounting > Reporting > Corporate Tax Report\n"
 msgstr ""
 "\n"
 "Yhdistyneiden arabiemiirikuntien yritysveroraportti\n"
 "=======================================================\n"
-"Lisätty yritysveroraportti, joka löytyy kohdasta Kirjanpito > Raportointi > Yritysveroraportti\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ae_hr_payroll
@@ -12514,63 +12411,23 @@ msgid ""
 "\n"
 "United Arab Emirates Payroll and End of Service rules.\n"
 "=======================================================\n"
-"- Basic salary calculations\n"
-"- EOS calculations\n"
-"- Annual leaves provisions and EOS provisions\n"
-"- Social insurance rules for locals\n"
-"- Overtime rule for the other inputs case\n"
-"- Sick-leaves calculations\n"
-"- DEWS calculations\n"
-"- EOS calculations for free zones (DMCC)\n"
-"- Out of contract calculations\n"
-"- Calculation for unused leaves for EOS calculation\n"
-"- Additional other input rules for (bonus, commissions, arrears, etc.)\n"
-"- Master payroll export\n"
-"- WPS\n"
+"\n"
 msgstr ""
 "\n"
-"Yhdistyneiden arabiemiirikuntien palkka- ja työsuhteen päättymisen säännöt.\n"
+"Yhdistyneet arabiemiirikunnat Palkanlaskentaa ja palvelussuhteen päättymistä koskevat säännöt.\n"
 "=======================================================\n"
-"- Peruspalkan laskelmat\n"
-"- Työsuhteen päättymisen laskelmat\n"
-"- Vuosiloma- ja työsuhteen päättymisen laskelmat\n"
-"- Sosiaalivakuutussäännöt paikallisille työntekijöille\n"
-"- Sosiaalivakuutussäännöt paikallisille työntekijöille\n"
-"- Sairauspoissaolojen laskenta\n"
-"- DEWS-laskelmat\n"
-"- Työsuhteen päättymisen laskelmat vapaavyöhykkeille (DMCC)\n"
-"- Sopimuksen ulkopuoliset laskelmat\n"
-"- Laskelmat käyttämättömille lomille työsuhteen päättyessä\n"
-"- Lisäansiot (bonukset, komissiot, palkkavelat jne.)\n"
-"- Palkanlaskennan vientiraportti\n"
-"- WPS (Wage Protection System)\n"
+"\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ae
 msgid ""
 "\n"
-"United Arab Emirates Accounting Module\n"
+"United Arab Emirates accounting chart and localization.\n"
 "=======================================================\n"
-"United Arab Emirates accounting basic charts and localization.\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of Accounts\n"
-"- Taxes\n"
-"- Tax Report\n"
-"- Fiscal Positions\n"
 msgstr ""
 "\n"
-"Yhdistyneiden arabiemiirikuntien Kirjanpito-moduuli \n"
+"Yhdistyneet arabiemiirikunnat kirjanpitokaavio ja lokalisointi.\n"
 "=======================================================\n"
-"Yhdistyneiden arabiemiirikuntien kirjanpidolliset perustaulukot ja lokalisaatio.\n"
-"\n"
-"Toiminnat:\n"
-"\n"
-"- Tilikartta\n"
-"- Verot\n"
-"- Veroraportti\n"
-"- Verokanta\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_us_hr_payroll
@@ -23279,14 +23136,8 @@ msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_sa_edi
-msgid ""
-"\n"
-"        E-Invoicing, Universal Business Language\n"
-"    "
-msgstr ""
-"\n"
-"        Sähköinen laskutus, Universal Business Language\n"
-"    "
+msgid "E-Invoicing, Universal Business Language"
+msgstr "Sähköinen laskutus, Universal Business Language"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_my_edi
@@ -23470,8 +23321,13 @@ msgstr "Egypti - Palkanlaskenta ja kirjanpito"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_eg_edi_eta
-msgid "Egypt E-Invoicing"
-msgstr "Egyptin e-laskutus"
+msgid "Egyptian E-Invoice Integration"
+msgstr "Egyptin verkkolaskujen integrointi"
+
+#. module: base
+#: model:ir.module.module,summary:base.module_l10n_eg_edi_eta
+msgid "Egyptian Tax Authority Invoice Integration"
+msgstr "Egyptin veroviranomaisen laskujen integrointi"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__eire
@@ -25602,6 +25458,11 @@ msgid "Footer text displayed at the bottom of all reports."
 msgstr "Alatunnisteen teksti näytetään kaikkien raporttien alaosassa."
 
 #. module: base
+#: model:ir.module.module,summary:base.module_l10n_be_codabox
+msgid "For Accounting Firms"
+msgstr "Kirjanpitotoimistoille"
+
+#. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_server__value
 #: model:ir.model.fields,help:base.field_ir_cron__value
 msgid ""
@@ -26022,7 +25883,7 @@ msgstr "Gantt-näkymä vapaapäivien kojelaudassa"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_gelato
 msgid "Gelato"
-msgstr "Gelato"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_gelato_stock
@@ -28962,13 +28823,13 @@ msgstr "K - RAHOITUS- JA VAKUUTUSTOIMINTA"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll
-msgid "Saudi Arabia - Payroll"
-msgstr "Saudi-Arabia - Palkanlaskenta"
+msgid "K.S.A. - Payroll"
+msgstr "K.S.A. - Palkanlaskenta"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa_hr_payroll_account
-msgid "Saudi Arabia - Payroll with Accounting"
-msgstr "Saudi Arabia - Palkanlaskenta ja Kirjanpito"
+msgid "K.S.A. - Payroll with Accounting"
+msgstr "K.S.A. - Palkanlaskenta ja kirjanpito"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_digest
@@ -42514,54 +42375,20 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_bd
 msgid ""
-"\n"
-"This is the base module to manage the accounting chart for Bangladesh in Odoo\n"
-"============================\n"
-"Bangladesh accounting basic charts and localization.\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of accounts\n"
-"- Taxes\n"
-"- Tax report\n"
+"This is the base module to manage chart of accounts and localization for the"
+" Bangladesh "
 msgstr ""
-"\n"
-"Tämä on perusmoduuli Bangladeshin kirjanpidollisten taulukoiden hallinnointiin Odoossa\n"
-"============================\n"
-"Bangladeshin kirjanpidolliset perustaulukot ja lokalisaatio.\n"
-"\n"
-"Aktivoi:\n"
-"\n"
-"- Tilikartta\n"
-"- Verot\n"
-"- Veroraportti\n"
+"Tämä on perusmoduuli, jolla hallitaan tilikarttaa ja Bangladeshin "
+"lokalisointia"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_pk
 msgid ""
-"\n"
-"Pakistan Accounting Module\n"
-"=======================================================\n"
-"Pakistan accounting basic charts and localization.\n"
-"\n"
-"Activates:\n"
-"\n"
-"- Chart of Accounts\n"
-"- Taxes\n"
-"- Tax Report\n"
-"- Withholding Tax Report\n"
+"This is the base module to manage chart of accounts and localization for the"
+" Pakistan "
 msgstr ""
-"\n"
-"Pakistanin Kirjanpito-moduuli\n"
-"=======================================================\n"
-"Pakistanin kirjanpidolliset perustaulukot ja lokalisaatio.\n"
-"\n"
-"Toiminnat:\n"
-"\n"
-"- Tilikartta\n"
-"- Verot\n"
-"- Veroraporttit\n"
-"- Verokanta\n"
+"Tämä on perusmoduuli, jolla hallitaan tilikarttaa ja Pakistanin "
+"lokalisointia"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_actions_report__attachment
@@ -42690,11 +42517,13 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_codabox
 msgid ""
-"This module allows connection to CodaBox and automatically imports CODA and "
-"SODA statements in Odoo."
+"This module allows Accounting Firms to connect to CodaBox\n"
+"and automatically import CODA and SODA statements for their clients in Odoo.\n"
+"The connection must be done by the Accounting Firm.\n"
 msgstr ""
-"Tämän moduulin avulla voit yhdistää CodaBoxiin ja tuoda automaattisesti "
-"CODA- ja SODA-tiliotteita Odooseen."
+"Tämän moduulin avulla tilitoimistot voivat muodostaa yhteyden CodaBoxiin\n"
+"ja tuoda automaattisesti asiakkaidensa CODA- ja SODA-tiliotteet Odoon.\n"
+"Kirjanpitotoimiston on avattava yhteys.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_online_payment
@@ -43665,18 +43494,13 @@ msgstr "U - EKSTRATERRITORIAALISTEN JÄRJESTÖJEN JA ELINTEN TOIMINTA"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll
-msgid "United Arab Emirates - Payroll"
-msgstr "Yhdistyneiden arabiemiirikunnat -Palkanlaskenta"
+msgid "U.A.E. - Payroll"
+msgstr "Yhdistynyt arabiemiirikunta - Palkkanlaskenta"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ae_hr_payroll_account
-msgid "United Arab Emirates - Payroll with Accounting"
-msgstr "Yhdistyneiden arabiemiirikunnat - Palkanlaskenta ja Kirjanpito"
-
-#. module: base
-#: model:ir.module.module,shortdesc:base.module_l10n_ae_corporate_tax_report
-msgid "United Arab Emirates - Corporate Tax Report"
-msgstr "Yhdistyneet arabiemiirikunnat - Yritysveroraportti"
+msgid "U.A.E. - Payroll with Accounting"
+msgstr "Yhdistynyt arabiemiirikunta - Palkkanlaskenta ja kirjanpito"
 
 #. module: base
 #: model:ir.model.fields.selection,name:base.selection__res_partner__tz__uct
@@ -44024,6 +43848,11 @@ msgstr "Yhdistyneet arabiemiirikunnat - Kirjanpito"
 #: model:ir.module.module,shortdesc:base.module_l10n_ae_reports
 msgid "United Arab Emirates - Accounting Reports"
 msgstr "Yhdistyneet arabiemiirikunnat - Kirjanpitoraportit"
+
+#. module: base
+#: model:ir.module.module,shortdesc:base.module_l10n_ae_corporate_tax_report
+msgid "United Arab Emirates - Corporate Tax Report"
+msgstr "Yhdistyneet arabiemiirikunnat - Yritysveroraportti"
 
 #. module: base
 #: model:res.country,name:base.uk

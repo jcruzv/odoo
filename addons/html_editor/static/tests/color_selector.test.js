@@ -50,40 +50,8 @@ test("can set background color", async () => {
     expect(".o-we-toolbar").toHaveCount(1); // toolbar still open
     expect(".o_font_color_selector").toHaveCount(0); // selector closed
     expect(getContent(el)).toBe(
-        `<p><font style="background-color: rgba(107, 173, 222, 0.6);">[test]</font></p>`
+        `<p><font style="background-color: rgb(107, 173, 222);">[test]</font></p>`
     );
-});
-
-test("should add opacity to custom background colors but not to theme colors", async () => {
-    const { el } = await setupEditor("<p>[test]</p>");
-
-    await waitFor(".o-we-toolbar");
-    expect(".o_font_color_selector").toHaveCount(0);
-
-    await contains(".o-select-color-background").click();
-    expect(".o_font_color_selector").toHaveCount(1);
-
-    await contains(".o_color_button[data-color='#FF0000']").click(); // Select a custom color.
-    await waitFor(".o-we-toolbar");
-    expect(".o-we-toolbar").toHaveCount(1);
-    expect(".o_font_color_selector").toHaveCount(0);
-    // Verify custom color applies RGBA with 0.6 opacity.
-    expect(getContent(el)).toBe(
-        `<p><font style="background-color: rgba(255, 0, 0, 0.6);">[test]</font></p>`
-    );
-    // Verify paintbrush border bottom color has no opacity.
-    expect("i.fa-paint-brush").toHaveStyle({ borderBottomColor: "rgb(255, 0, 0)" });
-
-    await contains(".o-select-color-background").click();
-    expect(".o_font_color_selector").toHaveCount(1);
-    expect(".o_color_button[data-color='#FF0000']").toHaveClass("selected");
-
-    await contains(".o_color_button[data-color='o-color-1']").click(); // Select a theme color
-    await waitFor(".o-we-toolbar");
-    expect(getContent(el)).toBe(`<p><font style="" class="bg-o-color-1">[test]</font></p>`);
-    // Verify computed background color has no opacity.
-    const backgroundColor = getComputedStyle(el.querySelector("p font")).backgroundColor;
-    expect(backgroundColor).toBe("rgb(113, 75, 103)");
 });
 
 test("can render and apply color theme", async () => {
@@ -200,9 +168,7 @@ test("select hex color and apply it", async () => {
 });
 
 test("always show the current custom color", async () => {
-    const defaultTextColor = "rgb(1, 10, 100)";
-    const styleContent = `* {color: ${defaultTextColor};}`;
-    await setupEditor(`<p>[test]</p>`, { styleContent });
+    const { el } = await setupEditor(`<p>[test]</p>`);
     await waitFor(".o-we-toolbar");
     await click(".o-we-toolbar .o-select-color-foreground");
     await animationFrame();
@@ -212,6 +178,7 @@ test("always show the current custom color", async () => {
     await click(".o_hex_input");
     await animationFrame();
     expect(".o_colorpicker_section:nth-of-type(1) button").toHaveCount(1);
+    const defaultTextColor = getComputedStyle(el.querySelector("p")).color;
     expect(queryOne(".o_colorpicker_section:nth-of-type(1) button").style.backgroundColor).toBe(
         defaultTextColor,
         { message: "backgroundColor is the default black" }
@@ -315,13 +282,10 @@ test("selected text color is shown in the toolbar and update when clicking", asy
     expect("i.fa-font").toHaveStyle({ borderBottomColor: "rgb(255, 0, 255)" });
 });
 test("selected text color is not shown in the toolbar after removeFormat", async () => {
-    const defaultTextColor = "rgb(1, 10, 100)";
-    const styleContent = `* {color: ${defaultTextColor};}`;
     const { el } = await setupEditor(
         `<p>
             <font style="color: rgb(255, 0, 0);">t[es]t</font>
-        </p>`,
-        { styleContent }
+        </p>`
     );
 
     await waitFor(".o-we-toolbar");
@@ -333,7 +297,8 @@ test("selected text color is not shown in the toolbar after removeFormat", async
             <font style="color: rgb(255, 0, 0);">t</font>[es]<font style="color: rgb(255, 0, 0);">t</font>
         </p>`);
     await animationFrame();
-    expect("i.fa-font").toHaveStyle({ borderBottomColor: defaultTextColor });
+    const defaultBodyColor = window.getComputedStyle(document.body)["color"];
+    expect("i.fa-font").toHaveStyle({ borderBottomColor: defaultBodyColor });
 });
 
 test("collapsed selection color is shown in the permanent toolbar", async () => {
@@ -543,10 +508,7 @@ describe("color preview", () => {
     });
 
     test("should preview color in table on hover in solid tab", async () => {
-        const defaultTextColor = "color: rgb(1, 10, 100);";
-        const styleContent = `* {${defaultTextColor}}`;
-        const { el } = await setupEditor(
-            `
+        const { el } = await setupEditor(`
             <table class="table table-bordered o_table">
                 <tbody>
                     <tr>
@@ -561,9 +523,7 @@ describe("color preview", () => {
                     </tr>
                 </tbody>
             </table>
-        `,
-            { styleContent }
-        );
+        `);
         await waitFor(".o-we-toolbar");
         await animationFrame();
         await click(".o-select-color-background");
@@ -574,12 +534,12 @@ describe("color preview", () => {
             <table class="table table-bordered o_table o_selected_table">
                 <tbody>
                     <tr>
-                        <td class="" style="background-color: rgb(206, 0, 0); ${defaultTextColor}">
+                        <td class="" style="background-color: rgb(206, 0, 0);">
                             <p>[<br></p>
                         </td>
                     </tr>
                     <tr>
-                        <td class="" style="background-color: rgb(206, 0, 0); ${defaultTextColor}">
+                        <td class="" style="background-color: rgb(206, 0, 0);">
                             <p>]<br></p>
                         </td>
                     </tr>
@@ -609,10 +569,7 @@ describe("color preview", () => {
     });
 
     test("should preview color in table on hover in custom tab", async () => {
-        const defaultTextColor = "color: rgb(1, 10, 100);";
-        const styleContent = `* {${defaultTextColor}}`;
-        const { el } = await setupEditor(
-            `
+        const { el } = await setupEditor(`
             <table class="table table-bordered o_table">
                 <tbody>
                     <tr>
@@ -627,9 +584,7 @@ describe("color preview", () => {
                     </tr>
                 </tbody>
             </table>
-        `,
-            { styleContent }
-        );
+        `);
         await waitFor(".o-we-toolbar");
         await animationFrame();
         await click(".o-select-color-background");
@@ -642,12 +597,12 @@ describe("color preview", () => {
             <table class="table table-bordered o_table o_selected_table">
                 <tbody>
                     <tr>
-                        <td class="bg-black" style="${defaultTextColor}">
+                        <td class="bg-black">
                             <p>[<br></p>
                         </td>
                     </tr>
                     <tr>
-                        <td class="bg-black" style="${defaultTextColor}">
+                        <td class="bg-black">
                             <p>]<br></p>
                         </td>
                     </tr>
