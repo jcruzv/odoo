@@ -1,6 +1,9 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from datetime import datetime, timedelta
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
@@ -12,10 +15,12 @@ class StockPicking(models.Model):
 
     date_filter = fields.Date(string='Fecha de filtro', default=fields.Date.today(), required=False)
 
+    @api.depends('scheduled_date', 'date_done', 'state')
     def _compute_on_time(self):
         hoy = datetime.now()
         for record in self:
-            if record.state != "done" and hoy > record.scheduled_date or (record.date_done and (record.date_done - timedelta(hours=1)) > record.scheduled_date):
+            _logger.info(f"Record: {record}, Scheduled Date: {record.scheduled_date}, Date Done: {record.date_done}, State: {record.state}, Hoy: {hoy}")
+            if record.state != "done" and (record.date_done or hoy) - timedelta(hours=1) > record.scheduled_date:
                 record.onTime = 'Atrasado'
             else:
                 record.onTime = 'En tiempo'

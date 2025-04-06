@@ -74,3 +74,65 @@
     font-weight: bold;
     color: #000;
 }
+/* Estilos para los botones de filtros */
+.custom-kpis-view .filters button {
+    background-color: #00509e; /* Azul medio */
+    color: #fff; /* Texto blanco */
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 5px;
+    transition: background-color 0.3s ease;
+}
+.custom-kpis-view .filters select{
+    text-align: center;
+    background-color: #e6f2ff; /* Azul muy claro */
+    color: #003366; /* Azul oscuro */
+    border: 1px solid #00509e; /* Azul medio */
+    border-radius: 4px;
+    padding: 5px;
+    font-size: 1em;
+    font-weight: bold;
+    margin: 5px;
+}
+
+.custom-kpis-view .filters button:disabled {
+    background-color: #ccc; /* Gris para botones deshabilitados */
+    cursor: not-allowed;
+}
+.custom-kpis-view .filters button:disabled:hover {
+    background-color: #ccc; /* Gris para botones deshabilitados */
+    cursor: not-allowed;
+}
+
+.custom-kpis-view .filters button:hover {
+    background-color: #003366; /* Azul oscuro al pasar el mouse */
+}
+
+.custom-kpis-view .filters button.sel {
+    background-color: #003366; /* Azul oscuro para el botón seleccionado */
+    color: #fff; /* Texto blanco */
+    border: 2px solid #00509e; /* Borde azul medio */
+}
+
+.custom-kpis-view .periodo-buttons{
+    display: flex;
+    justify-content: space-around
+}
+.custom-kpis-view .filter-date{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1.5em 0;
+}
+.custom-kpis-view .date-input{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.custom-kpis-view .filter-item{
+    text-align: center;
+}

@@ -5,29 +5,113 @@
         </div>
         <div class="filters">
             <div class="filter-item">
-                <label for="date">Fecha:</label>
-                <input type="date" id="date" t-att-value="state.date" t-on-change="onDateChange"/>
+                <label for="cliente">Cliente:</label>
+                <select id="cliente" t-att-value="state.cliente" t-on-change="onClienteChange">
+                    <option value="Todos">Todos</option>
+                    <option value="260">Comercial Hispana</option>
+                    <option value="230">Miniso Almacen</option>
+                    <option value="275">Factor Pesca</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <div>Periodo:</div>
+                <div class="periodo-buttons">
+                    <button t-att-class="state.periodo == 'Día' ? 'sel' : ''" value="Día" t-on-click="onPeriodoChange">Día</button>
+                    <button t-att-class="state.periodo == 'Semana' ? 'sel' : ''" value="Semana" t-on-click="onPeriodoChange">Semana</button>
+                    <button t-att-class="state.periodo == 'Mes' ? 'sel' : ''" value="Mes" t-on-click="onPeriodoChange">Mes</button>
+                </div>
+            </div>
+            <div class="filter-item filter-date">
+                <div>
+                    <button t-on-click="onAnterior" 
+                        t-att-disabled="state.periodo=='Semana' and state.date == 1 or state.periodo=='Mes' and state.mes == 1">
+                        <t t-if="state.periodo == 'Día'">Anterior</t>
+                        <t t-if="state.periodo == 'Semana'">Semana Anterior</t>
+                        <t t-if="state.periodo == 'Mes'">Mes Anterior</t>
+                        </button>
+                </div>
+                <div class="date-input">
+                    <t t-if="state.periodo == 'Día'">
+                        <label for="date">Fecha:</label>
+                        <input type="date" id="date" t-att-value="state.date" t-on-change="onDateChange"/>
+                    </t>
+                    <t t-if="state.periodo == 'Semana'">
+                        <label for="date">Semana del año:</label>
+                        <input type="number" id="date" min="1" max="52" t-att-value="state.date" t-on-input="onDateChange"/>
+                    </t>
+                    <t t-if="state.periodo == 'Mes'">
+                        <label for="date">Mes:</label>
+                        <select t-att-value="state.date" id="date" t-on-change="onDateChange">
+                            <option value="1">Enero</option>
+                            <option value="2">Febrero</option>
+                            <option value="3">Marzo</option>
+                            <option value="4">Abril</option>
+                            <option value="5">Mayo</option>
+                            <option value="6">Junio</option>
+                            <option value="7">Julio</option>
+                            <option value="8">Agosto</option>
+                            <option value="9">Septiembre</option>
+                            <option value="10">Octubre</option>
+                            <option value="11">Noviembre</option>
+                            <option value="12">Diciembre</option>
+                        </select>
+                    </t>
+                </div>
+                <div>
+                    <button t-on-click="onSiguiente"
+                    t-att-disabled="state.periodo=='Semana' and state.date == 52 or state.periodo=='Mes' and state.mes == 12">
+                        <t t-if="state.periodo == 'Día'">Siguiente</t>
+                        <t t-if="state.periodo == 'Semana'">Siguiente Semana</t>
+                        <t t-if="state.periodo == 'Mes'">Siguiente Mes</t>
+                    </button>
+                </div>
             </div>
         </div>
         <div class="kpi-container">
             <div class="kpi-line">
+                <div class="kpi-item" t-on-click="onClickCreadasAyer">
+                    <h2>Ordenes Creadas (Ayer)</h2>
+                    <div t-esc="state.creadasAyer.length"></div>
+                </div>
                 <div class="kpi-item" t-on-click="onClickRecibidasAyer">
-                    <h2>Ordenes Recibidas (Ayer)</h2>
+                    <h2>Ordenes por Surtir (Ayer)</h2>
                     <div t-esc="state.registrosAyer.length"></div>
                 </div>
                 <div class="kpi-item" t-on-click="onClickSurtidasAyer">
                     <h2>Ordenes Surtidas (Ayer)</h2>
                     <div t-esc="state.surtidasAyer.length"></div>
                 </div>
-                <div t-att-class="state.clasePendientes" t-on-click="onClickPendientes">
-                    <h2>Ordenes Pendientes</h2>
-                    <div t-esc="state.registrosPendientes.length"></div>
+                <div t-att-class="state.clasePendientes" t-on-click="onClickRetrasoAyer">
+                    <h2>Ordenes Pendientes (Anteriores)</h2>
+                    <div t-esc="state.retrasoAyer.length"></div>
                 </div>
             </div>
             <div class="kpi-line">
-                <div t-att-class="state.claseRetraso" t-on-click="onClickRetrasoHoy">
-                    <h2>Ordenes con Retraso</h2>
+                <div class="kpi-item" t-on-click="onClickCreadasHoy">
+                    <h2>Ordenes Creadas (Hoy)</h2>
+                    <div t-esc="state.creadasHoy.length"></div>
+                </div>
+                <div class="kpi-item" t-on-click="onClickRecibidasHoy">
+                    <h2>Ordenes por Surtir (Hoy)</h2>
+                    <div t-esc="state.registrosHoy.length"></div>
+                </div>
+                <div class="kpi-item" t-on-click="onClickSurtidasHoy">
+                    <h2>Ordenes Surtidas (Hoy)</h2>
+                    <div t-esc="state.surtidasHoy.length"></div>
+                </div>
+                <div t-att-class="state.clasePendientes" t-on-click="onClickRetrasoHoy">
+                    <h2>Ordenes Pendientes (Hoy)</h2>
                     <div t-esc="state.retrasoHoy.length"></div>
+                </div>
+            </div>
+            <div class="kpi-line">
+                <div t-att-class="state.claseRetraso" t-on-click="onClickSurtidasRetrasoHoy">
+                    <h2>Ordenes Surtidas con Retraso (Ayer y Hoy)</h2>
+                    <div t-esc="state.surtidasRetraso.length"></div>
+                </div>
+                <div t-att-class="state.claseRetraso" t-on-click="onClickPendientesRetrasoHoy">
+                    <h2>Ordenes Por Surtir con Retraso (Ayer y Hoy)</h2>
+                    <div t-esc="state.pendientesRetraso.length"></div>
                 </div>
                 <div class="kpi-item" t-on-click="onClickOTIFHoy">
                     <h2>Ordenes OTIF</h2>
