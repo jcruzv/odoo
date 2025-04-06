@@ -2,13 +2,10 @@
 import { registry } from "@web/core/registry";
 import { Component, useState } from "@odoo/owl";
 
-console.log("custom KPIs loaded")
-
 class CustomKPIs extends Component {
     static template = "custom_kpis.Template";
     setup() {
         const hoy = new Date();
-        console.log(this)
 
         const auxSaved = localStorage.getItem("savedKPIs") || "{}";
         const savedKPIs = JSON.parse(auxSaved);
@@ -45,7 +42,6 @@ class CustomKPIs extends Component {
     async onClienteChange(event) {
         const cliente = event.target.value;
         this.state.cliente = cliente;
-        console.log("Cliente cambiado a:", cliente);
         const auxSaved = localStorage.getItem("savedKPIs") || "{}";
         const savedKPIs = JSON.parse(auxSaved);
         savedKPIs.cliente = cliente; // Actualizar el cliente guardado
@@ -56,7 +52,6 @@ class CustomKPIs extends Component {
     async onPeriodoChange(event) {
         const periodo = event.target.value;
         this.state.periodo = periodo;
-        console.log("Periodo cambiado a:", periodo);
         if(periodo == "Día"){
             this.state.date = new Date().toISOString().split("T")[0]
         }
@@ -99,8 +94,6 @@ class CustomKPIs extends Component {
             dateStartUTC.setHours(dateStartUTC.getHours() + 12); // Restar 5 horas para GMT-5
             dateEndUTC = new Date(newDate); // Parse as UTC
             dateEndUTC.setHours(dateEndUTC.getHours() + 36); // Restar 5 horas para GMT-5
-            console.log(formatoOdoo(dateStartUTC), formatoOdoo(dateEndUTC));
-    
             
             // dia anterior
             dateStartUTC2 = new Date(newDate); // Parse as UTC
@@ -114,7 +107,6 @@ class CustomKPIs extends Component {
         }
         else if(this.state.periodo == "Semana"){
             const week = event.target.value; //numero de la semana del año
-            console.log(week)
             const year = new Date().getFullYear(); // año actual
             const firstDayOfYear = new Date(year, 0, 1);
             const adjustFirstDay = (firstDayOfYear.getDay() <= 4) ? 1 - firstDayOfYear.getDay() : 8 - firstDayOfYear.getDay(); // ajustar el primer día de la semana
@@ -172,9 +164,6 @@ class CustomKPIs extends Component {
         this.state.dateStartUTC2 = formatoOdoo(dateStartUTC2);
         this.state.dateEndUTC2 = formatoOdoo(dateEndUTC2);
 
-        console.log(formatoOdoo(dateStartUTC), formatoOdoo(dateEndUTC))
-        console.log(formatoOdoo(dateStartUTC2), formatoOdoo(dateEndUTC2))
-
         
         const auxSaved = localStorage.getItem("savedKPIs") || "{}";
         const savedKPIs = JSON.parse(auxSaved);
@@ -216,25 +205,29 @@ class CustomKPIs extends Component {
     }
 
     async getData(){
+        
+        const company_ids = this.env.services.company.activeCompanyIds;
 
         const filters = [
             ["date", ">=", this.state.dateStartUTC],
             ["date", "<=", this.state.dateEndUTC],
             ["state", "in", ["assigned", "done"]],
-            ["picking_type_id", "in", [203]],
+            ["picking_type_id", "in", [90, 203]],
+            ["company_id", "in", company_ids],
         ];
 
         if (this.state.cliente !== "Todos") {
             filters.push(["partner_id", "=", this.state.cliente]);
         }
-        console.log(filters)
+        
         const creadasHoy = await this.env.services.orm.searchRead("stock.picking", filters, []);
 
         const registrosHoyFilters = [
             ["scheduled_date", ">=", this.state.dateStartUTC],
             ["scheduled_date", "<=", this.state.dateEndUTC],
             ["state", "in", ["assigned", "done"]],
-            ["picking_type_id", "in", [203]],
+            ["picking_type_id", "in", [90, 203]],
+            ["company_id", "in", company_ids],
         ];
         if (this.state.cliente !== "Todos") {
             registrosHoyFilters.push(["partner_id", "=", this.state.cliente]);
@@ -246,7 +239,8 @@ class CustomKPIs extends Component {
         const retrasoAyerFilters = [
             ["scheduled_date", "<=", this.state.dateEndUTC2],
             ["state", "in", ["assigned", "waiting"]],
-            ["picking_type_id", "in", [203]],
+            ["picking_type_id", "in", [90, 203]],
+            ["company_id", "in", company_ids],
         ];
         if (this.state.cliente !== "Todos") {
             retrasoAyerFilters.push(["partner_id", "=", this.state.cliente]);
@@ -259,7 +253,8 @@ class CustomKPIs extends Component {
             ["date", ">=", this.state.dateStartUTC2],
             ["date", "<=", this.state.dateEndUTC2],
             ["state", "in", ["assigned", "done"]],
-            ["picking_type_id", "in", [203]],
+            ["picking_type_id", "in", [90, 203]],
+            ["company_id", "in", company_ids],
         ];
         if (this.state.cliente !== "Todos") {
             creadasAyerFilters.push(["partner_id", "=", this.state.cliente]);
@@ -270,7 +265,8 @@ class CustomKPIs extends Component {
             ["scheduled_date", ">=", this.state.dateStartUTC2],
             ["scheduled_date", "<=", this.state.dateEndUTC2],
             ["state", "in", ["assigned", "done"]],
-            ["picking_type_id", "in", [203]],
+            ["picking_type_id", "in", [90, 203]],
+            ["company_id", "in", company_ids],
         ];
         if (this.state.cliente !== "Todos") {
             registrosAyerFilters.push(["partner_id", "=", this.state.cliente]);
@@ -279,19 +275,21 @@ class CustomKPIs extends Component {
 
         const surtidasAyer = registrosAyer.filter((registro) => registro.state === "done");
         const surtidasHoy = registrosHoy.filter((registro) => registro.state === "done");
-
-
-        console.log("Registros de hoy:", registrosHoy)
-
-        console.log("Registros de ayer:", registrosAyer)
-
-        const auxSurtidasRetraso = await this.env.services.orm.searchRead("stock.picking", [
+        
+        const filtrosAuxSurtidasRetraso = [
             ["scheduled_date", "<=", this.state.dateEndUTC],
             ["date_done", ">=", this.state.dateStartUTC],
             ["date_done", "<=", this.state.dateEndUTC],
             ["state", "in", ["done"]],
-            ["picking_type_id", "in", [203]],
-        ], []);
+            ["picking_type_id", "in", [90, 203]],
+            ["company_id", "in", company_ids],
+        ]
+        
+        if (this.state.cliente !== "Todos") {
+            filtrosAuxSurtidasRetraso.push(["partner_id", "=", this.state.cliente*1]);
+        }
+
+        const auxSurtidasRetraso = await this.env.services.orm.searchRead("stock.picking", filtrosAuxSurtidasRetraso, []);
 
         const surtidasRetraso = [...auxSurtidasRetraso, ...registrosHoy, ...retrasoAyer].filter((registro) => registro.state == 'done' && (registro.onTime == 'Atrasado' || registro.onTime == 'delayed'))
         const pendientesRetraso = [registrosHoy, ...retrasoAyer].filter((registro) => registro.state == 'assigned' && (registro.onTime == 'Atrasado' || registro.onTime == 'delayed'))

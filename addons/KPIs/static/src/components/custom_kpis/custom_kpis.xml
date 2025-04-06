@@ -1,15 +1,18 @@
 <t t-name="custom_kpis.Template">
     <div class="custom-kpis-view">
+        <div class="logo-container">
+            <img src="/KPIs/static/src/img/logo_alpha.svg" alt="Logo Alpha" class="logo-alpha"/>
+        </div>
         <div class="header">
-            <h1>KPIs Surtidos</h1>
+            <h1>KPIs Surtido</h1>
         </div>
         <div class="filters">
             <div class="filter-item">
                 <label for="cliente">Cliente:</label>
                 <select id="cliente" t-att-value="state.cliente" t-on-change="onClienteChange">
                     <option value="Todos">Todos</option>
-                    <option value="260">Comercial Hispana</option>
-                    <option value="230">Miniso Almacen</option>
+                    <option value="257">Comercial Hispana</option>
+                    <option value="260">Miniso Almacen</option>
                     <option value="275">Factor Pesca</option>
                 </select>
             </div>
