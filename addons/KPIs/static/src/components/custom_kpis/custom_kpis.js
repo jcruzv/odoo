@@ -9,9 +9,16 @@ class CustomKPIs extends Component {
     setup() {
         const hoy = new Date();
         console.log(this)
+
+        const auxSaved = localStorage.getItem("savedKPIs") || "{}";
+        const savedKPIs = JSON.parse(auxSaved);
+        const savedDate = savedKPIs?.date || hoy.toISOString().split("T")[0]; // Obtener la fecha guardada o la fecha actual si no existe
+        const savedCliente = savedKPIs?.cliente || "Todos"; // Obtener el cliente guardado o "Todos" si no existe
+        const savedPeriodo = savedKPIs?.periodo || "Día"; // Obtener el periodo guardado o "Día" si no existe
+
         this.state = useState({
-            cliente: "Todos",
-            periodo: "Día",
+            cliente: savedCliente,
+            periodo: savedPeriodo,
             creadasAyer: [],
             creadasHoy: [],
             registrosAyer: [],
@@ -25,9 +32,12 @@ class CustomKPIs extends Component {
             otifHoy: [],
             clasePendientes: 'kpi-item',
             claseRetraso: 'kpi-item',
-            date : hoy.toISOString().split("T")[0]
+            date: savedDate
         });
-        this.onDateChange({ target: { value: hoy.toISOString().split("T")[0] } })
+
+        // Save the date whenever it changes
+        this.state.date = savedDate;
+        this.onDateChange({ target: { value: savedDate } })
     }
 
     // Método para actualizar el valor del KPI
@@ -36,6 +46,10 @@ class CustomKPIs extends Component {
         const cliente = event.target.value;
         this.state.cliente = cliente;
         console.log("Cliente cambiado a:", cliente);
+        const auxSaved = localStorage.getItem("savedKPIs") || "{}";
+        const savedKPIs = JSON.parse(auxSaved);
+        savedKPIs.cliente = cliente; // Actualizar el cliente guardado
+        localStorage.setItem("savedKPIs", JSON.stringify(savedKPIs)); // Guardar el cliente en localStorage
         this.getData()
     }
     
@@ -55,6 +69,11 @@ class CustomKPIs extends Component {
             this.state.date = hoy.getMonth() + 1;
         }
         this.onDateChange({ target: { value: this.state.date } })
+        
+        const auxSaved = localStorage.getItem("savedKPIs") || "{}";
+        const savedKPIs = JSON.parse(auxSaved);
+        savedKPIs.periodo = periodo; // Actualizar el periodo guardado
+        localStorage.setItem("savedKPIs", JSON.stringify(savedKPIs)); // Guardar el periodo en localStorage
     }
 
     async onDateChange(event) {
@@ -119,6 +138,10 @@ class CustomKPIs extends Component {
             dateEndUTC2.setHours(dateEndUTC2.getHours() + 36); // Restar 5 horas para GMT-5
 
 
+            const dateEnd = new Date(sundayOfWeek); // Parse as UTC
+            // dateEnd.setHours(dateEndUTC.getHours() + 36); // Restar 5 horas para GMT-5
+            console.log(dateEnd)
+            this.state.dateEnd = formatoOdoo(dateEnd);
 
             this.state.date = week;
         }
@@ -151,6 +174,12 @@ class CustomKPIs extends Component {
 
         console.log(formatoOdoo(dateStartUTC), formatoOdoo(dateEndUTC))
         console.log(formatoOdoo(dateStartUTC2), formatoOdoo(dateEndUTC2))
+
+        
+        const auxSaved = localStorage.getItem("savedKPIs") || "{}";
+        const savedKPIs = JSON.parse(auxSaved);
+        savedKPIs.date = event.target.value; // Actualizar la fecha guardada
+        localStorage.setItem("savedKPIs", JSON.stringify(savedKPIs)); // Guardar la fecha en localStorage
 
         this.getData()
     }
@@ -207,7 +236,7 @@ class CustomKPIs extends Component {
             ["state", "in", ["assigned", "done"]],
             ["picking_type_id", "in", [203]],
         ];
-        if (this.state.cliente !== "") {
+        if (this.state.cliente !== "Todos") {
             registrosHoyFilters.push(["partner_id", "=", this.state.cliente]);
         }
         const registrosHoy = await this.env.services.orm.searchRead("stock.picking", registrosHoyFilters, []);
@@ -219,7 +248,7 @@ class CustomKPIs extends Component {
             ["state", "in", ["assigned", "waiting"]],
             ["picking_type_id", "in", [203]],
         ];
-        if (this.state.cliente !== "") {
+        if (this.state.cliente !== "Todos") {
             retrasoAyerFilters.push(["partner_id", "=", this.state.cliente]);
         }
         const retrasoAyer = await this.env.services.orm.searchRead("stock.picking", retrasoAyerFilters, []);
@@ -232,7 +261,7 @@ class CustomKPIs extends Component {
             ["state", "in", ["assigned", "done"]],
             ["picking_type_id", "in", [203]],
         ];
-        if (this.state.cliente !== "") {
+        if (this.state.cliente !== "Todos") {
             creadasAyerFilters.push(["partner_id", "=", this.state.cliente]);
         }
         const creadasAyer = await this.env.services.orm.searchRead("stock.picking", creadasAyerFilters, []);
@@ -243,7 +272,7 @@ class CustomKPIs extends Component {
             ["state", "in", ["assigned", "done"]],
             ["picking_type_id", "in", [203]],
         ];
-        if (this.state.cliente !== "") {
+        if (this.state.cliente !== "Todos") {
             registrosAyerFilters.push(["partner_id", "=", this.state.cliente]);
         }
         const registrosAyer = await this.env.services.orm.searchRead("stock.picking", registrosAyerFilters, []);

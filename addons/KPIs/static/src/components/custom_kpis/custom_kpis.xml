@@ -66,6 +66,14 @@
                     </button>
                 </div>
             </div>
+            <div t-if="state.periodo == 'Semana'" class="filter-item">
+                <div>Semana del: </div>
+                <div>
+                    <span t-esc="state.dateStartUTC.split(' ')[0]"></span>
+                    <span> al </span>
+                    <span t-esc="state.dateEnd.split(' ')[0]"></span>
+                </div>
+            </div>
         </div>
         <div class="kpi-container">
             <div class="kpi-line">
@@ -81,7 +89,7 @@
                     <h2>Ordenes Surtidas (Ayer)</h2>
                     <div t-esc="state.surtidasAyer.length"></div>
                 </div>
-                <div t-att-class="state.clasePendientes" t-on-click="onClickRetrasoAyer">
+                <div t-att-class="state.retrasoAyer.length > 5 ? 'kpi-item text-warning' : state.retrasoAyer.length > 10 ? 'kpi-item text-danger' : 'kpi-item'" t-on-click="onClickRetrasoAyer">
                     <h2>Ordenes Pendientes (Anteriores)</h2>
                     <div t-esc="state.retrasoAyer.length"></div>
                 </div>
@@ -99,17 +107,17 @@
                     <h2>Ordenes Surtidas (Hoy)</h2>
                     <div t-esc="state.surtidasHoy.length"></div>
                 </div>
-                <div t-att-class="state.clasePendientes" t-on-click="onClickRetrasoHoy">
+                <div class="kpi-item" t-on-click="onClickRetrasoHoy">
                     <h2>Ordenes Pendientes (Hoy)</h2>
                     <div t-esc="state.retrasoHoy.length"></div>
                 </div>
             </div>
             <div class="kpi-line">
-                <div t-att-class="state.claseRetraso" t-on-click="onClickSurtidasRetrasoHoy">
+                <div class="kpi-item" t-on-click="onClickSurtidasRetrasoHoy">
                     <h2>Ordenes Surtidas con Retraso (Ayer y Hoy)</h2>
                     <div t-esc="state.surtidasRetraso.length"></div>
                 </div>
-                <div t-att-class="state.claseRetraso" t-on-click="onClickPendientesRetrasoHoy">
+                <div t-att-class="state.pendientesRetraso.length > 5 ? 'kpi-item text-warning' : state.pendientesRetraso.length > 10 ? 'kpi-item text-danger' : 'kpi-item'" t-on-click="onClickPendientesRetrasoHoy">
                     <h2>Ordenes Por Surtir con Retraso (Ayer y Hoy)</h2>
                     <div t-esc="state.pendientesRetraso.length"></div>
                 </div>
@@ -117,7 +125,7 @@
                     <h2>Ordenes OTIF</h2>
                     <div t-esc="state.otifHoy.length"></div>
                 </div>
-                <div class="kpi-item">
+                <div t-att-class="90 > state.otif ? 'kpi-item text-danger' : 95 > state.otif ? 'kpi-item text-warning' : 'kpi-item'">
                     <h2>OTIF (%)</h2>
                     <div t-esc="state.otif + '%'"></div>
                 </div>
