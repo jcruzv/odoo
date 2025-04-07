@@ -1,10 +1,12 @@
-from odoo import models
+from odoo import models, fields
 import logging
 
 _logger = logging.getLogger(__name__)
 
 class StockMoveLine(models.Model):
     _inherit = 'stock.move.line'
+
+    quant_id = fields.Many2one('stock.quant', 'Quants', store=True)
 
     def _get_fields_stock_barcode(self):
         _logger.info('StockMoveLine._get_fields_stock_barcode called')

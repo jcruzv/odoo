@@ -27,7 +27,7 @@ class BarcodePatch(http.Controller):
         parsed_results = nomenclature.parse_barcode(barcode)
         _logger.info(f"parsed_results: {parsed_results}")
         # parsed_results["type"] = "location"
-        _logger.info(f"parsed_results: {parsed_results}")
+        # _logger.info(f"parsed_results: {parsed_results}")
         if parsed_results and nomenclature.is_gs1_nomenclature:
             # search with the last feasible rule
             for result in parsed_results[::-1]:
