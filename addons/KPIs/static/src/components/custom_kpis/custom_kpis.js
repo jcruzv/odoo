@@ -2,6 +2,8 @@
 import { registry } from "@web/core/registry";
 import { Component, useState } from "@odoo/owl";
 
+console.log("custom KPIs loaded")
+
 class CustomKPIs extends Component {
     static template = "custom_kpis.Template";
     setup() {
@@ -217,10 +219,12 @@ class CustomKPIs extends Component {
         ];
 
         if (this.state.cliente !== "Todos") {
-            filters.push(["partner_id", "=", this.state.cliente]);
+            filters.push(["partner_id", "=", this.state.cliente*1]);
         }
         
         const creadasHoy = await this.env.services.orm.searchRead("stock.picking", filters, []);
+
+        console.log({creadasHoy})
 
         const registrosHoyFilters = [
             ["scheduled_date", ">=", this.state.dateStartUTC],
@@ -230,7 +234,7 @@ class CustomKPIs extends Component {
             ["company_id", "in", company_ids],
         ];
         if (this.state.cliente !== "Todos") {
-            registrosHoyFilters.push(["partner_id", "=", this.state.cliente]);
+            registrosHoyFilters.push(["partner_id", "=", this.state.cliente*1]);
         }
         const registrosHoy = await this.env.services.orm.searchRead("stock.picking", registrosHoyFilters, []);
 
@@ -243,7 +247,7 @@ class CustomKPIs extends Component {
             ["company_id", "in", company_ids],
         ];
         if (this.state.cliente !== "Todos") {
-            retrasoAyerFilters.push(["partner_id", "=", this.state.cliente]);
+            retrasoAyerFilters.push(["partner_id", "=", this.state.cliente*1]);
         }
         const retrasoAyer = await this.env.services.orm.searchRead("stock.picking", retrasoAyerFilters, []);
 
@@ -257,7 +261,7 @@ class CustomKPIs extends Component {
             ["company_id", "in", company_ids],
         ];
         if (this.state.cliente !== "Todos") {
-            creadasAyerFilters.push(["partner_id", "=", this.state.cliente]);
+            creadasAyerFilters.push(["partner_id", "=", this.state.cliente*1]);
         }
         const creadasAyer = await this.env.services.orm.searchRead("stock.picking", creadasAyerFilters, []);
 
@@ -269,7 +273,7 @@ class CustomKPIs extends Component {
             ["company_id", "in", company_ids],
         ];
         if (this.state.cliente !== "Todos") {
-            registrosAyerFilters.push(["partner_id", "=", this.state.cliente]);
+            registrosAyerFilters.push(["partner_id", "=", this.state.cliente*1]);
         }
         const registrosAyer = await this.env.services.orm.searchRead("stock.picking", registrosAyerFilters, []);
 

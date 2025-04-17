@@ -83,50 +83,160 @@
                 <div class="kpi-item" t-on-click="onClickCreadasAyer">
                     <h2>Ordenes Creadas (Ayer)</h2>
                     <div t-esc="state.creadasAyer.length"></div>
+                    <div class="extraInfo">
+                        <div>
+                            <span t-esc="state.creadasAyer.reduce((total, item) => total + (item.demanda || 0), 0)"></span>
+                            <span>Cajas</span>
+                        </div>
+                        <div>
+                            <span t-esc="state.creadasAyer.reduce((total, item) => total + (item.move_ids.length || 0), 0)"></span>
+                            <span>Pallets</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="kpi-item" t-on-click="onClickRecibidasAyer">
                     <h2>Ordenes por Surtir (Ayer)</h2>
                     <div t-esc="state.registrosAyer.length"></div>
+                    <div class="extraInfo">
+                        <div>
+                            <span t-esc="state.registrosAyer.reduce((total, item) => total + (item.demanda || 0), 0)"></span>
+                            <span>Cajas</span>
+                        </div>
+                        <div>
+                            <span t-esc="state.registrosAyer.reduce((total, item) => total + (item.move_ids.length || 0), 0)"></span>
+                            <span>Pallets</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="kpi-item" t-on-click="onClickSurtidasAyer">
                     <h2>Ordenes Surtidas (Ayer)</h2>
                     <div t-esc="state.surtidasAyer.length"></div>
+                    <div class="extraInfo">
+                        <div>
+                            <span t-esc="state.surtidasAyer.reduce((total, item) => total + (item.demanda || 0), 0)"></span>
+                            <span>Cajas</span>
+                        </div>
+                        <div>
+                            <span t-esc="state.surtidasAyer.reduce((total, item) => total + (item.move_ids.length || 0), 0)"></span>
+                            <span>Pallets</span>
+                        </div>
+                    </div>
                 </div>
                 <div t-att-class="state.retrasoAyer.length > 5 ? 'kpi-item text-warning' : state.retrasoAyer.length > 10 ? 'kpi-item text-danger' : 'kpi-item'" t-on-click="onClickRetrasoAyer">
                     <h2>Ordenes Pendientes (Anteriores)</h2>
                     <div t-esc="state.retrasoAyer.length"></div>
+                    <div class="extraInfo">
+                        <div>
+                            <span t-esc="state.retrasoAyer.reduce((total, item) => total + (item.demanda || 0), 0)"></span>
+                            <span>Cajas</span>
+                        </div>
+                        <div>
+                            <span t-esc="state.retrasoAyer.reduce((total, item) => total + (item.move_ids.length || 0), 0)"></span>
+                            <span>Pallets</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="kpi-line">
                 <div class="kpi-item" t-on-click="onClickCreadasHoy">
                     <h2>Ordenes Creadas (Hoy)</h2>
                     <div t-esc="state.creadasHoy.length"></div>
+                    <div class="extraInfo">
+                        <div>
+                            <span t-esc="state.creadasHoy.reduce((total, item) => total + (item.demanda || 0), 0)"></span>
+                            <span>Cajas</span>
+                        </div>
+                        <div>
+                            <span t-esc="state.creadasHoy.reduce((total, item) => total + (item.move_ids.length || 0), 0)"></span>
+                            <span>Pallets</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="kpi-item" t-on-click="onClickRecibidasHoy">
                     <h2>Ordenes por Surtir (Hoy)</h2>
                     <div t-esc="state.registrosHoy.length"></div>
+                    <div class="extraInfo">
+                        <div>
+                            <span t-esc="state.registrosHoy.reduce((total, item) => total + (item.demanda || 0), 0)"></span>
+                            <span>Cajas</span>
+                        </div>
+                        <div>
+                            <span t-esc="state.registrosHoy.reduce((total, item) => total + (item.move_ids.length || 0), 0)"></span>
+                            <span>Pallets</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="kpi-item" t-on-click="onClickSurtidasHoy">
                     <h2>Ordenes Surtidas (Hoy)</h2>
                     <div t-esc="state.surtidasHoy.length"></div>
+                    <div class="extraInfo">
+                        <div>
+                            <span t-esc="state.surtidasHoy.reduce((total, item) => total + (item.demanda || 0), 0)"></span>
+                            <span>Cajas</span>
+                        </div>
+                        <div>
+                            <span t-esc="state.surtidasHoy.reduce((total, item) => total + (item.move_ids.length || 0), 0)"></span>
+                            <span>Pallets</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="kpi-item" t-on-click="onClickRetrasoHoy">
                     <h2>Ordenes Pendientes (Hoy)</h2>
                     <div t-esc="state.retrasoHoy.length"></div>
+                    <div class="extraInfo">
+                        <div>
+                            <span t-esc="state.retrasoHoy.reduce((total, item) => total + (item.demanda || 0), 0)"></span>
+                            <span>Cajas</span>
+                        </div>
+                        <div>
+                            <span t-esc="state.retrasoHoy.reduce((total, item) => total + (item.move_ids.length || 0), 0)"></span>
+                            <span>Pallets</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="kpi-line">
                 <div class="kpi-item" t-on-click="onClickSurtidasRetrasoHoy">
                     <h2>Ordenes Surtidas con Retraso (Ayer y Hoy)</h2>
                     <div t-esc="state.surtidasRetraso.length"></div>
+                    <div class="extraInfo">
+                        <div>
+                            <span t-esc="state.retrasoHoy.reduce((total, item) => total + (item.demanda || 0), 0)"></span>
+                            <span>Cajas</span>
+                        </div>
+                        <div>
+                            <span t-esc="state.retrasoHoy.reduce((total, item) => total + (item.move_ids.length || 0), 0)"></span>
+                            <span>Pallets</span>
+                        </div>
+                    </div>
                 </div>
                 <div t-att-class="state.pendientesRetraso.length > 5 ? 'kpi-item text-warning' : state.pendientesRetraso.length > 10 ? 'kpi-item text-danger' : 'kpi-item'" t-on-click="onClickPendientesRetrasoHoy">
                     <h2>Ordenes Por Surtir con Retraso (Ayer y Hoy)</h2>
                     <div t-esc="state.pendientesRetraso.length"></div>
+                    <div class="extraInfo">
+                        <div>
+                            <span t-esc="state.retrasoHoy.reduce((total, item) => total + (item.demanda || 0), 0)"></span>
+                            <span>Cajas</span>
+                        </div>
+                        <div>
+                            <span t-esc="state.retrasoHoy.reduce((total, item) => total + (item.move_ids.length || 0), 0)"></span>
+                            <span>Pallets</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="kpi-item" t-on-click="onClickOTIFHoy">
                     <h2>Ordenes OTIF</h2>
                     <div t-esc="state.otifHoy.length"></div>
+                    <div class="extraInfo">
+                        <div>
+                            <span t-esc="state.retrasoHoy.reduce((total, item) => total + (item.demanda || 0), 0)"></span>
+                            <span>Cajas</span>
+                        </div>
+                        <div>
+                            <span t-esc="state.retrasoHoy.reduce((total, item) => total + (item.move_ids.length || 0), 0)"></span>
+                            <span>Pallets</span>
+                        </div>
+                    </div>
                 </div>
                 <div t-att-class="90 > state.otif ? 'kpi-item text-danger' : 95 > state.otif ? 'kpi-item text-warning' : 'kpi-item'">
                     <h2>OTIF (%)</h2>

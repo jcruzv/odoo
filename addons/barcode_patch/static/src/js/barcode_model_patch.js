@@ -376,7 +376,7 @@ patch(BarcodeModel.prototype, {
         if (currentLine) { // If line found, can it be incremented ?
             console.log("Ya hay linea")
             const categoria = currentLine.product_id.categ_id;
-            console.log({categoria})
+            
             if(categoria == 20){ //Es miniso
                 if(currentLine?.lot_id?.id != barcodeData?.lot?.id){
                     const qty = await getPackage(barcodeData?.product?.id) || 1
@@ -396,40 +396,53 @@ patch(BarcodeModel.prototype, {
                 }
             }
             else{
-                let exceedingQuantity = 0;
-                if (product.tracking !== 'serial' && barcodeData.uom && barcodeData.uom.category_id == currentLine.product_uom_id.category_id) {
-                    // convert to current line's uom
-                    barcodeData.quantity = (barcodeData.quantity / barcodeData.uom.factor) * currentLine.product_uom_id.factor;
-                    barcodeData.uom = currentLine.product_uom_id;
-                }
-                // Checks the quantity doesn't exceed the line's remaining quantity.
-                if (currentLine.reserved_uom_qty && product.tracking === 'none') {
-                    const remainingQty = currentLine.reserved_uom_qty - currentLine.qty_done;
-                    if (barcodeData.quantity > remainingQty && this._shouldCreateLineOnExceed(currentLine)) {
-                        // In this case, lowers the increment quantity and keeps
-                        // the excess quantity to create a new line.
-                        exceedingQuantity = barcodeData.quantity - remainingQty;
-                        barcodeData.quantity = remainingQty;
-                    }
-                }
-                if (barcodeData.quantity > 0 || barcodeData.lot || barcodeData.lotName) {
-                    const fieldsParams = this._convertDataToFieldsParams(barcodeData);
-                    if (barcodeData.uom) {
-                        fieldsParams.uom = barcodeData.uom;
-                    }
-                    await this.updateLine(currentLine, fieldsParams);
+                if (this.selectedLine && this.selectedLine.product_id.barcode === barcode) {
+                    console.log("Actualizar", this.selectedLine);
+                    const currentQty = this.selectedLine.qty_done || 0; // Ensure qty_done is initialized
+                    const updatedQty = currentQty + 1;
+                    console.log({ currentQty, updatedQty });
+                    await this.updateLine(this.selectedLine, { qty_done: 1 });
                     this.trigger("playSound", "success");
+                    await this.save();
+                    return false;
                 }
-                if (exceedingQuantity) { // Creates a new line for the excess quantity.
-                    barcodeData.quantity = exceedingQuantity;
-                    const fieldsParams = this._convertDataToFieldsParams(barcodeData);
-                    if (barcodeData.uom) {
-                        fieldsParams.uom = barcodeData.uom;
+                else{
+
+                    let exceedingQuantity = 0;
+                    if (product.tracking !== 'serial' && barcodeData.uom && barcodeData.uom.category_id == currentLine.product_uom_id.category_id) {
+                        // convert to current line's uom
+                        barcodeData.quantity = (barcodeData.quantity / barcodeData.uom.factor) * currentLine.product_uom_id.factor;
+                        barcodeData.uom = currentLine.product_uom_id;
                     }
-                    currentLine = await this._createNewLine({
-                        copyOf: currentLine,
-                        fieldsParams,
-                    });
+                    // Checks the quantity doesn't exceed the line's remaining quantity.
+                    if (currentLine.reserved_uom_qty && product.tracking === 'none') {
+                        const remainingQty = currentLine.reserved_uom_qty - currentLine.qty_done;
+                        if (barcodeData.quantity > remainingQty && this._shouldCreateLineOnExceed(currentLine)) {
+                            // In this case, lowers the increment quantity and keeps
+                            // the excess quantity to create a new line.
+                            exceedingQuantity = barcodeData.quantity - remainingQty;
+                            barcodeData.quantity = remainingQty;
+                        }
+                    }
+                    if (barcodeData.quantity > 0 || barcodeData.lot || barcodeData.lotName) {
+                        const fieldsParams = this._convertDataToFieldsParams(barcodeData);
+                        if (barcodeData.uom) {
+                            fieldsParams.uom = barcodeData.uom;
+                        }
+                        await this.updateLine(currentLine, fieldsParams);
+                        this.trigger("playSound", "success");
+                    }
+                    if (exceedingQuantity) { // Creates a new line for the excess quantity.
+                        barcodeData.quantity = exceedingQuantity;
+                        const fieldsParams = this._convertDataToFieldsParams(barcodeData);
+                        if (barcodeData.uom) {
+                            fieldsParams.uom = barcodeData.uom;
+                        }
+                        currentLine = await this._createNewLine({
+                            copyOf: currentLine,
+                            fieldsParams,
+                        });
+                    }
                 }
             }
         } else { // No line found, so creates a new one.
@@ -484,8 +497,17 @@ patch(BarcodeModel.prototype, {
             this.uriCache.add(barcode);
         }
         this.trigger('update');
+        console.log("va a guardar")
+        await this.save();
 
-        this.save();
+        for (const line of this.currentState.lines) {
+            if (!line.id) {
+            const savedLine = await this.orm.searchRead(this.lineModel, [["virtual_id", "=", line.virtual_id]], ["id"]);
+            if (savedLine.length > 0) {
+                line.id = savedLine[0].id;
+            }
+            }
+        }
         
     },
 
@@ -570,6 +592,47 @@ patch(BarcodeModel.prototype, {
             }
         });
         this.postProcessBarcode();
+    },
+    
+    async deleteLine(line) {
+        console.log("Delete Line")
+        console.log(line)
+        if(line.product_id.categ_id == 20 || line.product_id.categ_id == 24){ //Es miniso o factor pesca
+            const index = this.currentState.lines.findIndex(l => l.virtual_id === line.virtual_id);
+
+            if (line.parent_id) { // Check if the line is a subline
+                this.currentState.lines[index].qty_done = 0;
+                this.linesToSave = this.linesToSave.filter(vId => vId !== line.virtual_id);
+                if (line.id) {
+                    await this.orm.write(this.lineModel, [line.id], { quantity: 0 });
+                    this.trigger('refresh');
+                }
+            } else {
+                this.currentState.lines.splice(index, 1);
+                line.qty_done = 0;
+                this.linesToSave = this.linesToSave.filter(vId => vId !== line.virtual_id);
+                if (line.id) {
+                    await this.orm.write(this.lineModel, [line.id], { quantity: 0 });
+                    this.trigger('refresh');
+                }
+            }
+            // window.alert("No puedes eliminar este producto.")
+            // return false;
+            
+        }
+        else{
+
+            if (!line.id) {
+                // The line doesn't exist in the DB yet => Delete it only in the frontend.
+                const index = this.currentState.lines.findIndex(l => l.virtual_id === line.virtual_id);
+                this.currentState.lines.splice(index, 1);
+                this.linesToSave = this.linesToSave.filter(vId => vId !== line.virtual_id);
+            } else {
+                await this.save();
+                await this.orm.call(this.lineModel, this.deleteLineMethod, [line.id]);
+                this.trigger('refresh');
+            }
+        }
     }
     
     

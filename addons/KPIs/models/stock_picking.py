@@ -15,6 +15,13 @@ class StockPicking(models.Model):
 
     date_filter = fields.Date(string='Fecha de filtro', default=fields.Date.today(), required=False)
 
+    demanda = fields.Float(
+        string="Demanda",
+        compute="_compute_demanda",
+        store=True,
+        help="Suma de las demandas de los movimientos relacionados con este picking."
+    )
+
     @api.depends('scheduled_date', 'date_done', 'state')
     def _compute_on_time(self):
         hoy = datetime.now()
@@ -24,6 +31,11 @@ class StockPicking(models.Model):
                 record.onTime = 'Atrasado'
             else:
                 record.onTime = 'En tiempo'
+    
+    @api.depends('move_ids.product_uom_qty')
+    def _compute_demanda(self):
+        for picking in self:
+            picking.demanda = sum(move.product_uom_qty for move in picking.move_ids)
     
     def on_date_filter_change(self):
         print("on_date_filter_change")
