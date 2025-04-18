@@ -14,4 +14,28 @@ patch(BarcodePickingModel.prototype, {
         // await this.save(); // Guardar después de procesar el código de barras
         return result;
     },
+    async _processLocationDestination(barcodeData) {
+        const configScanDest = this.config.restrict_scan_dest_location;
+        if (configScanDest == "no") {
+            return;
+        }
+        // For planned transfers, check the scanned location is a part of transfer destination.
+        if (this._useReservation && !this._isSublocation(barcodeData.destLocation, this._defaultDestLocation())) {
+            barcodeData.stopped = true;
+            const message = _t("The scanned location doesn't belong to this operation's destination");
+            return this.notification(message, { type: 'danger' });
+        }
+        
+        if (!window.confirm("Estás seguro que quieres cambiar la ubicación de destino?")) {
+            barcodeData.stopped = true;
+            return;
+        }
+
+        // Change the destination of all concerned lines.
+        const lines = this._getLinesToMove();
+        for (const line of lines) {
+            await this.changeDestinationLocation(barcodeData.destLocation.id, line);
+        }
+        barcodeData.stopped = true;
+    },
 });
