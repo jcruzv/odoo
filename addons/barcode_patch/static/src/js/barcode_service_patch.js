@@ -51,7 +51,7 @@ barcodeService.start = function() {
     function checkBarcode(ev) {
         let str = barcodeInput ? barcodeInput.value : bufferedBarcode;
         str = barcodeService.cleanBarcode(str);
-        if (str.length >= 1) {
+        if (str.length >= 3) {
             if (ev) {
                 ev.preventDefault();
             }

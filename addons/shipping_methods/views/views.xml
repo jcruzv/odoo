@@ -1,0 +1,22 @@
+<odoo>
+  <data>
+    <record model="ir.ui.view" id="shipping_methods.list">
+      <field name="name">Metodos de envío</field>
+      <field name="model">shipping.methods</field>
+      <field name="arch" type="xml">
+        <list string="Metodos de envío">
+          <field name="purchase_order"/>
+          <field name="processedBy"/>
+          <field name="name"/>
+          <field name="shipping_code"/>
+          <field name="price"/>
+          <field name="weight"/>
+          <field name="origin"/>
+          <field name="destination"/>
+          <field name="requestDate"/>
+          <!-- <field name="rate_id"/> -->
+        </list>
+      </field>
+    </record>
+  </data>
+</odoo>

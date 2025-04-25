@@ -246,6 +246,36 @@ class PurchaseOrder(models.Model):
                 po.shipping_method = best_method.id
                 po.shipping_quote = best_method.price
         return True
+    
+    def set_shipping_method_best_DHL(self):
+        # Elegir el mejor precio entre los processedby DHL
+        for id in self.env.context.get("active_ids"):
+            po = self.env['purchase.order'].browse(id)
+            methods = self.shipping_method.search([
+                ("purchase_order", "=", po.id),
+                ("processedBy", "=", "DHL")
+            ])
+            
+            if methods:
+                best_method = min(methods, key=lambda m: m.price)
+                po.shipping_method = best_method.id
+                po.shipping_quote = best_method.price
+        return True
+    
+    def set_shipping_method_best_Skydropx(self):
+        # Elegir el mejor precio entre los processedby skydropx
+        for id in self.env.context.get("active_ids"):
+            po = self.env['purchase.order'].browse(id)
+            methods = self.shipping_method.search([
+                ("purchase_order", "=", po.id),
+                ("processedBy", "=", "Skydropx")
+            ])
+            
+            if methods:
+                best_method = min(methods, key=lambda m: m.price)
+                po.shipping_method = best_method.id
+                po.shipping_quote = best_method.price
+        return True
 
     def set_shipping_method_express(self):
         
@@ -399,14 +429,13 @@ class PurchaseOrder(models.Model):
     def request_shipping_quote(self):
         
         from .address_info import state_code_2_digits, couriers
-        from .emissary_info import get_price_plans
         import requests
         import logging
         _logger = logging.getLogger(__name__)  
         
-        testDHL = True
-        testEnvia = True
-        testSkydropx = True
+        testDHL = False
+        testEnvia = False
+        testSkydropx = False
 
         urlDHL = "https://express.api.dhl.com/mydhlapi/test/rates" if testDHL else "https://express.api.dhl.com/mydhlapi/rates"
         urlEnvia = "https://api-test.envia.com/ship/rate/" if testEnvia else "https://api.envia.com/ship/rate/"
@@ -442,11 +471,11 @@ class PurchaseOrder(models.Model):
                 "postal_code": self.partner_id.zip,
                 "area_level1": self.partner_id.state_id.name,
                 "area_level2": self.partner_id.city,
-                "area_level3": self.partner_id.street2 or "",
+                "area_level3": self.partner_id.l10n_mx_edi_colony or "",
                 "street1": self.partner_id.street,
                 "apartment_number": "",
                 "reference": "Nave 7",
-                "name": ''.join(filter(str.isalpha, self.partner_id.name)),
+                "name": ''.join(filter(str.isalpha, self.partner_id.name))[:30],
                 "company": self.partner_id.company_id.name or "",
                 "phone": self.partner_id.phone or "",
                 "email": self.partner_id.email or ""
@@ -456,11 +485,11 @@ class PurchaseOrder(models.Model):
                 "postal_code": self.customer_id.zip,
                 "area_level1": self.customer_id.state_id.name,
                 "area_level2": self.customer_id.city,
-                "area_level3": self.customer_id.street2 or "",
+                "area_level3": self.customer_id.l10n_mx_edi_colony or "",
                 "street1": self.customer_id.street,
                 "apartment_number": "",
                 "reference": "Zaguan blanco",
-                "name": ''.join(filter(str.isalpha, self.customer_id.name)),
+                "name": ''.join(filter(str.isalpha, self.customer_id.name))[:30],
                 "company": self.customer_id.company_id.name or "",
                 "phone": self.customer_id.phone or "",
                 "email": self.customer_id.email or ""
@@ -484,7 +513,7 @@ class PurchaseOrder(models.Model):
             "phone": self.partner_id.phone or '',
             "street": self.partner_id.street or '',
             "number": self.partner_id.street2 or '',
-            "district": self.partner_id.street2 or '',
+            "district": self.partner_id.l10n_mx_edi_colony or '',
             "city": self.partner_id.city or '',
             "state": state_code_2_digits(self.partner_id.state_id.name) or '',
             "country": self.partner_id.country_code or '',
@@ -498,7 +527,7 @@ class PurchaseOrder(models.Model):
             "phone": self.customer_id.phone or '',
             "street": self.customer_id.street or '',
             "number": self.customer_id.street2 or '',
-            "district": self.customer_id.street2 or '',
+            "district": self.customer_id.l10n_mx_edi_colony or '',
             "city": self.customer_id.city or '',
             "state": state_code_2_digits(self.customer_id.state_id.name) or '',
             "country": self.customer_id.country_code or '',
@@ -530,7 +559,7 @@ class PurchaseOrder(models.Model):
         }
 
         # _logger.info(f"paramsEnvia: {paramsEnvia}")
-        # _logger.info(f"paramsDHL: {paramsDHL}")
+        _logger.info(f"paramsDHL: {paramsDHL}")
         
         headersDHL = {
             'Content-Type': 'application/json',
@@ -586,7 +615,6 @@ class PurchaseOrder(models.Model):
             )
         # si no existe, hacer la solicitud a DHL y guardar los datos en shipping_methods
         else:
-            get_price_plans(self)
             # _logger.info(f"no existe, llamar api")
             tiempo = datetime.now()
             try:
@@ -604,8 +632,8 @@ class PurchaseOrder(models.Model):
                                 urlSkydropx + 'api/v1/oauth/token',
                                 json={
                                     "grant_type": "client_credentials",
-                                    "client_id" : "KRJ2ZCd6dxBNPCBKeIxmYfJ25_VU-Z8ULVudhct3MKI",
-                                    "client_secret" : "xYP0CsERedn2I_MWXnY3pOaPbjP4ty2o38WHkSEUYq4"
+                                    "client_id" : "YzD42mPgPbZjdIScpszVPc4b-6lKhnPniG547YQEhvY",
+                                    "client_secret" : "z563lrAB-L9SBdlnvTXr9xLUcZS-OEe1PG0n6hy2FJs"
                                 },
                                 headers=headers
                             )
@@ -618,9 +646,9 @@ class PurchaseOrder(models.Model):
                         _logger.info(f"token: {token}")
                         headers['Authorization'] = f'Bearer {token["access_token"]}'
                         async with session.post(url, json=params, headers=headers) as response:
-                            # _logger.info(f"response: {response}")
+                            _logger.info(f"response: {response}")
                             respuesta = await response.json()
-                            # _logger.info(f"respuesta: {respuesta}")
+                            _logger.info(f"respuesta: {respuesta}")
 
                             if 'error' in respuesta or ('code' in respuesta and (respuesta["code"] == 500 or respuesta["code"] == 400)) or ("data" in respuesta and isinstance(respuesta["data"], str)):
                                 return
@@ -693,9 +721,9 @@ class PurchaseOrder(models.Model):
                         async with session.post(url, data=params, headers=headers) as response:
                             if response.status == 500:
                                 return
-                            # _logger.info(f"response: {response}")
-                            # _logger.info(f"params: {params}")
-                            # _logger.info(f"texto respuesta: {await response.text()}")
+                            _logger.info(f"response: {response}")
+                            _logger.info(f"params: {params}")
+                            _logger.info(f"texto respuesta: {await response.text()}")
                             respuesta = await response.json()
                             _logger.info(f"respuesta: {respuesta}")
                             if 'error' in respuesta or ('code' in respuesta and (respuesta["code"] == 500 or respuesta["code"] == 400)) or ("data" in respuesta and isinstance(respuesta["data"], str)):
@@ -817,16 +845,16 @@ class PurchaseOrder(models.Model):
                         tasks.append(fetch(session, urlDHL, paramsDHL, headersDHL, "DHL", "DHL"))
 
                         # Skydropx
-                        # tasks.append(fetch(session, urlSkydropx+"api/v1/quotations", paramsSkydropx, headers, "Skydropx", "Skydropx"))
+                        tasks.append(fetch(session, urlSkydropx+"api/v1/quotations", paramsSkydropx, headers, "Skydropx", "Skydropx"))
                         
                         # Envia
-                        for courier in couriers:
-                            paramsEnvia['shipment'] = {
-                                "carrier": courier,
-                                "type": 0
-                            }
-                            # _logger.info(f"Paquetería: {courier}")
-                            tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia", courier))
+                        # for courier in couriers:
+                        #     paramsEnvia['shipment'] = {
+                        #         "carrier": courier,
+                        #         "type": 0
+                        #     }
+                        #     _logger.info(f"Paquetería: {courier}")
+                        #     tasks.append(fetch(session, urlEnvia, json.dumps(paramsEnvia), headers, "Envia", courier))
                         # Termina Envia
 
                         await asyncio.gather(*tasks)
@@ -1028,7 +1056,7 @@ class PurchaseOrder(models.Model):
                 "postal_code": self.partner_id.zip,
                 "area_level1": self.partner_id.state_id.name,
                 "area_level2": self.partner_id.city,
-                "area_level3": self.partner_id.street2 or "",
+                "area_level3": self.partner_id.l10n_mx_edi_colony or "",
                 "street1": self.partner_id.street,
                 "name": ''.join(filter(str.isalpha, self.partner_id.name)),
                 "company": self.partner_id.company_id.name or "",
@@ -1041,7 +1069,7 @@ class PurchaseOrder(models.Model):
                 "postal_code": self.customer_id.zip,
                 "area_level1": self.customer_id.state_id.name,
                 "area_level2": self.customer_id.city,
-                "area_level3": self.customer_id.street2 or "",
+                "area_level3": self.customer_id.l10n_mx_edi_colony or "",
                 "street1": self.customer_id.street,
                 "name": ''.join(filter(str.isalpha, self.customer_id.name)),
                 "company": self.customer_id.company_id.name or "",
@@ -1167,8 +1195,8 @@ class PurchaseOrder(models.Model):
                             urlSkydropx + 'api/v1/oauth/token',
                             json={
                                 "grant_type": "client_credentials",
-                                "client_id" : "KRJ2ZCd6dxBNPCBKeIxmYfJ25_VU-Z8ULVudhct3MKI",
-                                "client_secret" : "xYP0CsERedn2I_MWXnY3pOaPbjP4ty2o38WHkSEUYq4"
+                                "client_id" : "YzD42mPgPbZjdIScpszVPc4b-6lKhnPniG547YQEhvY",
+                                "client_secret" : "z563lrAB-L9SBdlnvTXr9xLUcZS-OEe1PG0n6hy2FJs"
                             },
                             headers=headers
                         )
@@ -1397,8 +1425,6 @@ class PurchaseOrder(models.Model):
             self.track_Envia()
         elif metodo.processedBy == "Skydropx":
             asyncio.run(self.track_Skydropx())
-        elif self.processedBy == "Emissary":
-            asyncio.run(self.track_Emissary())
 
     def track_DHL(self):
 
@@ -1585,8 +1611,8 @@ class PurchaseOrder(models.Model):
                     urlSkydropx + 'api/v1/oauth/token',
                     json={
                         "grant_type": "client_credentials",
-                        "client_id" : "KRJ2ZCd6dxBNPCBKeIxmYfJ25_VU-Z8ULVudhct3MKI",
-                        "client_secret" : "xYP0CsERedn2I_MWXnY3pOaPbjP4ty2o38WHkSEUYq4"
+                        "client_id" : "YzD42mPgPbZjdIScpszVPc4b-6lKhnPniG547YQEhvY",
+                        "client_secret" : "z563lrAB-L9SBdlnvTXr9xLUcZS-OEe1PG0n6hy2FJs"
                     },
                     headers=headers
                 ) as auth_response:
@@ -1644,39 +1670,6 @@ class PurchaseOrder(models.Model):
                     else:
                         self.shipping_status = 'Registrado'
                         
-            except Exception as e:
-                raise models.UserError(_('No se pudo obtener el estado: %s') % str(e))
-    
-    async def track_Emissary(self):
-
-
-        if self.shipping_method.courier == "dhl":
-            self.track_api_dhl()
-        elif self.shipping_method.courier == "fedex":
-            self.track_api_fedex()
-        elif self.shipping_method.courier == "ups":
-            self.track_api_ups()
-
-    async def track_api_dhl(self):
-
-        url = "https://api-eu.dhl.com/track/shipments"
-        headers = {
-            'DHL-API-Key': 'Ld3KfQ6Q'
-        }
-        payload = {
-            "trackingNumber": self.track_number
-        }
-
-        async with aiohttp.ClientSession() as session:
-            try:
-
-                async with session.get(
-                    url,
-                    headers=headers
-                ) as response:
-                    _logger.info(f"response: {response}")
-                    data = await response.json()
-
             except Exception as e:
                 raise models.UserError(_('No se pudo obtener el estado: %s') % str(e))
     
